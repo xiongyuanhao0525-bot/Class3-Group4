@@ -1,0 +1,74 @@
+@startuml
+title 界面流转图（箭头 = 可跳转方向）· DjangoBlog（软件3班4组 · 翟旌超）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam ArrowColor #2563eb
+skinparam ArrowFontColor #1e293b
+skinparam StateBorderColor #94a3b8
+skinparam StateBackgroundColor #f8fafc
+skinparam StateFontSize 13
+skinparam nodesep 28
+skinparam ranksep 40
+left to right direction
+
+state "首页\n<b>/</b>\nblog/article_index.html" as P_index
+state "文章详情\n/article/年/月/日/文章id.html" as P_detail
+state "分类页\n/category/分类名.html" as P_cat
+state "标签页\n/tag/标签名.html" as P_tag
+state "作者页\n/author/用户名.html" as P_author
+state "归档页\n/archives.html" as P_arch
+state "友链页\n/links.html" as P_links
+state "搜索页\n/search?q=关键词" as P_search
+state "登录页\n/login/" as P_login
+state "注册页\n/register/" as P_reg
+state "忘记密码\n/forget_password/" as P_pwd
+state "管理后台\n/admin/" as P_admin
+state "错误页\n404 / 500" as P_err
+
+[*] --> P_index : 打开站点
+
+' ===== 首页的出口 =====
+P_index --> P_detail : 点文章标题
+P_index --> P_cat : 点分类
+P_index --> P_tag : 点侧边栏标签云
+P_index --> P_arch : 导航栏「归档」
+P_index --> P_search : 导航栏搜索框
+P_index --> P_links : 直接访问（无入口链接）
+P_index --> P_login : 侧边栏「登录」
+
+' ===== 列表页 -> 详情页 =====
+P_cat --> P_detail : 点文章
+P_tag --> P_detail : 点文章
+P_arch --> P_detail : 点文章
+P_search --> P_detail : 点搜索结果
+P_author --> P_detail : 点文章
+
+' ===== 详情页的内部跳转 =====
+P_detail --> P_author : 点作者名
+P_detail --> P_cat : 点分类
+P_detail --> P_tag : 点标签
+
+' ===== 登录闭环（评论需登录）=====
+P_detail --> P_login : 提交评论（未登录）next=当前页
+P_login --> P_detail : 登录成功回原页
+P_login --> P_index : 登录成功 success_url='/'
+P_login --> P_reg : 「注册」
+P_login --> P_pwd : 「忘记密码」
+P_login --> P_admin : 超管登录
+P_admin --> P_index : 退出/回前台
+
+' ===== 异常 =====
+P_detail --> P_err : 文章不存在/无权限
+
+note right of P_detail
+  同页面内跳转：
+  上一篇/下一篇、评论翻页(?comment_page=N)、点赞
+end note
+
+legend bottom
+  <b>登录闭环（评论需登录）：</b>未登录点「发表评论」→ 跳转 /login/?next=当前页 →
+  登录成功后自动回到原文章，不丢失阅读位置。
+  <b>同页面跳转：</b>首页分页 /page/页码/、分类分页、标签分页、评论翻页。
+  <b>友情链接页 /links.html：</b>模板中没有入口链接，需直接输入网址访问。
+end legend
+@enduml
