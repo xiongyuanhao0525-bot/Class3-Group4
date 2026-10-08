@@ -62,48 +62,68 @@ class BaseModel(models.Model):
 class Article(BaseModel):
     """文章"""
     STATUS_CHOICES = (
-        ('d', _('Draft')),
-        ('p', _('Published')),
+        ('d', _('Draft')),      # d代表草稿状态
+        ('p', _('Published')),  # p代表已发布状态
     )
     COMMENT_STATUS = (
-        ('o', _('Open')),
-        ('c', _('Close')),
+        ('o', _('Open')),    # o代表开启评论
+        ('c', _('Close')),   # c代表关闭评论
     )
     TYPE = (
-        ('a', _('Article')),
-        ('p', _('Page')),
+        ('a', _('Article')),  # a代表普通文章
+        ('p', _('Page')),     # p代表独立页面
     )
-    title = models.CharField(_('title'), max_length=200, unique=True)
-    body = MDTextField(_('body'))
+    title = models.CharField(_('title'), max_length=200, unique=True)  # 文章标题，唯一，最大长度200
+    body = MDTextField(_('body'))    # 文章Markdown正文内容
+
+    # 文章发布时间
     pub_time = models.DateTimeField(
         _('publish time'), blank=False, null=False, default=now)
+
+    # 文章状态：草稿/已发布
     status = models.CharField(
         _('status'),
         max_length=1,
         choices=STATUS_CHOICES,
         default='p')
+
+    # 评论开关状态：开启/关闭
     comment_status = models.CharField(
         _('comment status'),
         max_length=1,
         choices=COMMENT_STATUS,
         default='o')
+
+    # 内容类型：文章或者独立页面
     type = models.CharField(_('type'), max_length=1, choices=TYPE, default='a')
+
+    # 文章浏览计数
     views = models.PositiveIntegerField(_('views'), default=0)
+
+    # 外键，关联文章作者用户，删除用户时级联删除文章
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
         blank=False,
         null=False,
         on_delete=models.CASCADE)
+
+    # 文章排序权重，数值越大越靠前
     article_order = models.IntegerField(
         _('order'), blank=False, null=False, default=0)
+
+    # 是否展示文章目录TOC
     show_toc = models.BooleanField(_('show toc'), blank=False, null=False, default=False)
+
+    # 外键，关联文章所属分类，删除分类级联删除文章
     category = models.ForeignKey(
         'Category',
         verbose_name=_('category'),
         on_delete=models.CASCADE,
         blank=False,
         null=False)
+
+    # 多对多关系，一篇文章可以拥有多个标签
     tags = models.ManyToManyField('Tag', verbose_name=_('tag'), blank=True)
 
     def body_to_string(self):
