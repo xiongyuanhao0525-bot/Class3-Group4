@@ -1,0 +1,57 @@
+@startmindmap
+title 界面流转思维导图 · DjangoBlog（软件3班4组 · 翟旌超）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam TitleFontSize 22
+
+' ===== 中心主题：首页 =====
+* 首页\n<b>URL: /</b>\n模板: blog/article_index.html
+
+' ===== 右侧：从首页往下钻的内容页 =====
+** 文章详情页\n<b>/article/年/月/日/文章id.html</b>\n模板: blog/article_detail.html
+*** 评论区（评论列表，分页参数 ?comment_page=N）
+**** 发表评论 <b>POST /article/文章id/postcomment</b>\n<i>需登录才能提交</i>
+***** 未登录 → 登录页 <b>/login/?next=当前页</b>
+****** 登录成功后 → 回到当前文章详情
+**** 评论点赞 <b>POST /comment/评论id/react</b>
+*** 点作者名 → 作者页 <b>/author/用户名.html</b>
+*** 上一篇 / 下一篇文章 → 文章详情
+** 分类页\n<b>/category/分类名.html</b>\n显示该分类（含子分类）的文章
+*** 点文章标题 → 文章详情
+*** 分类分页 <b>/category/分类名/页码.html</b>
+** 标签页\n<b>/tag/标签名.html</b>
+*** 点文章标题 → 文章详情
+*** 标签分页 <b>/tag/标签名/页码.html</b>
+** 归档页\n<b>/archives.html</b>\n模板: blog/article_archives.html（不分页）
+*** 点文章标题 → 文章详情
+** 搜索页\n<b>/search?q=关键词</b>\n模板: search/search.html
+*** 搜索结果 → 文章详情
+** 首页分页\n<b>/page/页码/</b>
+
+' ===== 左侧：全站公共入口 =====
+left side
+** 顶部导航栏\n（所有页面共用 base.html → nav.html）
+*** Logo / 首页 → 首页
+*** 顶级分类（含下拉子分类）→ 分类页
+*** 归档 → 归档页
+*** 搜索框 → 搜索页
+*** 后台配置的独立页面 nav_pages
+*** 工具站（外链）tools.lylinux.net
+** 侧边栏\n（blog/tags/sidebar.html）
+*** 最新文章 / 热门文章 → 文章详情
+*** 最新评论 → 文章详情#comment-评论id
+*** 标签云 → 标签页
+*** 登录 → 登录页
+*** 管理后台 <b>/admin/</b>
+** 页脚\n（share_layout/footer.html）
+*** 首页 / 归档 / RSS(/feed)
+*** 工具站 / GitHub（外链）
+** 账户相关
+*** 注册页 <b>/register/</b>
+*** 忘记密码 <b>/forget_password/</b>
+*** 登录成功 → 首页（success_url = '/'）
+** 可直接访问的独立页面
+*** 友情链接页 <b>/links.html</b>\n<i>模板中无入口链接，需直接输入网址</i>
+*** 作者页 <b>/author/用户名.html</b>
+*** 站点地图 /sitemap.xml · RSS /feed/ · 健康检查 /health/
+@endmindmap
