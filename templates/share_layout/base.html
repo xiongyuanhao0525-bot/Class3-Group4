@@ -1,32 +1,50 @@
+<!-- 全站基础父模板，所有页面继承该模板；统一页面骨架、导航、页脚、主题、公共组件，实现代码复用 -->
 {% load static %}
+<!-- 加载静态文件模板标签，用于读取项目static目录下资源 -->
 {% load cache %}
+<!-- 加载缓存标签，实现页面片段缓存，提升访问性能 -->
 {% load i18n %}
+<!-- 加载国际化多语言标签，支持网站中英文切换 -->
 {% load compress %}
+<!-- 加载资源压缩标签，压缩CSS、JS文件，减小文件体积 -->
 {% load vite_tags %}
+<!-- 加载vite构建工具标签，用于引入前端打包后的资源 -->
 <!DOCTYPE html>
+<!-- HTML文档根节点；lang设置网页语言为中文；og为社交分享元数据命名空间 -->
 <html lang="zh-CN" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
 <head>
     {% load blog_tags %}
+    <!-- 加载博客自定义模板标签，提供博客业务相关自定义功能 -->
 
+    <!-- 设置网页字符编码为UTF8，保证中文正常显示 -->
     <meta charset="UTF-8"/>
+    <!-- 视口配置，适配手机移动端设备 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- 禁止浏览器自动识别电话号码转为拨号链接 -->
     <meta name="format-detection" content="telephone=no"/>
+    <!-- 浅色模式浏览器地址栏主题色 -->
     <meta name="theme-color" content="#a855f7" media="(prefers-color-scheme: light)"/>
+       <!-- 深色模式浏览器地址栏主题色 -->
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)"/>
+        <!-- 爬虫规则：允许搜索引擎收录页面、抓取页面链接 -->
     <meta name="robots" content="index, follow"/>
     {% head_meta %}
     {% block header %}
+                <!-- header预留块：子模板可重写，SEO插件自动生成title、description、keywords等头部信息 -->
         <!-- SEO插件会自动生成title、description、keywords等标签 -->
     {% endblock %}
+    <!-- 网页资料配置链接 -->
     <link rel="profile" href="http://gmpg.org/xfn/11"/>
 
     <!-- 防闪烁脚本：必须在CSS加载前立即执行 -->
+    <!-- 防闪烁脚本，CSS加载前立刻执行，提前设置明暗主题，避免页面切换闪烁 -->
     <script>
         (function() {
             const STORAGE_KEY = 'dark-mode-enabled';
             const THEME_ATTR = 'data-theme';
             const ENABLE_SYSTEM = true;
 
+            // 获取用户偏好主题，优先读取本地存储，无设置则跟随系统
             function getPreferredTheme() {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved !== null) return saved === 'dark' ? 'dark' : 'light';
@@ -36,6 +54,7 @@
                 return 'light';
             }
 
+            // 将主题应用到html根元素，切换深色/浅色样式
             function applyTheme(theme) {
                 const isDark = theme === 'dark';
                 if (isDark) {
@@ -48,13 +67,16 @@
             }
 
             // 立即应用主题到html元素（防止闪烁）
+            // 页面加载立刻执行，应用主题，消除闪烁
             const theme = getPreferredTheme();
             applyTheme(theme);
+            // 全局保存当前主题
 
             // 存储主题供后续使用
             window.__THEME__ = theme;
 
             // 全局主题管理器，供导航栏等组件调用
+            // 对外暴露主题切换管理器，导航栏等组件调用toggle切换明暗模式
             window.themeManager = {
                 toggle: function() {
                     var current = document.documentElement.getAttribute(THEME_ATTR) === 'dark' ? 'dark' : 'light';
@@ -69,15 +91,18 @@
 
     <!-- 资源提示优化 -->
     <!-- 仅保留真正需要的 dns-prefetch，MathJax 由智能加载器按需加载 -->
+    <!-- DNS预解析，提前解析MathJax域名，优化后续加载速度 -->
     <link rel="dns-prefetch" href="//cdn.mathjax.org"/>
 
     <!-- RSS和图标 -->
+    <!-- RSS订阅链接、网站图标配置 -->
     <link rel="alternate" type="application/rss+xml" title="{{ SITE_NAME }} &raquo; Feed" href="/feed"/>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
     <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
     <link rel="apple-touch-icon" href="/favicon.ico"/>
 
     <!-- 关键CSS：防止深色模式闪烁 + 首屏优化（bootstrap 样式，Tailwind 加载前生效，颜色值与 design system 一致） -->
+    <!-- 首屏关键内联CSS；深色浅色基础颜色、骨架屏加载动画，防止主题切换闪烁 -->
     <style>
         :root {
             /* bootstrap token：与 main.css 的 --background/--foreground 保持同值 */
@@ -123,6 +148,7 @@
             flex: 1;
         }
 
+        /* 骨架屏加载动画样式，数据未加载完成时展示占位效果 */
         .skeleton {
             background: linear-gradient(90deg,
                 rgb(var(--bootstrap-skeleton-base)) 25%,
@@ -136,63 +162,76 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
-
+        /* xcloak：Alpine.js未初始化完成时隐藏组件，避免闪现未渲染内容 */
         [x-cloak] {
             display: none !important;
         }
     </style>
 
     <!-- 字体优化加载：使用媒体查询延迟非关键字体 -->
+    <!-- 非关键字体延迟加载，提升首屏速度；noscript兼容不支持js浏览器 -->
     <link rel="stylesheet" href="{% static 'blog/fonts/open-sans.css' %}" media="print" onload="this.media='all'; this.onload=null;">
     <noscript><link rel="stylesheet" href="{% static 'blog/fonts/open-sans.css' %}"></noscript>
 
     <!-- 代码高亮样式（Pygments） - 异步加载，仅在有代码块时需要 -->
+    <!-- 代码高亮Pygments样式，异步加载，页面存在代码块时生效 -->
     <link rel="stylesheet" href="{% static 'pygments/default.css' %}" media="print" onload="this.media='all'; this.onload=null;">
     <noscript><link rel="stylesheet" href="{% static 'pygments/default.css' %}"></noscript>
 
     <!-- 新前端：Tailwind CSS + Alpine.js - 完整样式系统（通过JS加载） -->
+    <!-- 引入vite打包后的前端主脚本，包含Tailwind CSS、Alpine.js -->
     {% vite_js 'src/main.js' %}
 
     <!-- 插件CSS文件 -->
+    <!-- compress压缩css块，子模板可追加自定义样式，同时加载插件提供的css -->
     {% compress css %}
         {% block compress_css %}
         {% endblock %}
         {% plugin_compressed_css %}
     {% endcompress %}
 
+    <!-- 网站全局自定义头部脚本代码，后台配置注入 -->
     {% if GLOBAL_HEADER %}
         {{ GLOBAL_HEADER|safe }}
     {% endif %}
 
+    <!-- 统计分析脚本，后台配置注入，如百度统计等 -->
     {% if ANALYTICS_CODE %}
         {{ ANALYTICS_CODE|safe }}
     {% endif %}
 
 </head>
 
+<!-- body挂载全局变量：主题配色、登录状态、Alpine全局搜索状态 -->
 <body data-color-scheme="{{ COLOR_SCHEME|default:'purple' }}"
       data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
       x-data="{ searchOpen: false }">
+<!-- page页面容器，flex布局实现页脚贴底 -->
 <div id="page" class="hfeed site flex min-h-screen flex-col">
     {% load i18n %}
+    <!-- 复用引入导航栏公共组件nav.html -->
     {% include 'share_layout/nav.html' %}
+    <!-- main主内容区；启用htmx局部页面刷新，无整页重载跳转 -->
     <div id="main" role="main" class="flex-1" hx-boost="true" hx-target="#main" hx-select="#main" hx-swap="innerHTML" hx-push-url="true">
 
         {% block content %}
         {% endblock %}
-
+        <!-- content块：留给子模板填充页面主体内容 -->
 
         {% block sidebar %}
         {% endblock %}
+        <!-- sidebar块：留给子模板填充侧边栏内容 -->
 
 
     </div><!-- #main .wrapper -->
+    <!-- 复用引入页脚公共组件footer.html -->
     {% include 'share_layout/footer.html' %}
 </div><!-- #page -->
 
 <!-- JS已在head中加载，无需重复 -->
 
 <!-- 插件JS文件 -->
+<!-- compress压缩js块；子模板追加脚本，加载插件JS脚本 -->
 {% compress js %}
     {% block compress_js %}
     {% endblock %}
@@ -200,12 +239,15 @@
 {% endcompress %}
 
 <!-- MathJax智能加载器 - 延迟加载,不阻塞渲染 -->
+<!-- MathJax公式渲染延迟加载脚本，defer延迟执行不阻塞页面渲染 -->
 <script src="{% static 'blog/js/mathjax-loader.js' %}" defer></script>
 
 {% block footer %}
 {% endblock %}
+<!-- footer预留块：子模板可追加页面底部自定义脚本 -->
 
 <!-- 回到顶部按钮 - Alpine.js组件 -->
+<!-- 回到顶部按钮，Alpine组件；滚动到下方出现，点击滚动回页面顶部 -->
 <button x-data="backToTop()"
      x-init="init()"
      @click="scrollToTop()"
@@ -222,6 +264,7 @@
 </button>
 
 <!-- 图片灯箱 - Alpine.js组件 -->
+<!-- 图片灯箱预览组件，Alpine组件；点击图片弹出全屏预览，ESC关闭弹窗 -->
 <div x-data="imageLightbox()"
      x-init="init()"
      @keydown.escape.window="closeLightbox()"
@@ -231,6 +274,7 @@
      :aria-hidden="!showLightbox"
      aria-label="{% trans 'Image preview' %}">
     <!-- 遮罩层 -->
+    <!-- 遮罩层，点击遮罩关闭预览 -->
     <div x-show="showLightbox"
          x-trap="showLightbox"
          @click="closeLightbox()"
@@ -244,6 +288,7 @@
     </div>
 
     <!-- 图片容器 -->
+    <!-- 图片弹窗容器 -->
     <div x-show="showLightbox"
          class="fixed inset-0 z-50 flex items-center justify-center p-4"
          x-transition:enter="transition ease-out duration-300"
@@ -258,12 +303,14 @@
                  class="max-w-full max-h-[85vh] sm:max-h-[90vh] object-contain rounded-lg shadow-2xl">
 
             <!-- 图片说明 -->
+            <!-- 图片说明文字 -->
             <div x-show="currentAlt"
                  class="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-center py-3 px-4 rounded-b-lg max-w-full">
                 <p class="text-sm break-words" x-text="currentAlt"></p>
             </div>
 
             <!-- 关闭按钮 -->
+            <!-- 关闭弹窗按钮 -->
             <button @click="closeLightbox()"
                     aria-label="{% trans 'Close' %}"
                     class="absolute top-2 right-2 inline-flex size-9 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white/50">
