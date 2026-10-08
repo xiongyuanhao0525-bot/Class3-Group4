@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="450px" preserveAspectRatio="none" style="width:1709px;height:450px;background:#FFFFFF;" version="1.1" viewBox="0 0 1709 450" width="1709px" zoomAndPan="magnify"><defs/><g><!--MD5=[6e7a5780a5a0fb57afbd0e0326fcbc3e]
+cluster templates--><g id="cluster_templates"><path d="M148,6 L218,6 A3.75,3.75 0 0 1 220.5,8.5 L227.5,31.1201 L1437,31.1201 A2.5,2.5 0 0 1 1439.5,33.6201 L1439.5,441 A2.5,2.5 0 0 1 1437,443.5 L148,443.5 A2.5,2.5 0 0 1 145.5,441 L145.5,8.5 A2.5,2.5 0 0 1 148,6 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="145.5" x2="227.5" y1="31.1201" y2="31.1201"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="69" x="149.5" y="24.0439">templates</text></g><!--MD5=[b2a3a35b8ea9e9d5ff19496431d14a3b]
+cluster share_layout--><g id="cluster_share_layout"><path d="M464,196 L555,196 A3.75,3.75 0 0 1 557.5,198.5 L564.5,221.1201 L747,221.1201 A2.5,2.5 0 0 1 749.5,223.6201 L749.5,417 A2.5,2.5 0 0 1 747,419.5 L464,419.5 A2.5,2.5 0 0 1 461.5,417 L461.5,198.5 A2.5,2.5 0 0 1 464,196 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="461.5" x2="564.5" y1="221.1201" y2="221.1201"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="90" x="465.5" y="214.0439">share_layout</text></g><!--MD5=[1faa5a998a426336e71708095b4f0588]
+cluster blog--><g id="cluster_blog"><path d="M308,52 L340,52 A3.75,3.75 0 0 1 342.5,54.5 L349.5,77.1201 L1219,77.1201 A2.5,2.5 0 0 1 1221.5,79.6201 L1221.5,142.5 A2.5,2.5 0 0 1 1219,145 L308,145 A2.5,2.5 0 0 1 305.5,142.5 L305.5,54.5 A2.5,2.5 0 0 1 308,52 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="305.5" x2="349.5" y1="77.1201" y2="77.1201"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="31" x="309.5" y="70.0439">blog</text></g><!--MD5=[591455a8fdc1cf4188a95876b143768c]
+cluster comments--><g id="cluster_comments"><path d="M1248,52 L1321,52 A3.75,3.75 0 0 1 1323.5,54.5 L1330.5,77.1201 L1413,77.1201 A2.5,2.5 0 0 1 1415.5,79.6201 L1415.5,142.5 A2.5,2.5 0 0 1 1413,145 L1248,145 A2.5,2.5 0 0 1 1245.5,142.5 L1245.5,54.5 A2.5,2.5 0 0 1 1248,52 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="1245.5" x2="1330.5" y1="77.1201" y2="77.1201"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="72" x="1249.5" y="70.0439">comments</text></g><!--MD5=[c3f73ca7a1e85901c8e4bfbb11c9c20a]
+cluster account--><g id="cluster_account"><path d="M172,52 L229,52 A3.75,3.75 0 0 1 231.5,54.5 L238.5,77.1201 L279,77.1201 A2.5,2.5 0 0 1 281.5,79.6201 L281.5,142.5 A2.5,2.5 0 0 1 279,145 L172,145 A2.5,2.5 0 0 1 169.5,142.5 L169.5,54.5 A2.5,2.5 0 0 1 172,52 " style="stroke:#000000;stroke-width:1.5;fill:none;"/><line style="stroke:#000000;stroke-width:1.5;fill:none;" x1="169.5" x2="238.5" y1="77.1201" y2="77.1201"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="56" x="173.5" y="70.0439">account</text></g><!--MD5=[21ab09ffd5d05f413c587b952aee3778]
+entity base--><g id="elem_base"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="81" x="652" y="234"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="61" x="662" y="260.0439">base.html</text></g><!--MD5=[717aee06d80e4f1d913e8dba0922aa11]
+entity nav.html--><g id="elem_nav.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="73" x="531" y="364.5"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="53" x="541" y="390.5439">nav.html</text></g><!--MD5=[47baf149f5b83bd3f87d4c37475bdf7f]
+entity footer.html--><g id="elem_footer.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="87" x="639" y="364.5"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="67" x="649" y="390.5439">footer.html</text></g><!--MD5=[59e73649d861bad61b31c8de988888c9]
+entity base_account.html--><g id="elem_base_account.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="139" x="478" y="234"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="119" x="488" y="260.0439">base_account.html</text></g><!--MD5=[494d86a0123e02d5950bac8cec9f9203]
+entity article_index.html--><g id="elem_article_index.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="129" x="940" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="109" x="950" y="116.0439">article_index.html</text></g><!--MD5=[b7a627d029218aa828790c25a29d0c57]
+entity article_detail.html--><g id="elem_article_detail.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="130" x="452.5" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="110" x="462.5" y="116.0439">article_detail.html</text></g><!--MD5=[e8f49de5e2969e880708deb7df7d6483]
+entity article_archives.html--><g id="elem_article_archives.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="149" x="618" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="129" x="628" y="116.0439">article_archives.html</text></g><!--MD5=[586e6441bdb8a3ee860e9b6915084767]
+entity links_list.html--><g id="elem_links_list.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="103" x="802" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="83" x="812" y="116.0439">links_list.html</text></g><!--MD5=[87ee803c1f35bacd8c58d0ffac586aca]
+entity blog_tags.py--><g id="elem_blog_tags.py"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="101" x="1104" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="81" x="1114" y="116.0439">blog_tags.py</text></g><!--MD5=[cce83d1706e018a23f3364eceeed8575]
+entity vite_tags.py--><g id="elem_vite_tags.py"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="96" x="321.5" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="76" x="331.5" y="116.0439">vite_tags.py</text></g><!--MD5=[f1ffdf3262e6743aaeb7d26366f383e6]
+entity comments_tags.py--><g id="elem_comments_tags.py"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="138" x="1261.5" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="118" x="1271.5" y="116.0439">comments_tags.py</text></g><!--MD5=[9773d6ec996c40c65969f7276d082bef]
+entity login.html--><g id="elem_login.html"><rect fill="#F1F1F1" height="39.1201" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="80" x="185.5" y="90"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="60" x="195.5" y="116.0439">login.html</text></g><!--MD5=[c3f0ccd12d72b7517cf265313bf9e6d7]
+entity templatetags--><g id="elem_templatetags"><path d="M8.5,88.5 L102.5,88.5 A3.75,3.75 0 0 1 105,91 L112,113.6201 L126.5,113.6201 A2.5,2.5 0 0 1 129,116.1201 L129,128.1201 A2.5,2.5 0 0 1 126.5,130.6201 L8.5,130.6201 A2.5,2.5 0 0 1 6,128.1201 L6,91 A2.5,2.5 0 0 1 8.5,88.5 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><line style="stroke:#181818;stroke-width:0.5;" x1="6" x2="112" y1="113.6201" y2="113.6201"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="81" x="16" y="107.5439">templatetags</text></g><!--MD5=[c639849580f95f7bc9ba0dfd749b1c40]
+entity sidebar.html--><g id="elem_sidebar.html"><ellipse cx="1501.5" cy="253.5" fill="#F1F1F1" rx="8" ry="8" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="77" x="1463" y="286.5439">sidebar.html</text></g><!--MD5=[ac0f16005af2b3a29423ba6a045a51db]
+entity comment_list.html--><g id="elem_comment_list.html"><ellipse cx="1646.5" cy="253.5" fill="#F1F1F1" rx="8" ry="8" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="14" lengthAdjust="spacing" textLength="112" x="1590.5" y="286.5439">comment_list.html</text></g><!--MD5=[61b494d86eb4b7baed744e8ff5bae89b]
+link base to nav.html--><g id="link_base_nav.html"><path d="M668.08,273.14 C653.61,284.67 635.28,300.16 620.5,315.5 C607.01,329.5 593.5,346.77 583.5,360.33 " fill="none" id="base-to-nav.html" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="580.51,364.42,589.0601,359.5318,583.4687,360.3893,582.6111,354.7979,580.51,364.42" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="55" x="621.5" y="331.3979">«include»</text></g><!--MD5=[5c8e0d8539dedce53c9e13ebe89e6b78]
+link base to footer.html--><g id="link_base_footer.html"><path d="M691.05,273.19 C689.28,295.93 686.28,334.37 684.35,359.21 " fill="none" id="base-to-footer.html" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="683.96,364.29,688.6423,355.6253,684.3457,359.3049,680.6661,355.0083,683.96,364.29" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="55" x="688.5" y="331.3979">«include»</text></g><!--MD5=[fc6f34a45db1f22f80df981069991c3c]
+link article_index.html to base--><g id="link_article_index.html_base"><path d="M970.06,129.03 C955.5,136.69 938.29,145.5 922.5,153 C859.23,183.04 784.59,214.64 737.9,233.96 " fill="none" id="article_index.html-to-base" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="733.18,235.91,743.0248,236.1927,737.8055,234.0113,739.9868,228.7919,733.18,235.91" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="53" x="904.5" y="176.8979">«extend»</text></g><!--MD5=[062ef5ba8297705f776cfba8d356f65d]
+link article_detail.html to base--><g id="link_article_detail.html_base"><path d="M550.09,129.02 C574.47,143.58 608.02,165.16 634.5,188 C649.17,200.66 663.75,216.89 674.62,229.9 " fill="none" id="article_detail.html-to-base" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="677.87,233.83,675.2055,224.3484,674.6789,229.9807,669.0467,229.4541,677.87,233.83" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="53" x="623.5" y="176.8979">«extend»</text></g><!--MD5=[25a4a391a49ff4958ed44875b0979978]
+link article_archives.html to base--><g id="link_article_archives.html_base"><path d="M692.5,129.06 C692.5,154.68 692.5,200.88 692.5,228.92 " fill="none" id="article_archives.html-to-base" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="692.5,233.93,696.5,224.93,692.5,228.93,688.5,224.93,692.5,233.93" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="53" x="693.5" y="176.8979">«extend»</text></g><!--MD5=[2d2ae64a2664b90a04d69fff512a9f90]
+link links_list.html to base--><g id="link_links_list.html_base"><path d="M832.45,129.06 C802.92,155.11 749.28,202.42 717.67,230.3 " fill="none" id="links_list.html-to-base" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="713.55,233.93,722.9517,230.9961,717.3067,230.6304,717.6724,224.9854,713.55,233.93" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="53" x="792.5" y="176.8979">«extend»</text></g><!--MD5=[0d79fd7ff1d3b5377c26d6210710994a]
+link login.html to base_account.html--><g id="link_login.html_base_account.html"><path d="M258.6,129.02 C272.87,136.76 289.84,145.64 305.5,153 C369.03,182.85 444.03,212.91 493.51,232.06 " fill="none" id="login.html-to-base_account.html" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="498.22,233.88,491.2786,226.893,493.5592,232.0698,488.3824,234.3504,498.22,233.88" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="53" x="364.5" y="176.8979">«extend»</text></g><!--MD5=[ab4f2e6d39f3b46f65393b1089863fb8]
+link blog_tags.py to sidebar.html--><g id="link_blog_tags.py_sidebar.html"><path d="M1192.77,129.06 C1208.93,136.72 1228.02,145.53 1245.5,153 C1336.56,191.91 1448.35,233.17 1487.31,247.36 " fill="none" id="blog_tags.py-to-sidebar.html" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="1492.11,249.11,1485.0255,242.2682,1487.4127,247.3967,1482.2842,249.7839,1492.11,249.11" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="26" x="1308.5" y="176.8979">渲染</text></g><!--MD5=[b4a533625e2740eb838357d5028e8dd8]
+link comments_tags.py to comment_list.html--><g id="link_comments_tags.py_comment_list.html"><path d="M1399.92,119.28 C1441.48,126.49 1494.43,139.19 1537.5,161 C1578.66,181.84 1617.76,220.96 1635.91,240.6 " fill="none" id="comments_tags.py-to-comment_list.html" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="1639.46,244.49,1636.3173,235.156,1636.0775,240.8078,1630.4257,240.568,1639.46,244.49" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="&quot;Microsoft YaHei&quot;" font-size="13" lengthAdjust="spacing" textLength="26" x="1567.5" y="176.8979">渲染</text></g><!--MD5=[dcbb02bf341619db129b274babad7db0]
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam componentStyle rectangle
+
+package "templates" {
+  package "share_layout" {
+    [base.html] as base
+    [nav.html]
+    [footer.html]
+    [base_account.html]
+  }
+  package "blog" {
+    [article_index.html]
+    [article_detail.html]
+    [article_archives.html]
+    [links_list.html]
+  }
+  package "comments" {
+  }
+  package "account" {
+    [login.html]
+  }
+}
+
+package "templatetags" {
+  package "blog" {
+    [blog_tags.py]
+    [vite_tags.py]
+  }
+  package "comments" {
+    [comments_tags.py]
+  }
+}
+
+base ..> nav.html : <<include>>
+base ..> footer.html : <<include>>
+article_index.html ..> base : <<extend>>
+article_detail.html ..> base : <<extend>>
+article_archives.html ..> base : <<extend>>
+links_list.html ..> base : <<extend>>
+login.html ..> base_account.html : <<extend>>
+blog_tags.py ..> sidebar.html : 渲染
+comments_tags.py ..> comment_list.html : 渲染
+@enduml
+
+PlantUML version 1.2022.5(Sat Apr 30 18:55:52 CST 2022)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: GBK
+Language: zh
+Country: CN
+--></g></svg>
