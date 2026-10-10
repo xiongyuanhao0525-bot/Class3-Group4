@@ -23,7 +23,7 @@ class Command(BaseCommand):
             categories[name] = Category.objects.create(name=name)
 
         # 标签
-        tag_names = ['海岛', '美食', '亲子', '自驾', '徒步', '摄影', '避暑', '冬季', '自由行', '小众']
+        tag_names = ['海岛', '美食', '亲子', '自驾', '徒步', '摄影', '避暑', '冬季', '自由行', '小众', '攻略']
         tags = {}
         for name in tag_names:
             tags[name], _ = Tag.objects.get_or_create(name=name)

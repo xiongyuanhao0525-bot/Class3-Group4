@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Microsoft YaHei"
+skinparam componentStyle rectangle
+
+package "templates" {
+  package "share_layout" {
+    [base.html] as base
+    [nav.html]
+    [footer.html]
+    [base_account.html]
+  }
+  package "blog" {
+    [article_index.html]
+    [article_detail.html]
+    [article_archives.html]
+    [links_list.html]
+  }
+  package "comments" {
+  }
+  package "account" {
+    [login.html]
+  }
+}
+
+package "templatetags" {
+  package "blog" {
+    [blog_tags.py]
+    [vite_tags.py]
+  }
+  package "comments" {
+    [comments_tags.py]
+  }
+}
+
+base ..> nav.html : <<include>>
+base ..> footer.html : <<include>>
+article_index.html ..> base : <<extend>>
+article_detail.html ..> base : <<extend>>
+article_archives.html ..> base : <<extend>>
+links_list.html ..> base : <<extend>>
+login.html ..> base_account.html : <<extend>>
+blog_tags.py ..> sidebar.html : 渲染
+comments_tags.py ..> comment_list.html : 渲染
+@enduml

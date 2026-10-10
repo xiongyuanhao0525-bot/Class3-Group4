@@ -1,79 +1,73 @@
-{% extends 'share_layout/base.html' %}
-{% load blog_tags %}
-{% load i18n %}
-
-{% block header %}
-    <title>{{ SITE_NAME }}</title>
-    <meta name="description" content="{{ SITE_DESCRIPTION }}"/>
-    <meta name="keywords" content="{{ SITE_KEYWORDS }}"/>
+{% extends 'share_layout/base.html' %} {# 继承基础模板：引入全站统一的导航栏和底部样式 #}
+{% load blog_tags %} {# 加载自定义标签库：提供文章详情、分页、侧边栏等标签 #}
+{% load i18n %} {# 加载国际化标签库：支持多语言翻译 #}
+{% block header %} {# 定义页面头部区块：设置浏览器标题和SEO信息 #}
+    <title>{{ SITE_NAME }}</title> {# 网页标题：显示站点名称 #}
+    <meta name="description" content="{{ SITE_DESCRIPTION }}"/> {# SEO描述：供搜索引擎抓取页面摘要 #}
+    <meta name="keywords" content="{{ SITE_KEYWORDS }}"/> {# SEO关键词：提高页面检索命中 #}
 {% endblock %}
-
-{% block content %}
-    <div class="mx-auto max-w-6xl px-4 py-4 lg:px-6 lg:py-6">
-        {# Main Grid #}
+{% block content %} {# 定义内容区块：文章列表页的全部正文内容 #}
+    <div class="mx-auto max-w-6xl px-4 py-4 lg:px-6 lg:py-6"> {# 最外层容器：限制页面最大宽度并留出四周内边距 #}
+        {# 主栅格布局：大屏下分成两栏，左侧正文列表、右侧固定侧边栏 #}
         <div class="grid gap-6 lg:grid-cols-[1fr_300px]">
-            {# Main Content #}
+            {# 主内容区：左侧的文章列表区域 #}
             <main>
-                {# Title Section #}
+                {# 页面标题区：根据当前页面类型显示不同的标题 #}
                 <div class="mb-6">
-                    {% if page_type == "分类目录归档" %}
+                    {% if page_type == "分类目录归档" %} {# 当前是按分类浏览时：显示"分类"字样 #}
                         <p class="mb-1 text-xs text-muted-foreground">分类</p>
                         <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
                             <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
-                            {{ tag_name }}
+                            {{ tag_name }} {# 显示当前分类的名称 #}
                         </h2>
-                    {% elif page_type == "分类标签归档" %}
+                    {% elif page_type == "分类标签归档" %} {# 当前是按标签浏览时：显示"标签"字样 #}
                         <p class="mb-1 text-xs text-muted-foreground">标签</p>
                         <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
                             <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
-                            {{ tag_name }}
+                            {{ tag_name }} {# 显示当前标签的名称 #}
                         </h2>
-                    {% elif page_type == "作者文章归档" %}
+                    {% elif page_type == "作者文章归档" %} {# 当前是按作者浏览时：显示"作者"字样 #}
                         <p class="mb-1 text-xs text-muted-foreground">作者</p>
                         <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
                             <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
-                            {{ tag_name }}
+                            {{ tag_name }} {# 显示当前作者的名称 #}
                         </h2>
-                    {% else %}
+                    {% else %} {# 默认情况（如首页）：显示"最新文章" #}
                         <h2 class="flex items-center gap-2 text-xl font-bold text-foreground m-0">
                             <span class="h-5 w-1 shrink-0 rounded-full bg-primary"></span>
-                            {% trans 'recent articles' %}
+                            {% trans 'recent articles' %} {# 标题文字：最新文章（支持多语言） #}
                         </h2>
                     {% endif %}
                 </div>
-
-                {# Article List #}
+                {# 文章列表区：把所有文章逐篇渲染出来 #}
                 <div class="flex flex-col gap-5">
-                    {% for article in article_list %}
-                        {% load_article_detail article True user %}
+                    {% for article in article_list %} {# 遍历文章列表，循环输出每一篇文章 #}
+                        {% load_article_detail article True user %} {# 调用自定义标签：渲染单篇文章的完整卡片（含标题、摘要、评论数） #}
                     {% endfor %}
                 </div>
-
-                {# Pagination #}
-                {% if is_paginated %}
-                    {% load_pagination_info page_obj page_type tag_name %}
+                {# 分页区：文章较多时显示翻页按钮 #}
+                {% if is_paginated %} {# 只有文章超过每页数量才显示分页 #}
+                    {% load_pagination_info page_obj page_type tag_name %} {# 调用分页标签：传入当前页对象、页面类型和分类/标签名 #}
                 {% endif %}
             </main>
-
-            {# Sidebar - Desktop: fixed right column #}
+            {# 桌面端侧边栏：仅在宽屏显示，固定在右侧 #}
             <div class="hidden lg:block">
-                <div class="sticky top-20">
-                    {% load_sidebar user "p" %}
+                <div class="sticky top-20"> {# 粘性定位：侧边栏随页面滚动时保持在可视区域 #}
+                    {% load_sidebar user "p" %} {# 调用侧边栏标签：展示分类、标签云、最新评论等内容 #}
                 </div>
             </div>
         </div>
-
-        {# Mobile Sidebar - collapsible accordion on small screens #}
+        {# 手机端侧边栏：小屏时显示，做成可折叠的手风琴样式 #}
         <div class="mt-8 lg:hidden">
             <details class="rounded-xl border border-border bg-card group">
                 <summary class="flex cursor-pointer items-center justify-between p-4 text-sm font-medium text-muted-foreground list-none [&::-webkit-details-marker]:hidden">
-                    <span>发现更多</span>
+                    <span>发现更多</span> {# 折叠标题：提示用户点击展开查看更多 #}
                     <svg class="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/> {# 箭头图标：展开时旋转180度 #}
                     </svg>
                 </summary>
                 <div class="border-t border-border p-4">
-                    {% load_sidebar user "p" %}
+                    {% load_sidebar user "p" %} {# 展开后显示侧边栏内容 #}
                 </div>
             </details>
         </div>
