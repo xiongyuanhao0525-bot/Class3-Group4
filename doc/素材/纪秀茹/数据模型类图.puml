@@ -1,0 +1,211 @@
+@startuml 数据模型类图
+skinparam defaultFontName "Microsoft YaHei"
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+title 班级4组博客系统 - 数据模型类图（15个模型类 + 关系 + 基数）
+
+' ============ 抽象基类 ============
+abstract class BaseModel {
+  + id : AutoField
+  + creation_time : DateTimeField
+  + last_modify_time : DateTimeField
+  --
+  + save()
+  + get_full_url()
+  + get_absolute_url()*
+}
+
+' ============ blog 应用 ============
+package "blog 应用" {
+
+  class Article {
+    + title : CharField(200, unique)
+    + body : MDTextField
+    + pub_time : DateTimeField
+    + status : CharField(1)  {d=草稿, p=已发布}
+    + comment_status : CharField(1)  {o=开放, c=关闭}
+    + type : CharField(1)  {a=文章, p=页面}
+    + views : PositiveIntegerField
+    + article_order : IntegerField
+    + show_toc : BooleanField
+    --
+    + viewed()
+    + comment_list()
+    + next_article()
+    + prev_article()
+    + get_first_image_url()
+  }
+
+  class Category {
+    + name : CharField(30, unique)
+    + slug : SlugField(60)
+    + index : IntegerField
+    --
+    + get_category_tree()
+    + get_sub_categorys()
+  }
+
+  class Tag {
+    + name : CharField(30, unique)
+    + slug : SlugField(60)
+    --
+    + get_article_count()
+  }
+
+  class Links {
+    + name : CharField(30, unique)
+    + link : URLField
+    + sequence : IntegerField(unique)
+    + is_enable : BooleanField
+    + show_type : CharField(1)
+    + creation_time : DateTimeField
+    + last_mod_time : DateTimeField
+  }
+
+  class SideBar {
+    + name : CharField(100)
+    + content : TextField
+    + sequence : IntegerField(unique)
+    + is_enable : BooleanField
+    + creation_time : DateTimeField
+    + last_mod_time : DateTimeField
+  }
+
+  class BlogSettings {
+    + site_name : CharField(200)
+    + site_description : TextField
+    + site_seo_description : TextField
+    + site_keywords : TextField
+    + article_sub_length : IntegerField
+    + sidebar_article_count : IntegerField
+    + sidebar_comment_count : IntegerField
+    + article_comment_count : IntegerField
+    + show_google_adsense : BooleanField
+    + google_adsense_codes : TextField
+    + open_site_comment : BooleanField
+    + color_scheme : CharField(20)
+    + global_header : TextField
+    + global_footer : TextField
+    + beian_code : CharField(2000)
+    + analytics_code : TextField
+    + show_gongan_code : BooleanField
+    + gongan_beiancode : TextField
+    + comment_need_review : BooleanField
+    --
+    + clean()
+  }
+}
+
+' ============ accounts 应用 ============
+package "accounts 应用" {
+  class BlogUser {
+    + nickname : CharField(100)
+    + creation_time : DateTimeField
+    + last_modify_time : DateTimeField
+    + source : CharField(100)
+    --
+    + get_absolute_url()
+    + get_full_url()
+  }
+}
+
+' ============ comments 应用 ============
+package "comments 应用" {
+  class Comment {
+    + body : TextField(300)
+    + creation_time : DateTimeField
+    + last_modify_time : DateTimeField
+    + is_enable : BooleanField
+    --
+    + get_reactions_summary(user)
+  }
+
+  class CommentReaction {
+    + reaction_type : CharField(10)
+    + created_at : DateTimeField
+  }
+}
+
+' ============ oauth 应用 ============
+package "oauth 应用" {
+  class OAuthUser {
+    + openid : CharField(50)
+    + nickname : CharField(50)
+    + token : CharField(150)
+    + picture : CharField(350)
+    + type : CharField(50)
+    + email : CharField(50)
+    + metadata : TextField
+    + creation_time : DateTimeField
+    + last_modify_time : DateTimeField
+  }
+
+  class OAuthConfig {
+    + type : CharField(10)  {weibo/google/github/facebook/qq}
+    + appkey : CharField(200)
+    + appsecret : CharField(200)
+    + callback_url : CharField(200)
+    + is_enable : BooleanField
+    + creation_time : DateTimeField
+    + last_modify_time : DateTimeField
+    --
+    + clean()
+  }
+}
+
+' ============ servermanager 应用 ============
+package "servermanager 应用" {
+  class commands {
+    + title : CharField(300)
+    + command : CharField(2000)
+    + describe : CharField(300)
+    + creation_time : DateTimeField
+    + last_modify_time : DateTimeField
+  }
+
+  class EmailSendLog {
+    + emailto : CharField(300)
+    + title : CharField(2000)
+    + content : TextField
+    + send_result : BooleanField
+    + creation_time : DateTimeField
+  }
+}
+
+' ============ 继承关系 ============
+BaseModel <|-- Article
+BaseModel <|-- Category
+BaseModel <|-- Tag
+
+' ============ 关联关系（含基数） ============
+' 文章 -> 作者 (N:1)
+Article "N" --> "1" BlogUser : author
+
+' 文章 -> 分类 (N:1)
+Article "N" --> "1" Category : category
+
+' 文章 <-> 标签 (M:N)
+Article "N" -- "M" Tag : tags
+
+' 分类 -> 父分类 (N:1 自引用)
+Category "N" --> "0..1" Category : parent_category
+
+' 评论 -> 作者 (N:1)
+Comment "N" --> "1" BlogUser : author
+
+' 评论 -> 文章 (N:1)
+Comment "N" --> "1" Article : article
+
+' 评论 -> 父评论 (N:1 自引用)
+Comment "N" --> "0..1" Comment : parent_comment
+
+' 评论反应 -> 评论 (N:1)
+CommentReaction "N" --> "1" Comment : comment
+
+' 评论反应 -> 用户 (N:1)
+CommentReaction "N" --> "1" BlogUser : user
+
+' OAuth用户 -> 本站用户 (N:1, 可空)
+OAuthUser "N" --> "0..1" BlogUser : author
+
+@enduml
