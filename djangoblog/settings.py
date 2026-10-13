@@ -43,6 +43,8 @@ CSRF_TRUSTED_ORIGINS = ['http://example.com']
 
 
 INSTALLED_APPS = [
+    # 注：不使用默认 admin，改用 SimpleAdminConfig + 自定义 AdminSite，
+    #     后台准入被收紧为 is_superuser（见 djangoblog/admin_site.py）
     # 'django.contrib.admin',
     'django.contrib.admin.apps.SimpleAdminConfig',
     'django.contrib.auth',
@@ -50,34 +52,34 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'django.contrib.sitemaps',
-    'mdeditor',
-    'haystack',
-    'blog',
-    'accounts',
-    'comments',
-    'oauth',
-    'servermanager',
-    'compressor',
-    'djangoblog'
+    'django.contrib.sites',        # 多站点框架，get_current_site 依赖
+    'django.contrib.sitemaps',     # 生成 sitemap.xml 供搜索引擎收录
+    'mdeditor',                    # Markdown 编辑器字段（Article.body）
+    'haystack',                    # 搜索框架：Whoosh / Elasticsearch 双后端
+    'blog',                        # 核心：文章/分类/标签/归档/友链/站点配置
+    'accounts',                    # 注册/登录/找回密码（自定义用户 BlogUser）
+    'comments',                    # 评论与表情回应
+    'oauth',                       # 第三方登录（微博/Google/GitHub/QQ/Facebook）
+    'servermanager',               # 微信公众号机器人与白名单运维指令
+    'compressor',                  # 静态资源压缩合并
+    'djangoblog'                   # 本项目公共模块（信号、日志后台等）
 ]
 
 MIDDLEWARE = [
-
+    # 请求自上而下、响应自下而上穿过该链（见 doc/素材/熊圆好/系统架构图）
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.locale.LocaleMiddleware',   # 中英文多语言
+    'django.middleware.gzip.GZipMiddleware',       # 响应压缩
     # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',   # CSRF 防护
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
-    'blog.middleware.OnlineMiddleware'
+    'blog.middleware.OnlineMiddleware'             # 自定义：页面耗时统计
 ]
 
 ROOT_URLCONF = 'djangoblog.urls'

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
+"""
+公共工具模块（标注人：熊圆好）
+作用：汇集全站复用的基础能力——缓存装饰器、站点配置读取、
+     Markdown 渲染、邮件发送入口、签名/验证码生成、
+     HTML 安全清洗（XSS 防护）等，供各 app 的 views/models 引用。
+"""
 
 
 import logging
@@ -22,18 +28,32 @@ logger = logging.getLogger(__name__)
 
 
 def get_max_articleid_commentid():
+    """返回当前文章与评论的最大主键 ID（压测脚本生成测试数据用）。"""
     from blog.models import Article
     from comments.models import Comment
     return (Article.objects.latest().pk, Comment.objects.latest().pk)
 
 
 def get_sha256(value):
+    """用 SECRET_KEY 对入参做 HMAC-SHA256 签名。
+
+    用途：注册激活链接、图床上传 sign 参数等场景，
+    保证链接/参数不可被伪造篡改。
+    """
     key = settings.SECRET_KEY.encode('utf-8')
     msg = str(value).encode('utf-8')
     return hmac.new(key, msg, hashlib.sha256).hexdigest()
 
 
 def cache_decorator(expiration=3 * 60):
+    """通用结果缓存装饰器（默认 3 分钟）。
+
+    缓存键优先取对象的 get_cache_key()，否则用
+    「函数+参数」的 SHA256 摘要生成；None 结果以哨兵值
+    __default_cache_value__ 缓存，避免缓存穿透。
+    典型用法：@cache_decorator(10h) 标注分类树、标签计数等
+    高频低变的查询方法。
+    """
     def wrapper(func):
         def news(*args, **kwargs):
             try:
@@ -96,11 +116,20 @@ def expire_view_cache(path, servername, serverport, key_prefix=None):
 
 @cache_decorator()
 def get_current_site():
+    """获取当前站点对象（多站点部署时用于拼完整 URL），结果带缓存。"""
     site = Site.objects.get_current()
     return site
 
 
 class CommonMarkdown:
+    """Markdown 渲染器。
+
+    启用 extra/codehilite/toc/tables 扩展：
+    - get_markdown：只返回渲染后的 HTML 正文；
+    - get_markdown_with_toc：同时返回正文与目录（TOC），
+      供文章详情页"目录"侧栏使用（配合 Article.show_toc）。
+    """
+
     @staticmethod
     def _convert_markdown(value):
         md = markdown.Markdown(
@@ -127,6 +156,12 @@ class CommonMarkdown:
 
 
 def send_email(emailto, title, content):
+    """发送邮件的统一入口。
+
+    并不直接 SMTP，而是派发 Django 信号 send_email_signal，
+    由 blog_signals.py 中的接收器真正发信并写 EmailSendLog，
+    实现解耦与发送留痕（注册激活/找回密码/评论审核通知）。
+    """
     from djangoblog.blog_signals import send_email_signal
     send_email_signal.send(
         send_email.__class__,
@@ -141,6 +176,7 @@ def generate_code() -> str:
 
 
 def parse_dict_to_url(dict):
+    """把字典序列化为 URL 查询串（键值均做 URL 编码）。"""
     from urllib.parse import quote
     url = '&'.join(['{}={}'.format(quote(k, safe='/'), quote(v, safe='/'))
                     for k, v in dict.items()])
@@ -148,6 +184,13 @@ def parse_dict_to_url(dict):
 
 
 def get_blog_setting():
+    """读取站点全局配置单例（BlogSettings），带缓存。
+
+    全站唯一配置对象：首次调用若库中不存在，则自动创建一条
+    默认配置（站点名、摘要、SEO 关键词、文章摘要长度、侧栏
+    条数、评论开关、是否先审后发等）。评论开关、摘要长度等
+    业务规则都从这里取值。
+    """
     value = cache.get('get_blog_setting')
     if value:
         return value
@@ -180,6 +223,10 @@ def save_user_avatar(url):
     保存用户头像
     :param url:头像url
     :return: 本地路径
+
+    第三方登录（oauth）建号时调用：把平台头像下载到
+    static/avatar/ 目录并以 UUID 重命名；任何异常都
+    回退为默认头像，保证注册流程不因头像失败而中断。
     '''
     logger.info(url)
 
@@ -204,6 +251,11 @@ def save_user_avatar(url):
 
 
 def delete_sidebar_cache():
+    """清空侧边栏缓存（友链/侧栏内容变更后调用）。
+
+    侧边栏按 LinkShowType 各取值分别缓存（键形如 sidebar+i/l/p/a/s），
+    逐一删除以让前台立即看到新配置。
+    """
     from blog.models import LinkShowType
     keys = ["sidebar" + x for x in LinkShowType.values]
     for k in keys:
@@ -212,12 +264,14 @@ def delete_sidebar_cache():
 
 
 def delete_view_cache(prefix, keys):
+    """删除模板片段缓存（{% cache %} 标签产生的键）。"""
     from django.core.cache.utils import make_template_fragment_key
     key = make_template_fragment_key(prefix, keys)
     cache.delete(key)
 
 
 def get_resource_url():
+    """返回静态资源前缀 URL（优先 STATIC_URL，否则拼当前站点域名）。"""
     if settings.STATIC_URL:
         return settings.STATIC_URL
     else:
