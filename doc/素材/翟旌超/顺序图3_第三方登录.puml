@@ -1,0 +1,171 @@
+@startuml
+' ============================================================
+' 顺序图 3：第三方授权登录（微博 / Google / GitHub / QQ / Facebook）
+' DjangoBlog 博客系统 · 软工3班4组 · 翟旌超（2415304340）
+' 依据真实代码：oauth/views.py(oauthlogin/authorize/RequireEmailView/
+'              emailconfirm/bindsuccess)  oauth/oauthmanager.py
+'              oauth/models.py(OAuthUser)  oauth/urls.py
+'              oauth/templatetags/oauth_tags.py
+'              djangoblog/blog_signals.py(oauth_user_login_signal)
+'              accounts/models.py(BlogUser，AUTH_USER_MODEL)
+' ============================================================
+title 顺序图3：第三方授权登录（微博/Google/GitHub/QQ/Facebook）\n—— DjangoBlog 博客系统（软工3班4组 · 翟旌超）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  MessageAlign left
+  ArrowColor #2563eb
+  ArrowFontColor #1e293b
+  ArrowFontSize 12
+  ParticipantBackgroundColor #f8fafc
+  ParticipantBorderColor #94a3b8
+  LifeLineBorderColor #cbd5e1
+  DividerBackgroundColor #eef4ff
+}
+skinparam NoteBackgroundColor #fffbe6
+skinparam NoteBorderColor #d4b106
+skinparam BoxPadding 8
+skinparam maxMessageSize 190
+
+actor "用户" as U #e8f1ff
+participant "浏览器\n登录页" as B #eef2f7
+participant "URL 路由\nurls.py" as R #eef2f7
+participant "oauthlogin()\noauth/views.py" as O1 #e8f7ee
+participant "authorize()\noauth/views.py" as O2 #e8f7ee
+participant "授权管理器\noauthmanager.py" as G #f7f0e8
+participant "第三方平台\n微博/Google/GitHub/QQ" as P #f0f5ff
+participant "OAuthUser\noauth/models.py" as OM #faf0f7
+participant "BlogUser\naccounts/models.py" as M #faf0f7
+participant "登录信号\nblog_signals.py" as SG #f0f0f0
+participant "会话 + Cookie" as S #f0f0f0
+
+== 一、点击第三方图标，跳转授权页 ==
+U -> B : [1] 点击"使用 weibo 登录"
+note right of B
+  图标由 oauth_tags.load_oauth_applications 渲染，
+  href = /oauth/oauthlogin?type={类型}&next_url={当前页}
+  支持 5 种：weibo/google/github/qq/facebook
+end note
+B -> R : [2] GET /oauth/oauthlogin?type=weibo
+R -> O1 : [3] 路由到 oauthlogin()
+O1 -> O1 : [4] type 为空 → 302 回 '/'
+O1 -> G : [5] get_manager_by_type(type)
+alt 类型非法 / 平台未配置
+    G --> O1 : 异常：返回 None
+    O1 --> B : 异常：302 回首页
+else 平台已配置
+    G --> O1 : [6] 返回该平台管理器
+    O1 -> O1 : [7] nexturl = get_redirecturl(request)
+    note right of O1
+      next_url 为空或为 /login/ → '/'；
+      仅当通过 url_has_allowed_host_and_scheme 校验时才沿用，
+      否则记日志并回退 '/'（防开放重定向）
+    end note
+    O1 -> G : [8] get_authorization_url(nexturl)
+    G --> O1 : [9] 生成含 client_id/redirect_uri/state 的授权地址
+    O1 --> B : [10] 302 跳转第三方授权页
+end
+
+== 二、第三方平台授权并回调 ==
+B -> P : [11] 打开授权页（必要时先登录平台）
+U -> P : [12] 确认授权（昵称/头像/邮箱）
+P -> R : [13] 回调 /oauth/authorize?code=..&type=..
+R -> O2 : [14] 路由到 authorize()
+O2 -> G : [15] get_manager_by_type(type)
+O2 -> O2 : [16] code = GET['code']
+O2 -> G : [17] get_access_token_by_code(code)
+G -> P : [18] 以 code + client_secret 换 access_token
+alt 授权码无效 / 换 token 失败
+    P --> G : 异常：错误响应
+    G --> O2 : 抛 OAuthAccessTokenException
+    O2 --> B : 记 warning 后回首页/重发授权
+else 成功取得 token
+    G --> O2 : [19] 返回 token 响应
+    O2 -> G : [20] get_oauth_userinfo()
+    G -> P : [21] 请求平台用户资料接口
+    P --> G : [22] openid/nickname/picture/email
+    G --> O2 : [23] 统一格式的用户信息
+end
+alt 未取到用户信息
+    O2 --> B : 异常：重新发起一次授权
+end
+
+== 三、本地账号匹配与自动绑定 ==
+O2 -> O2 : [24] 昵称为空 → 生成\ndjangoblog+yyMMddhhmmss 默认昵称
+O2 -> OM : [25] get(type=type, openid=openid)
+alt 已绑定过（非首次登录）
+    OM --> O2 : [26] 返回既有 OAuthUser\n并刷新头像/昵称/metadata
+else 首次登录
+    OM --> O2 : 异常：ObjectDoesNotExist
+end
+O2 -> O2 : [27] type=facebook → token 置空（过长）
+
+== 四、分支A：平台返回了邮箱 ==
+alt 有邮箱（Google/GitHub/微博等）
+    O2 -> O2 : [28] 开启事务 transaction.atomic()
+    O2 -> M : [29] 按 author_id 查已绑定的 BlogUser
+    alt 已绑定本站账号
+        M --> O2 : [30] 返回 author
+    else 未绑定
+        M --> O2 : 异常：ObjectDoesNotExist
+        O2 -> M : [31] get_or_create(email=..)
+        alt 新建 BlogUser（邮箱首次出现）
+            M --> O2 : [32] (author, created=True)
+            O2 -> M : [33] 用户名查重 get(username=nickname)
+            O2 -> M : [34] username = 昵称\n（重名则用 djangoblog+时间戳）
+            O2 -> M : [35] source='authorize'，save() → INSERT
+        else 邮箱已存在（自动关联老账号）
+            M --> O2 : [36] (author, created=False)
+        end
+    end
+    O2 -> OM : [37] user.author = author，save()
+    O2 -> SG : [38] 发送 oauth_user_login_signal
+    note right of SG
+      信号处理：头像若是第三方外链，
+      用 save_user_avatar() 下载到本站；
+      再 delete_sidebar_cache()
+    end note
+    O2 -> S : [39] login(request, author)
+    O2 -> S : [40] session.set_expiry(1209600 秒 = 14 天)
+    O2 -> B : [41] 302 → nexturl\n+ set_cookie('logged_user','true',..)
+    B --> U : [42] 从登录页进入→首页；\n被拦截后进入→回原文章页
+
+== 五、分支B：平台未返回邮箱（QQ/Facebook）==
+else 无邮箱
+    O2 -> OM : [43] user.save()（邮箱暂空）
+    O2 --> B : [44] 302 → 补充邮箱页\n/oauth/requireemail/{oauthid}.html
+    B --> U : [45] 显示"补充邮箱"表单
+    U -> B : [46] 填写邮箱并提交
+    B -> R : [47] POST → RequireEmailView.form_valid()
+    R -> OM : [48] oauthuser.email = email，save()
+    R -> R : [49] sign = sha256(SECRET_KEY+id+SECRET_KEY)
+    R -> R : [50] send_email(绑定链接\n/oauth/emailconfirm/{id}/{sign}.html)
+    R --> B : 302 → /oauth/bindsuccess?type=email
+    B --> U : 提示"请到邮箱点击链接完成绑定"
+    U -> B : 打开邮箱点击绑定链接
+    B -> R : GET /oauth/emailconfirm/{id}/{sign}.html
+    R -> R : 校验 sign（不匹配 → 403）
+    R -> M : get_or_create 新建/复用 BlogUser\n（source='emailconfirm'）
+    R -> OM : oauthuser.author = author，save()
+    R -> SG : 发送登录信号（头像本地化+清缓存）
+    R -> S : login(request, author)\nset_expiry(1209600 秒)
+    R -> R : send_email("绑定成功"通知)
+    R --> B : 302 → bindsuccess?type=success\n+ set_cookie('logged_user','true')
+    B --> U : 绑定成功，以后可免密登录
+end
+
+legend bottom
+  <b>异常 / 分支汇总</b>
+  |授权类型非法|get_manager_by_type 返回 None → 302 回首页|
+  |next_url 为站外地址|get_redirecturl() 校验不通过 → 记日志并回退 '/'|
+  |换取 token 失败|OAuthAccessTokenException → 记 warning 后回首页|
+  |用户信息接口异常|except Exception 捕获，rsp=None → 重新发起授权|
+  |平台无邮箱|走"补充邮箱 → 邮件确认绑定"子流程|
+  |绑定链接 sign 不匹配|403 Forbidden|
+  |昵称为空或重名|自动生成 djangoblog+时间戳作为用户名|
+  |邮箱已存在|复用已有 BlogUser，不重复注册（自动绑定）|
+  |头像处理|oauth_user_login_signal → save_user_avatar() 本地化|
+  |免密登录|登录成功后写会话 + logged_user Cookie，有效期 14 天|
+end legend
+@enduml
