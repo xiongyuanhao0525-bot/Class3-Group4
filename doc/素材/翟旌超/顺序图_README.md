@@ -1,7 +1,8 @@
 # 顺序图 · 翟旌超（软工3班4组 · 2415304340）
 
 > **本周小组任务（分工表 zjc 一行）**：负责 `accounts`（注册 / 登录 / 找回密码流程）模块，交付物 = **顺序图 ×3：注册、登录、第三方登录**。
-> 本目录即为该交付物的**可直接提交版本**：3 张顺序图（PNG 图片 + SVG 矢量图 + PlantUML 源码）+ 本说明。
+> 本目录即为该交付物的**可直接提交版本**：分工表要求的 3 张之外，**额外补齐模块内第 4 条流程"找回密码"**，
+> 共 4 张顺序图（PNG 图片 + SVG 矢量图 + PlantUML 源码）+ 本说明，覆盖 `accounts` 模块全部关键流程。
 
 ---
 
@@ -12,7 +13,8 @@
 | `顺序图1_用户注册与邮箱验证.puml` / `.png` / `.svg` | 注册（含邮箱验证激活） | **主交付物 ①** |
 | `顺序图2_用户登录.puml` / `.png` / `.svg` | 登录（用户名/邮箱 + 密码，含"记住我"） | **主交付物 ②** |
 | `顺序图3_第三方登录.puml` / `.png` / `.svg` | 第三方授权登录（微博/Google/GitHub/QQ/Facebook） | **主交付物 ③** |
-| `README.md` | 本文件：步骤表 + 代码对照表 + 异常分支 + 导出方法 | 交作业说明、组长汇总时直接引用 |
+| `顺序图4_找回密码.puml` / `.png` / `.svg` | 找回密码 / 重置密码（邮箱验证码 + 新密码） | **额外补齐**：对应分工表里的"找回密码流程" |
+| `顺序图_README.md` | 本文件：步骤表 + 代码对照表 + 异常分支 + 导出方法 | 交作业说明、组长汇总时直接引用 |
 
 - `.puml` 是 PlantUML 源码，用 VSCode 的 **PlantUML 插件**打开即可改字、改流程并重新导出图片；
   也可以把源码整段粘到 <https://www.plantuml.com/plantuml> 在线渲染。
@@ -27,13 +29,14 @@ java -Dfile.encoding=UTF-8 -jar C:\Users\91585\Desktop\plantuml\plantuml.jar -ch
 
 ---
 
-## 二、三张图分别画了什么
+## 二、四张图分别画了什么
 
 | 图 | 一句话说明 | 主要参与者（生命线） |
 | --- | --- | --- |
 | 顺序图1 注册与邮箱验证 | 访客提交注册表单 → 校验 → 新建**未激活**账号 → 发验证邮件 → 点邮件链接把 `is_active` 置真 | 访客、浏览器/注册页、URL 路由、`RegisterView`、`RegisterForm`、`BlogUser`、邮件信号、`EmailSendLog`、用户邮箱 |
 | 顺序图2 用户登录 | 提交用户名或邮箱 + 密码 → 认证后端比对 → 写会话并定有效期（记住我 30 天 / 默认 14 天）→ 跳转，另含退出登录 | 用户、浏览器/登录页、URL 路由、`LoginView`、`LoginForm`、认证后端、`BlogUser`、会话、缓存 |
 | 顺序图3 第三方登录 | 点第三方图标 → 跳平台授权 → 回调换 token 取用户信息 → 匹配/新建本地 `OAuthUser` 与 `BlogUser` → 免密登录；无邮箱时走"补充邮箱 + 邮件确认绑定" | 用户、浏览器/登录页、URL 路由、`oauthlogin()`、`authorize()`、授权管理器、第三方平台、`OAuthUser`、`BlogUser`、登录信号、会话与 Cookie |
+| 顺序图4 找回密码 | 邮箱申请 6 位验证码（存缓存 5 分钟）→ 提交验证码 + 新密码 → 校验通过后用 `make_password` 覆盖旧密码 → 跳登录页 | 用户、浏览器/忘记密码页、URL 路由、`ForgetPasswordEmailCode`、`ForgetPasswordView`、表单、验证码工具、缓存、邮件信号、`BlogUser`、用户邮箱 |
 
 ---
 
@@ -66,9 +69,16 @@ java -Dfile.encoding=UTF-8 -jar C:\Users\91585\Desktop\plantuml\plantuml.jar -ch
 | 四、有邮箱分支 | [28]–[42] | 事务内按 `author_id` 找已绑定账号，否则 `get_or_create(email=..)` 新建/复用 `BlogUser`（`source='authorize'`，昵称重名时用时间戳兜底）→ 回写 `OAuthUser.author` → 发 `oauth_user_login_signal`（头像本地化 `save_user_avatar()` + 清缓存）→ `login()` + `set_expiry(14 天)` → 302 + `logged_user` Cookie |
 | 五、无邮箱分支 | [43]–[50] | 先落库 → 跳 `/oauth/requireemail/{oauthid}.html` 补邮箱 → `RequireEmailView.form_valid()` 存邮箱并发送绑定邮件 → 点 `/oauth/emailconfirm/{id}/{sign}.html` → `emailconfirm()` 校验 `sign`、建/取 `BlogUser`、`login()` → `bindsuccess` 页提示绑定成功 |
 
+## 六、顺序图4：找回密码（步骤表）
+
+| 阶段 | 步骤 | 说明 |
+| --- | --- | --- |
+| 一、申请验证码 | [1]–[15] | 打开 `/forget_password/` → 点"获取验证码"（`account.js` 用 AJAX POST `/forget_password_code/`）→ `ForgetPasswordEmailCode.post()` → 邮箱格式校验（失败返回"错误的邮箱"）→ `generate_code()` 生成 6 位数字 → `send_verify_email()` 发信 → `set_code()` 按邮箱写入缓存（**TTL 300 秒**）→ 返回 `ok`，前端开始 60 秒倒计时 |
+| 二、提交新密码 | [16]–[32] | POST `/forget_password/` → `ForgetPasswordView`（`SecureFormView`，CSRF 保护）→ 表单按字段顺序校验：`clean_new_password2()`（两次一致 + 强度）→ `clean_email()`（邮箱必须已注册）→ `clean_code()` → `utils.verify(email, code)` 比对缓存验证码 → 全部通过后 `BlogUser.objects.get(email=..)` → `make_password()` 覆盖密码 → `save()` → 302 跳 `/login/`，用新密码登录（衔接顺序图2） |
+
 ---
 
-## 六、步骤 ↔ 代码对照表（写报告时的"设计依据"）
+## 七、步骤 ↔ 代码对照表（写报告时的"设计依据"）
 
 ### 顺序图1（`accounts` 注册）
 
@@ -105,9 +115,25 @@ java -Dfile.encoding=UTF-8 -jar C:\Users\91585\Desktop\plantuml\plantuml.jar -ch
 | [28]–[42] 自动建号登录 | `oauth/views.py`: `transaction.atomic()` + `get_user_model().objects.get_or_create(email=...)`、`author.source='authorize'`、`login()`、`session.set_expiry()`、`set_cookie('logged_user')`；`djangoblog/blog_signals.py`: `oauth_user_login_signal_handler()` → `save_user_avatar()` |
 | [43]–[50] 补邮箱绑定 | `oauth/views.py`: `RequireEmailView.form_valid()`、`emailconfirm()`、`bindsuccess()`；`accounts/models.py`: `BlogUser`（`AUTH_USER_MODEL`） |
 
+### 顺序图4（`accounts` 找回密码）
+
+| 步骤 | 代码位置 |
+| --- | --- |
+| [1]–[3] 忘记密码页 | `accounts/urls.py`: `^forget_password/$`；`templates/account/forget_password.html` |
+| [4]–[5] 申请验证码 | `blog/static/account/js/account.js`: `$("#btn").onclick` → `$.ajax({url: "/forget_password_code/", type: "POST", data: {email, csrfmiddlewaretoken}})` |
+| [6]–[8] 验证码接口 | `accounts/urls.py`: `^forget_password_code/$`；`accounts/views.py`: `ForgetPasswordEmailCode.post()`；`accounts/forms.py`: `ForgetPasswordCodeForm` |
+| [9] 生成验证码 | `djangoblog/utils.py`: `generate_code()` → `random.sample(string.digits, 6)` |
+| [10]–[11] 发验证码邮件 | `accounts/utils.py`: `send_verify_email(to_mail, code, subject=_("Verify Email"))` → `djangoblog/utils.py`: `send_email()` → `blog_signals.py`: `send_email_signal_handler()`（SMTP + 写 `EmailSendLog`） |
+| [12]–[13] 存缓存 | `accounts/utils.py`: `set_code()` → `cache.set(email, code, _code_ttl.seconds)`，`_code_ttl = timedelta(minutes=5)` |
+| [16]–[19] 提交重置 | `accounts/urls.py`: `^forget_password/$` → `views.ForgetPasswordView`（`SecureFormView` → `csrf_protect`）；`accounts/forms.py`: `ForgetPasswordForm` |
+| [20] 新密码校验 | `accounts/forms.py`: `clean_new_password2()` → 两次一致 + `password_validation.validate_password()` |
+| [21] 邮箱校验 | `accounts/forms.py`: `clean_email()` → `BlogUser.objects.filter(email=..).exists()`（不存在则 "email does not exist"） |
+| [22]–[25] 验证码校验 | `accounts/forms.py`: `clean_code()` → `accounts/utils.py`: `verify(email, code)`（内部 `get_code()` 读缓存，不一致返回 "Verification code error"） |
+| [26]–[32] 重置密码 | `accounts/views.py`: `ForgetPasswordView.form_valid()` → `BlogUser.objects.filter(email=..).get()`、`make_password(new_password2)`、`blog_user.save()`、`HttpResponseRedirect('/login/')` |
+
 ---
 
-## 七、异常 / 分支一览（答辩、写报告可直接用）
+## 八、异常 / 分支一览（答辩、写报告可直接用）
 
 | 场景 | 处理 |
 | --- | --- |
@@ -126,10 +152,15 @@ java -Dfile.encoding=UTF-8 -jar C:\Users\91585\Desktop\plantuml\plantuml.jar -ch
 | 第三方：用户信息接口异常 | `except Exception` 捕获，`rsp=None` → 重新发起授权 |
 | 第三方：平台无邮箱（QQ/Facebook） | 走"补充邮箱 → 邮件确认绑定"子流程；绑定链接 `sign` 不符 → 403 |
 | 第三方：昵称为空 / 重名 | 生成 `djangoblog+时间戳` 作为用户名兜底 |
+| 找回密码：邮箱格式非法 | `ForgetPasswordCodeForm` 校验失败 → 返回"错误的邮箱"，不发验证码 |
+| 找回密码：邮箱未注册 | `clean_email()` → "email does not exist"，回表单页 |
+| 找回密码：两次密码不一致 / 强度不足 | `clean_new_password2()` → "passwords do not match" / `password_validation` 报错 |
+| 找回密码：验证码错误或超过 5 分钟 | `verify()` 比对缓存失败 → "Verification code error"（`set_code` 的 TTL 300 秒） |
+| 找回密码：CSRF 非法 | `ForgetPasswordView`（`SecureFormView`）→ `csrf_protect` → 403 |
 
 ---
 
-## 八、安全与技术要点（报告里的"设计说明"小节可摘）
+## 九、安全与技术要点（报告里的"设计说明"小节可摘）
 
 1. **密码安全**：注册密码经 Django `UserCreationForm` 校验强度后以 PBKDF2 哈希入库；登录用 `check_password()` 比对，日志中密码被 `sensitive_post_parameters` 脱敏。
 2. **邮箱验证令牌**：`sign = sha256(sha256(SECRET_KEY + id))`，服务端可重算校验，链接被篡改即 403。
@@ -138,13 +169,14 @@ java -Dfile.encoding=UTF-8 -jar C:\Users\91585\Desktop\plantuml\plantuml.jar -ch
 5. **会话有效期**：默认 2 周，勾选"记住我"延长到 30 天（`REMEMBER_ME_LOGIN_TTL`）。
 6. **登录后缓存一致性**：登录/退出、第三方资料更新、评论写入都会 `delete_sidebar_cache()`，避免缓存里残留旧登录态或旧侧边栏。
 7. **第三方登录免密**：`OAuthUser` 与 `BlogUser` 通过 `author` 外键绑定；同一邮箱自动复用已有账号，避免重复注册。
-8. **找回密码**（本模块同样包含，如需第四张图可补画）：`ForgetPasswordEmailCode` 生成 6 位验证码 → `send_verify_email()` 发信 → `utils.set_code()` 写缓存（TTL 5 分钟）→ `ForgetPasswordView` 经 `clean_code()` 校验后 `make_password()` 改写密码并 302 到 `/login/`。
+8. **找回密码的验证码时效**：6 位随机数字按邮箱为 key 存缓存，TTL 300 秒（5 分钟）过期自动失效；重置成功后密码以 PBKDF2 哈希覆盖旧值。
+   注：默认 `CACHES` 是 `LocMemCache`（单进程内存），若多进程/多机部署应改用 Redis（`settings.py` 已支持 `DJANGO_REDIS_URL`），否则验证码在进程间不共享。
 
 ---
 
-## 九、交付人信息
+## 十、交付人信息
 
 - 姓名：翟旌超　班级：软件工程 3 班　学号：2415304340
 - 小组：3 班 4 组（组长：熊圆好；组员：纪秀茹、翟旌超、王鑫悦、陈汉佳、杨杰翰）
 - 负责模块：`accounts`（注册 / 登录 / 找回密码流程）
-- 本次交付：顺序图 ×3（注册、登录、第三方登录）+ 本说明
+- 本次交付：顺序图 ×3（注册、登录、第三方登录）+ **额外补齐**顺序图 ×1（找回密码）+ 本说明
