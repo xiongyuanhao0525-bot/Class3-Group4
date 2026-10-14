@@ -1,0 +1,77 @@
+@startuml sequence_reaction
+title Sequence Diagram: Comment Reaction (Like)
+
+actor User as user
+participant Browser as browser
+participant Django as django
+participant CommentReactionView as view
+participant Comment as comment
+participant CommentReaction as reaction
+participant Database as db
+
+== User Clicks Reaction Button ==
+
+user -> browser: Click reaction button (e.g., thumbs up)
+activate browser
+browser -> django: POST /comment/<comment_id>/react
+activate django
+django -> view: CommentReactionView.post()
+activate view
+
+== Authentication Check ==
+
+view -> view: Check if user.is_authenticated
+activate view
+
+alt User Not Authenticated
+    view --> django: JsonResponse(error=Authentication required)
+    deactivate view
+    django --> browser: HTTP 401 Unauthorized
+    deactivate django
+    browser -> user: Show login prompt
+    deactivate browser
+else User Authenticated
+    view -> comment: Get comment by id
+    activate comment
+    comment --> view: Return comment
+    deactivate comment
+
+    view -> reaction: CommentReaction.objects.get_or_create(comment=comment, user=user, reaction_type=type)
+    activate reaction
+    reaction -> db: Check if reaction exists
+    activate db
+
+    alt Reaction Already Exists
+        db --> reaction: Return existing reaction
+        deactivate db
+        reaction -> reaction: Delete reaction (toggle off)
+        reaction --> view: reaction, created=False
+    else Reaction Does Not Exist
+        reaction -> db: INSERT INTO comments_commentreaction
+        activate db
+        db --> reaction: Return success
+        deactivate db
+        reaction --> view: reaction, created=True
+    end
+
+    reaction --> view: Return reaction result
+    deactivate reaction
+
+    view -> comment: comment.get_reactions_summary(user)
+    activate comment
+    comment -> db: SELECT reaction_type, COUNT(*) FROM comments_commentreaction WHERE comment_id=<id> GROUP BY reaction_type
+    activate db
+    db --> comment: Return reaction statistics
+    deactivate db
+    comment --> view: Return reactions_data
+    deactivate comment
+
+    view --> django: JsonResponse({success: True, action: added/removed, reactions: reactions_data})
+    deactivate view
+    django --> browser: HTTP 200 OK
+    deactivate django
+    browser -> user: Update UI with new reaction count
+    deactivate browser
+end
+
+@enduml
