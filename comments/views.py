@@ -10,7 +10,6 @@ from djangoblog.base_views import AuthenticatedFormView
 from .forms import CommentForm
 from .models import Comment, CommentReaction
 
-
 class CommentPostView(AuthenticatedFormView):
     """
     评论提交视图（发表/回复评论）
@@ -64,7 +63,6 @@ class CommentPostView(AuthenticatedFormView):
         return HttpResponseRedirect(      # 跳回文章页并定位到新评论位置
             "%s#div-comment-%d" %
             (article.get_absolute_url(), comment.pk))
-
 
 class CommentReactionView(View):
     """
