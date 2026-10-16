@@ -44,7 +44,7 @@ Redis 缓存贯穿站点配置、分类树、侧边栏；插件体系通过钩�
 - `UML包图-应用包全景.png`：10 个包三行网格布局（表现层 templates/templatetags/plugins → 业务 app blog/comments/accounts/oauth → 支撑层 servermanager/djangoblog/外部框架），虚线箭头只画跨包依赖并标注性质（FK→Article、建号写 BlogUser、渲染插件钩子、settings 注册等）。与王鑫悦《模板UML包图.png》互补：后者细化模板继承，本图为应用包全景。
 
 ### 小组统稿
-- 泛读报告统稿见 `doc/素材/开源软件泛读报告-DjangoBlog.docx`（按课程模板六章节组织，嵌入全组素材）。
+- 泛读报告统稿见 `doc/开源软件泛读报告-DjangoBlog.docx`（与"素材"目录同级，按课程模板六章节组织，嵌入全组素材）。
 
 ## 三、协调事项（组长）
 - 组会安排：周三代码标注互查 → 周五模型图互查 → 周日统稿泛读报告
