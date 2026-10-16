@@ -36,6 +36,16 @@ Redis 缓存贯穿站点配置、分类树、侧边栏；插件体系通过钩�
 右侧外部系统：微信公众平台、五家 OAuth、SMTP、ChatGPT、百度推送。
 配套生成脚本：`系统架构图生成脚本.py`（matplotlib，可复现）。
 
+### 数据流图（补交，本目录两张 PNG）
+- `数据流图-顶层上下文图.png`：系统黑盒 + 4 外部实体（游客/注册用户、超级管理员、第三方平台、SMTP）+ 8 条边界数据流，Gane-Sarson 记号。
+- `数据流图-0层分解图.png`：P0 分解为 P1 注册登录、P2 浏览搜索、P3 评论互动、P4 内容管理、P5 机器人服务五个加工；D1-D5 数据存储与杨杰翰《数据字典.md》模型分组一一对应（D1↔BlogUser、D2↔Article/Category/Tag、D3↔Comment/CommentReaction、D4↔BlogSettings、D5↔OAuthUser/commands），实线为写流、虚线为读流，父子图平衡。
+
+### UML 包图（补交）
+- `UML包图-应用包全景.png`：10 个包三行网格布局（表现层 templates/templatetags/plugins → 业务 app blog/comments/accounts/oauth → 支撑层 servermanager/djangoblog/外部框架），虚线箭头只画跨包依赖并标注性质（FK→Article、建号写 BlogUser、渲染插件钩子、settings 注册等）。与王鑫悦《模板UML包图.png》互补：后者细化模板继承，本图为应用包全景。
+
+### 小组统稿
+- 泛读报告统稿见 `doc/素材/开源软件泛读报告-DjangoBlog.docx`（按课程模板六章节组织，嵌入全组素材）。
+
 ## 三、协调事项（组长）
 - 组会安排：周三代码标注互查 → 周五模型图互查 → 周日统稿泛读报告
 - 依赖管控：顺序图（zjc/yjh）已发放 28 用例编号底稿；数据字典（chj）与数据流图（jxr）命名表已对齐
