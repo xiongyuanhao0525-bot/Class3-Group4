@@ -3,62 +3,55 @@ skinparam defaultFontName "Microsoft YaHei"
 skinparam nodesep 80
 skinparam ranksep 100
 skinparam rectangle {
-  BackgroundColor #FEFEFE
+  BackgroundColor white
   BorderColor black
   FontSize 13
 }
-skinparam circle {
-  BackgroundColor #BBDEFB
-  BorderColor #1565C0
-  FontSize 14
-}
 skinparam ArrowFontSize 11
-skinparam ArrowColor #555555
+skinparam ArrowColor black
 skinparam Shadowing false
-left to right direction
-title 图0  DjangoBlog系统 数据流图（顶层图/上下文图）
+title 图0  DjangoBlog系统 数据流图（顶层图）
 
-rectangle "读者\n(Guest)" as E1 #FFE0B2
-rectangle "作者\n(Author)" as E2 #C8E6C9
-rectangle "管理员\n(Admin)" as E3 #F8BBD0
-rectangle "OAuth服务商" as E4 #E1BEE7
-circle "0\nDjangoBlog\n博客系统" as P0
+rectangle "读者\n(Guest)" as E1
+rectangle "作者\n(Author)" as E2
+rectangle "管理员\n(Admin)" as E3
+rectangle "OAuth\n服务商" as E4
+usecase "博客系统" as P0
 
-E1 <--> P0 : 浏览请求/文章详情\n评论内容/评论列表
-E2 <--> P0 : 文章内容/图片上传\n编辑表单/保存结果
-E3 <--> P0 : 配置/友链/审核\n管理界面/操作结果
-E4 <--> P0 : 授权请求\n用户信息
+E1 --> P0 : 浏览请求/评论内容
+P0 --> E1 : 文章详情/评论列表
+E2 --> P0 : 文章内容/图片上传
+P0 --> E2 : 编辑表单/保存结果
+E3 --> P0 : 配置/友链/审核操作
+P0 --> E3 : 管理界面/操作结果
+E4 --> P0 : 授权请求
+P0 --> E4 : 用户信息
 @enduml
-
 
 @startuml DFD-1前台文章浏览
 skinparam defaultFontName "Microsoft YaHei"
-skinparam nodesep 60
-skinparam ranksep 80
+skinparam nodesep 50
+skinparam ranksep 70
 skinparam rectangle {
-  BackgroundColor #FEFEFE
+  BackgroundColor white
   BorderColor black
   FontSize 12
 }
-skinparam database {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-}
 skinparam ArrowFontSize 10
-skinparam ArrowColor #555555
+skinparam ArrowColor black
 title 图1.0  前台文章浏览 数据流图（1层分解）
 
-rectangle "读者" as E1 #FFE0B2
+rectangle "读者" as E1
 
-rectangle "1.1\n文章列表" as P11 #E8F4FD
-rectangle "1.2\n文章详情" as P12 #E8F4FD
-rectangle "1.3\n分类标签筛选" as P13 #E8F4FD
-rectangle "1.4\n时间归档" as P14 #E8F4FD
+usecase "1.1\n文章列表" as P11
+usecase "1.2\n文章详情" as P12
+usecase "1.3\n分类标签筛选" as P13
+usecase "1.4\n时间归档" as P14
 
-database "D1\nArticle" as D1 #FFF9C4
-database "D2\nCategory" as D2 #FFF9C4
-database "D3\nTag" as D3 #FFF9C4
-database "D4\nComment" as D4 #FFF9C4
+rectangle "D1\nArticle" as D1
+rectangle "D2\nCategory" as D2
+rectangle "D3\nTag" as D3
+rectangle "D4\nComment" as D4
 
 E1 --> P11 : 首页请求
 P11 --> D1 : 查询已发布文章
@@ -85,38 +78,29 @@ D1 --> P14 : 归档数据
 P14 --> E1 : 时间轴
 @enduml
 
-
 @startuml DFD-2文章内容管理
 skinparam defaultFontName "Microsoft YaHei"
-skinparam nodesep 60
-skinparam ranksep 80
+skinparam nodesep 50
+skinparam ranksep 70
 skinparam rectangle {
-  BackgroundColor #FEFEFE
+  BackgroundColor white
   BorderColor black
   FontSize 12
 }
-skinparam database {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-}
-skinparam file {
-  BackgroundColor #FFCCBC
-  BorderColor #BF360C
-}
 skinparam ArrowFontSize 10
-skinparam ArrowColor #555555
+skinparam ArrowColor black
 title 图2.0  文章内容管理 数据流图（1层分解）
 
-rectangle "作者" as E2 #C8E6C9
+rectangle "作者" as E2
 
-rectangle "2.1\n撰写编辑文章" as P21 #E8F4FD
-rectangle "2.2\n上传图片" as P22 #E8F4FD
-rectangle "2.3\n删除文章" as P23 #E8F4FD
+usecase "2.1\n撰写编辑文章" as P21
+usecase "2.2\n上传图片" as P22
+usecase "2.3\n删除文章" as P23
 
-database "D1\nArticle" as D1 #FFF9C4
-database "D2\nCategory" as D2 #FFF9C4
-database "D3\nTag" as D3 #FFF9C4
-file "图片文件\n(media/)" as F1 #FFCCBC
+rectangle "D1\nArticle" as D1
+rectangle "D2\nCategory" as D2
+rectangle "D3\nTag" as D3
+rectangle "F1\n图片文件" as F1
 
 E2 --> P21 : 标题/正文/分类标签
 P21 --> D2 : 读分类列表
@@ -138,34 +122,29 @@ D1 --> P23 : 删除确认
 P23 --> E2 : 删除成功
 @enduml
 
-
 @startuml DFD-3评论互动
 skinparam defaultFontName "Microsoft YaHei"
-skinparam nodesep 60
-skinparam ranksep 80
+skinparam nodesep 50
+skinparam ranksep 70
 skinparam rectangle {
-  BackgroundColor #FEFEFE
+  BackgroundColor white
   BorderColor black
   FontSize 12
 }
-skinparam database {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-}
 skinparam ArrowFontSize 10
-skinparam ArrowColor #555555
+skinparam ArrowColor black
 title 图3.0  评论互动 数据流图（1层分解）
 
-rectangle "读者" as E1 #FFE0B2
-rectangle "管理员" as E3 #F8BBD0
+rectangle "读者" as E1
+rectangle "管理员" as E3
 
-rectangle "3.1\n发表评论" as P31 #E8F4FD
-rectangle "3.2\n表情反应" as P32 #E8F4FD
-rectangle "3.3\n审核评论" as P33 #E8F4FD
+usecase "3.1\n发表评论" as P31
+usecase "3.2\n表情反应" as P32
+usecase "3.3\n审核评论" as P33
 
-database "D4\nComment" as D4 #FFF9C4
-database "D5\nCommentReaction" as D5 #FFF9C4
-database "D6\nBlogUser" as D6 #FFF9C4
+rectangle "D4\nComment" as D4
+rectangle "D5\nCommentReaction" as D5
+rectangle "D6\nBlogUser" as D6
 
 E1 --> P31 : 评论内容+文章ID
 P31 --> D6 : 校验用户
@@ -188,35 +167,30 @@ D4 --> P33 : 更新确认
 P33 --> E3 : 审核结果
 @enduml
 
-
 @startuml DFD-4分类标签友链维护
 skinparam defaultFontName "Microsoft YaHei"
-skinparam nodesep 60
-skinparam ranksep 80
+skinparam nodesep 50
+skinparam ranksep 70
 skinparam rectangle {
-  BackgroundColor #FEFEFE
+  BackgroundColor white
   BorderColor black
   FontSize 12
 }
-skinparam database {
-  BackgroundColor #FFF9C4
-  BorderColor #F9A825
-}
 skinparam ArrowFontSize 10
-skinparam ArrowColor #555555
+skinparam ArrowColor black
 title 图4.0  分类标签与友链维护 数据流图（1层分解）
 
-rectangle "管理员" as E3 #F8BBD0
+rectangle "管理员" as E3
 
-rectangle "4.1\n维护分类" as P41 #E8F4FD
-rectangle "4.2\n维护标签" as P42 #E8F4FD
-rectangle "4.3\n维护友链" as P43 #E8F4FD
-rectangle "4.4\n维护侧边栏" as P44 #E8F4FD
+usecase "4.1\n维护分类" as P41
+usecase "4.2\n维护标签" as P42
+usecase "4.3\n维护友链" as P43
+usecase "4.4\n维护侧边栏" as P44
 
-database "D2\nCategory" as D2 #FFF9C4
-database "D3\nTag" as D3 #FFF9C4
-database "D7\nLinks" as D7 #FFF9C4
-database "D8\nSideBar" as D8 #FFF9C4
+rectangle "D2\nCategory" as D2
+rectangle "D3\nTag" as D3
+rectangle "D7\nLinks" as D7
+rectangle "D8\nSideBar" as D8
 
 E3 --> P41 : 增删改分类
 P41 --> D2 : 写分类记录
