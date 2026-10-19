@@ -1,0 +1,78 @@
+@startuml sequence_view_article
+title Sequence Diagram: View Article
+
+actor User as user
+participant Browser as browser
+participant Django as django
+participant ArticleDetailView as view
+participant Article as article
+participant Database as db
+participant Cache as cache
+participant PluginSystem as plugin
+
+== User Visits Article Page ==
+
+user -> browser: Visit article URL\n/article/2024/10/13/1.html
+activate browser
+
+browser -> django: GET /article/2024/10/13/1.html
+activate django
+
+django -> view: ArticleDetailView.get()
+activate view
+
+== Query Article Data ==
+
+view -> article: Article.objects.get(id=1)
+activate article
+
+article -> db: SELECT * FROM blog_article WHERE id=1
+activate db
+
+db --> article: Return article data
+deactivate db
+
+article --> view: Return Article object
+deactivate article
+
+== Query Comment Data ==
+
+view -> article: article.comment_list()
+activate article
+
+article -> cache: Get comment list from cache
+activate cache
+
+cache --> article: Cache hit?
+
+alt Cache Miss
+    article -> db: SELECT * FROM comments_comment WHERE article_id=1 AND is_enable=True
+    activate db
+    db --> article: Return comment list
+    deactivate db
+    article -> cache: Save to cache
+end
+
+cache --> article: Return comment list
+deactivate cache
+
+article --> view: Return comment list
+deactivate article
+
+== Call Plugin Hooks ==
+
+view -> plugin: run_action('after_article_body_get')
+activate plugin
+plugin --> view: Hook execution complete
+deactivate plugin
+
+== Render Page ==
+
+view -> django: Return context data
+deactivate view
+django -> browser: Render HTML page
+deactivate django
+browser -> user: Display article page
+deactivate browser
+
+@enduml

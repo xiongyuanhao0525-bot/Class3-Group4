@@ -1,0 +1,78 @@
+@startuml sequence_post_comment
+title Sequence Diagram: Post Comment
+
+actor User as user
+participant Browser as browser
+participant Django as django
+participant CommentPostView as view
+participant CommentForm as form
+participant Comment as comment
+participant Article as article
+participant BlogSettings as settings
+participant Database as db
+
+== User Submits Comment ==
+
+user -> browser: Submit comment form
+activate browser
+browser -> django: POST /comment/article/<id>/
+activate django
+django -> view: CommentPostView.post()
+activate view
+
+== Form Validation ==
+
+view -> form: CommentForm(data)
+activate form
+form --> view: Form is valid?
+deactivate form
+
+alt Form Valid
+    view -> article: Get article by id
+    activate article
+    article --> view: Return article
+    deactivate article
+
+    view -> settings: Get blog settings
+    activate settings
+    settings --> view: Return settings
+    deactivate settings
+
+    view -> comment: Create comment instance
+    activate comment
+    comment -> comment: Set comment.article = article
+    comment -> comment: Set comment.author = user
+
+    alt Need Review
+        comment -> comment: Set is_enable = False
+    else No Review Required
+        comment -> comment: Set is_enable = True
+    end
+
+    alt Has Parent Comment
+        view -> comment: Set parent_comment
+    end
+
+    comment -> db: INSERT INTO comments_comment
+    activate db
+    db --> comment: Return success
+    deactivate db
+    comment --> view: Return comment object
+    deactivate comment
+
+    view -> django: HttpResponseRedirect to article page
+    deactivate view
+    django -> browser: Redirect response
+    deactivate django
+    browser -> user: Display article page with new comment
+    deactivate browser
+else Form Invalid
+    view -> django: Return error response
+    deactivate view
+    django -> browser: Display error message
+    deactivate django
+    browser -> user: Show form validation errors
+    deactivate browser
+end
+
+@enduml
