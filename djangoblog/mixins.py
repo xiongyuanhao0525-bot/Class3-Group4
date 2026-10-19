@@ -6,6 +6,14 @@ Django Blog 混入类 (Mixins)
 提供可复用的功能模块，减少代码重复
 """
 
+# xyh：模块级说明 —— 可复用的 Mixin 工具箱，分模型层与视图层两组：
+# xyh：  模型层：TimeStampedModel（抽象基类，统一 created_at/updated_at 时间戳）；
+# xyh：  视图层：SlugCachedMixin（slug 查询结果请求内缓存）、OptimizedArticleQueryMixin
+# xyh：    （select_related/prefetch_related 防 N+1）、CachedListViewMixin（ListView 结果缓存）、
+# xyh：    PageNumberMixin（页码解析）、ArticleListMixin（前四者组合，文章列表视图一键继承）。
+# xyh：设计意图：把跨视图/跨模型的横切逻辑沉到 Mixin，业务 View 只声明差异部分，
+# xyh：体现 Django"组合优先于继承"的视图组织方式（blog/views.py 直接组合使用）。
+
 import logging
 from django.db import models
 from django.shortcuts import get_object_or_404
@@ -16,7 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 # ===== 模型层 Mixin =====
+# xyh：模型层 Mixin（抽象基类）——继承后自动获得字段与行为，不额外建表
 
+# xyh：时间戳抽象模型：created_at + updated_at 两个字段一次配齐，子类无需重复声明
 class TimeStampedModel(models.Model):
     """
     抽象模型：为所有模型提供统一的时间戳字段
@@ -28,12 +38,14 @@ class TimeStampedModel(models.Model):
         class MyModel(TimeStampedModel):
             name = models.CharField(max_length=100)
     """
+    # xyh：创建时间——默认取当前时间，建索引支持按时间排序/范围过滤
     created_at = models.DateTimeField(
         _('creation time'),
         default=now,
         db_index=True,
         help_text=_('The date and time when this object was created')
     )
+    # xyh：最后修改时间——无索引（更新频繁，索引维护成本高）
     updated_at = models.DateTimeField(
         _('last modify time'),
         default=now,
@@ -41,10 +53,11 @@ class TimeStampedModel(models.Model):
     )
 
     class Meta:
-        abstract = True
-        ordering = ['-created_at']
-        get_latest_by = 'created_at'
+        abstract = True   # xyh：抽象基类——不生成独立数据表，字段下发给子类
+        ordering = ['-created_at']   # xyh：默认按创建时间倒序（最新在前）
+        get_latest_by = 'created_at'  # xyh：latest()/earliest() 的排序依据
 
+    # xyh：重写 save：把 updated_at 刷新为当前时间；若指定了 update_fields 且未含该字段则补上
     def save(self, *args, **kwargs):
         """
         重写 save 方法，自动更新 updated_at 字段
@@ -66,7 +79,9 @@ class TimeStampedModel(models.Model):
 
 
 # ===== 视图层 Mixin =====
+# xyh：视图层 Mixin —— 供 CBV 多继承组合，各自解决一类横切问题
 
+# xyh：slug 查询缓存：同一请求内反复取同一 slug 对象只查库一次（典型：详情页多次取分类）
 class SlugCachedMixin:
     """
     Mixin: 缓存 slug 查询结果，避免重复数据库查询
@@ -87,8 +102,8 @@ class SlugCachedMixin:
                 category = self.get_slug_object()
                 return Article.objects.filter(category=category)
     """
-    slug_url_kwarg = 'slug'
-    slug_model = None
+    slug_url_kwarg = 'slug'   # xyh：URL 中 slug 参数的键名（可从 kwargs 取出）
+    slug_model = None          # xyh：子类必须指定的模型类（None 时调用即抛错）
 
     def get_slug_object(self):
         """
@@ -100,14 +115,14 @@ class SlugCachedMixin:
         Raises:
             Http404: 如果 slug 对应的对象不存在
         """
-        if not hasattr(self, '_slug_object'):
+        if not hasattr(self, '_slug_object'):   # xyh：以实例属性做请求内缓存标志
             if self.slug_model is None:
                 raise ValueError(
                     f'{self.__class__.__name__} must define slug_model attribute'
                 )
 
             slug = self.kwargs.get(self.slug_url_kwarg)
-            self._slug_object = get_object_or_404(self.slug_model, slug=slug)
+            self._slug_object = get_object_or_404(self.slug_model, slug=slug)  # xyh：不存在对象直接抛 404
             logger.debug(
                 f'Loaded {self.slug_model.__name__} object: {self._slug_object} (slug={slug})'
             )
@@ -115,6 +130,7 @@ class SlugCachedMixin:
         return self._slug_object
 
 
+# xyh：文章查询优化：预加载外键与多对多关联，避免列表页 N+1 查询
 class OptimizedArticleQueryMixin:
     """
     Mixin: 优化文章查询（预加载关联对象）
@@ -142,7 +158,7 @@ class OptimizedArticleQueryMixin:
         Returns:
             QuerySet: 优化后的 Article queryset
         """
-        from blog.models import Article
+        from blog.models import Article   # xyh：函数内导入避免模块级循环依赖
 
         return Article.objects.select_related(
             'author',      # 预加载作者（ForeignKey）
@@ -152,6 +168,7 @@ class OptimizedArticleQueryMixin:
         )
 
 
+# xyh：ListView 结果缓存：按子类提供的键缓存整个 queryset，命中即省掉数据库查询
 class CachedListViewMixin:
     """
     Mixin: 为 ListView 提供统一的缓存逻辑
@@ -206,15 +223,15 @@ class CachedListViewMixin:
         Returns:
             QuerySet: 查询结果
         """
-        from djangoblog.utils import cache
+        from djangoblog.utils import cache   # xyh：延迟导入复用全局缓存实例（LocMem/Redis 由 settings 决定）
 
         value = cache.get(cache_key)
         if value:
             logger.info(f'Cache HIT: {cache_key}')
             return value
 
-        queryset = self.get_queryset_data()
-        cache.set(cache_key, queryset)
+        queryset = self.get_queryset_data()   # xyh：未命中则真正查库
+        cache.set(cache_key, queryset)        # xyh：默认 TTL（LocMem 配置 10800s）；失效由 signals 中清键逻辑负责
         logger.info(f'Cache MISS: {cache_key}')
         return queryset
 
@@ -225,10 +242,11 @@ class CachedListViewMixin:
         Returns:
             QuerySet: 查询结果（从缓存或数据库）
         """
-        key = self.get_queryset_cache_key()
+        key = self.get_queryset_cache_key()   # xyh：缓存键由子类按场景拼出（含页码/名称等）
         return self.get_queryset_from_cache(key)
 
 
+# xyh：页码解析：优先 URL kwargs，其次 GET 参数，非法/缺失一律回退第 1 页
 class PageNumberMixin:
     """
     Mixin: 提供页码获取功能
@@ -240,9 +258,9 @@ class PageNumberMixin:
             def get_queryset_cache_key(self):
                 return f'list_{self.page_number}'
     """
-    page_kwarg = 'page'
+    page_kwarg = 'page'   # xyh：页码参数名（可被子类覆盖）
 
-    @property
+    @property   # xyh：只读属性，供上方 get_queryset_cache_key 之类直接引用
     def page_number(self):
         """
         获取当前页码
@@ -253,14 +271,15 @@ class PageNumberMixin:
             int: 当前页码
         """
         page = self.kwargs.get(self.page_kwarg) or \
-               self.request.GET.get(self.page_kwarg) or 1
+               self.request.GET.get(self.page_kwarg) or 1   # xyh：URL 优先于查询串，均缺省用 1
 
         try:
             return int(page)
         except (ValueError, TypeError):
-            return 1
+            return 1   # xyh：非数字页码（如 ?page=abc）容错回第 1 页，避免 500
 
 
+# xyh：组合型 Mixin —— 一继承即具备"优化查询 + 缓存 + 页码"三项能力，文章列表视图复用
 class ArticleListMixin(
     OptimizedArticleQueryMixin,
     CachedListViewMixin,
@@ -282,4 +301,4 @@ class ArticleListMixin(
             def get_queryset_cache_key(self):
                 return f'my_list_{self.page_number}'
     """
-    pass
+    pass   # xyh：本身无实现，靠 MRO 继承三个父 Mixin 的方法（blog/views.py 的 ArticleListView 即组合使用）

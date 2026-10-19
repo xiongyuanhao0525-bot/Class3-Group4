@@ -1,0 +1,28 @@
+# djangoblog 注释文件清单（标注人：熊圆好  #xyh）
+
+| 文件路径 | 注释行数(# xyh) | 文件总行数 |
+|---|---|---|
+| djangoblog/whoosh_cn_backend.py | 149 | 1100 |
+| djangoblog/settings.py | 107 | 486 |
+| djangoblog/utils.py | 61 | 379 |
+| djangoblog/elasticsearch_backend.py | 60 | 242 |
+| djangoblog/blog_signals.py | 54 | 193 |
+| djangoblog/constants.py | 48 | 101 |
+| djangoblog/plugin_manage/base_plugin.py | 36 | 214 |
+| djangoblog/mixins.py | 35 | 304 |
+| djangoblog/logentryadmin.py | 30 | 99 |
+| djangoblog/urls.py | 27 | 79 |
+| djangoblog/sitemap.py | 22 | 62 |
+| djangoblog/plugin_manage/hook_constants.py | 18 | 25 |
+| djangoblog/admin_site.py | 16 | 73 |
+| djangoblog/plugin_manage/loader.py | 16 | 70 |
+| djangoblog/base_views.py | 14 | 132 |
+| djangoblog/feeds.py | 14 | 43 |
+| djangoblog/error_views.py | 11 | 148 |
+| djangoblog/plugin_manage/hooks.py | 10 | 49 |
+| djangoblog/spider_notify.py | 8 | 23 |
+| djangoblog/apps.py | 7 | 13 |
+| djangoblog/wsgi.py | 4 | 18 |
+| **合计（21 个文件）** | **747** | **3853** |
+
+统计口径：#xyh 标记的注释行数（含模块级/类级/方法级/行尾注释）；测试文件与 __init__.py 不计。

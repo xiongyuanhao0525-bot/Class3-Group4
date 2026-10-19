@@ -9,6 +9,19 @@ https://docs.djangoproject.com/en/1.10/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
+
+# xyh：模块级说明 —— DjangoBlog 全局配置文件（djangoblog.settings），按以下分区组织：
+# xyh：  ①安全开关（SECRET_KEY/DEBUG/TESTING/ALLOWED_HOSTS/CSRF_TRUSTED_ORIGINS）
+# xyh：  ②应用与中间件（INSTALLED_APPS/MIDDLEWARE/ROOT_URLCONF/TEMPLATES/WSGI）
+# xyh：  ③数据库（MySQL，凭据全部走环境变量）
+# xyh：  ④密码校验器；⑤国际化与时区；⑥Session 生命周期
+# xyh：  ⑦搜索引擎双后端（Elasticsearch / Whoosh，由环境变量决定分支）
+# xyh：  ⑧鉴权后端与用户模型；⑨静态资源与 compressor 压缩体系
+# xyh：  ⑩缓存（LocMemCache，可被 DJANGO_REDIS_URL 切换为 Redis）
+# xyh：  ⑪站点ID/百度推送；⑫邮件（经信号异步发送）；⑬WXADMIN 口令
+# xyh：  ⑭日志 LOGGING；⑮媒体文件与安全头；⑯插件系统
+# xyh：约定：大量敏感项以 os.environ.get(...) or 默认值 形式读取，部署时优先配环境变量。
+
 import os
 import sys
 from pathlib import Path
@@ -16,29 +29,30 @@ from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 
 
+# xyh：环境变量布尔解析：仅字符串 'True' 视为真，未设置时用传入默认值
 def env_to_bool(env, default):
-    str_val = os.environ.get(env)
-    return default if str_val is None else str_val == 'True'
+    str_val = os.environ.get(env)   # xyh：读原始字符串，None 表示未配置
+    return default if str_val is None else str_val == 'True'   # xyh：严格比较 'True'，避免 '1'/'yes' 歧义
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent   # xyh：项目根目录，后续静态/媒体/日志/索引路径都基于它
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY') or 'n9ceqv38)#&mwuat@(mjb_p%em$e8$qyr#fw9ot!=ba6lijx-6'
+    'DJANGO_SECRET_KEY') or 'n9ceqv38)#&mwuat@(mjb_p%em$e8$qyr#fw9ot!=ba6lijx-6'   # xyh：⚠ 生产必须设 DJANGO_SECRET_KEY，否则回落到仓库内公开默认值（签名/会话全部可伪造）
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env_to_bool('DJANGO_DEBUG', True)
+DEBUG = env_to_bool('DJANGO_DEBUG', True)   # xyh：⚠ 默认开调试；上线务必设 DJANGO_DEBUG=False（否则堆栈与配置泄露）
 # DEBUG = False
-TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'   # xyh：测试模式标志，供 signals 跳过真实外呼（见 blog_signals.py）
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['*', '127.0.0.1', 'example.com']
+ALLOWED_HOSTS = ['*', '127.0.0.1', 'example.com']   # xyh：⚠ 通配 '*' 仅为开发便利；部署收紧为实际域名
 # django 4.0新增配置
-CSRF_TRUSTED_ORIGINS = ['http://example.com']
+CSRF_TRUSTED_ORIGINS = ['http://example.com']   # xyh：可信来源域（Django 4+ 必配，否则跨域表单被拒）
 # Application definition
 
 
@@ -46,7 +60,7 @@ INSTALLED_APPS = [
     # 注：不使用默认 admin，改用 SimpleAdminConfig + 自定义 AdminSite，
     #     后台准入被收紧为 is_superuser（见 djangoblog/admin_site.py）
     # 'django.contrib.admin',
-    'django.contrib.admin.apps.SimpleAdminConfig',
+    'django.contrib.admin.apps.SimpleAdminConfig',   # xyh：仅注册 admin 基础，不自动发现 app 后台（注册集中在 admin_site.py）
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -67,27 +81,27 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # 请求自上而下、响应自下而上穿过该链（见 doc/素材/熊圆好/系统架构图）
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.security.SecurityMiddleware',   # xyh：安全响应头（HSTS/X-Content-Type 等）
+    'django.contrib.sessions.middleware.SessionMiddleware',   # xyh：会话装载
     'django.middleware.locale.LocaleMiddleware',   # 中英文多语言
     'django.middleware.gzip.GZipMiddleware',       # 响应压缩
     # 'django.middleware.cache.UpdateCacheMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'django.middleware.common.CommonMiddleware',   # xyh：通用处理（URL 规整等）
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',   # CSRF 防护
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.http.ConditionalGetMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',   # xyh：把用户挂到 request.user
+    'django.contrib.messages.middleware.MessageMiddleware',   # xyh：一次性消息（登录提示等）
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # xyh：点击劫持防护（配合 X_FRAME_OPTIONS）
+    'django.middleware.http.ConditionalGetMiddleware',   # xyh：协商缓存（ETag/If-Modified-Since）
     'blog.middleware.OnlineMiddleware'             # 自定义：页面耗时统计
 ]
 
-ROOT_URLCONF = 'djangoblog.urls'
+ROOT_URLCONF = 'djangoblog.urls'   # xyh：全站路由根配置（见 djangoblog/urls.py）
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],   # xyh：全局模板目录（各 app 模板另经 APP_DIRS 查找）
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,18 +109,18 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'blog.context_processors.seo_processor'
+                'blog.context_processors.seo_processor'   # xyh：自定义 SEO 上下文（站点名/描述/关键词注入模板）
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'djangoblog.wsgi.application'
+WSGI_APPLICATION = 'djangoblog.wsgi.application'   # xyh：生产部署入口指针（gunicorn/uWSGI 加载）
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-
+# xyh：③数据库——MySQL 连接，库名/用户/密码/主机/端口全部支持环境变量覆盖
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -115,60 +129,61 @@ DATABASES = {
         'PASSWORD': os.environ.get('DJANGO_MYSQL_PASSWORD') or '',
         'HOST': os.environ.get('DJANGO_MYSQL_HOST') or '127.0.0.1',
         'PORT': int(
-            os.environ.get('DJANGO_MYSQL_PORT') or 3306),
+            os.environ.get('DJANGO_MYSQL_PORT') or 3306),   # xyh：端口强转 int（Django 要求数值型）
         'OPTIONS': {
-            'charset': 'utf8mb4'},
+            'charset': 'utf8mb4'},   # xyh：utf8mb4 支持 emoji 与生僻字
     }}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
+# xyh：④密码强度校验器：相似度/最小长度/常见弱口令/纯数字 四道关，注册与改密时生效
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',   # xyh：禁止与用户名/邮箱等属性雷同
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',   # xyh：默认最短 8 位
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',   # xyh：拒绝常见弱口令库
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',   # xyh：拒绝纯数字
     },
 ]
 
+# xyh：⑤国际化——三语言支持（英/简中/繁中），翻译文件位于 locale/ 目录
 LANGUAGES = (
     ('en', _('English')),
     ('zh-hans', _('Simplified Chinese')),
     ('zh-hant', _('Traditional Chinese')),
 )
 LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'locale'),
+    os.path.join(BASE_DIR, 'locale'),   # xyh：编译后 .mo 与 .po 源文件目录
 )
 
-LANGUAGE_CODE = 'zh-hans'
+LANGUAGE_CODE = 'zh-hans'   # xyh：默认语言简体中文
 
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = 'Asia/Shanghai'   # xyh：默认时区东八区
 
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = False
+USE_I18N = True   # xyh：启用国际化（翻译机制）
+USE_L10N = True   # xyh：启用本地化格式（数字/日期）
+USE_TZ = False   # xyh：关闭 UTC 存储——时间按本地时区原样存库（简化处理，跨时区部署需改回 True）
 
 # Session settings
-SESSION_COOKIE_AGE = 1209600  # 2周（Django默认值）
-REMEMBER_ME_LOGIN_TTL = 2626560  # 30天（勾选"记住我"时使用）
+SESSION_COOKIE_AGE = 1209600  # 2周（Django默认值）   # xyh：⑥会话有效期默认 2 周
+REMEMBER_ME_LOGIN_TTL = 2626560  # 30天（勾选"记住我"时使用）   # xyh：勾选"记住我"时账号登录前端据此延长会话
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-
+# xyh：⑨静态资源——collectstatic 收集到 collectedstatic/，前台经 /static/ 访问
 # ==================== 搜索引擎配置 ====================
 # 支持 Whoosh 和 Elasticsearch 两种搜索引擎
 # 优先级：环境变量 > 手动配置 > 默认 Whoosh
 
+# xyh：⑦搜索引擎双后端：本节按"ES 环境变量 → ES 手配 → Whoosh 默认"三级优先级组装
 # === Elasticsearch 配置 ===
 # 1. 生产环境：通过环境变量配置（见下方）
 # 2. 开发环境：手动配置（取消下面注释）
@@ -209,6 +224,7 @@ REMEMBER_ME_LOGIN_TTL = 2626560  # 30天（勾选"记住我"时使用）
 #   - ELASTICSEARCH_CLIENT_CERT: 客户端证书路径
 #   - ELASTICSEARCH_CLIENT_KEY: 客户端私钥路径
 
+# xyh：只要设置了 DJANGO_ELASTICSEARCH_HOST 就走 ES 分支，构建 ELASTICSEARCH_DSL 配置
 if os.environ.get('DJANGO_ELASTICSEARCH_HOST'):
     # 通过环境变量配置 Elasticsearch（生产环境）
     _es_config = {
@@ -235,61 +251,63 @@ if os.environ.get('DJANGO_ELASTICSEARCH_HOST'):
     ELASTICSEARCH_DSL = {'default': _es_config}
 
 # === Haystack 配置 ===
+# xyh：按上面是否产出了 ELASTICSEARCH_DSL 局部变量，二选一绑定搜索后端
 if 'ELASTICSEARCH_DSL' in locals():
     # 使用 Elasticsearch
     HAYSTACK_CONNECTIONS = {
         'default': {
-            'ENGINE': 'djangoblog.elasticsearch_backend.ElasticSearchEngine',
+            'ENGINE': 'djangoblog.elasticsearch_backend.ElasticSearchEngine',   # xyh：ES 后端实现（见同目录 elasticsearch_backend.py）
         }
     }
 else:
     # 默认使用 Whoosh
     HAYSTACK_CONNECTIONS = {
         'default': {
-            'ENGINE': 'djangoblog.whoosh_cn_backend.WhooshEngine',
-            'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+            'ENGINE': 'djangoblog.whoosh_cn_backend.WhooshEngine',   # xyh：Whoosh 中文后端（jieba 分词，见 whoosh_cn_backend.py）
+            'PATH': os.path.join(BASE_DIR, 'whoosh_index'),   # xyh：本地索引目录（文件形式）
         },
     }
 
 # Automatically update searching index
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'   # xyh：模型保存/删除时实时同步搜索索引
 # Allow user login with username and password
 AUTHENTICATION_BACKENDS = [
-    'accounts.user_login_backend.EmailOrUsernameModelBackend']
+    'accounts.user_login_backend.EmailOrUsernameModelBackend']   # xyh：⑧自定义鉴权：邮箱或用户名均可登录
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'collectedstatic')
+STATIC_ROOT = os.path.join(BASE_DIR, 'collectedstatic')   # xyh：collectstatic 收集目标目录（生产由 Nginx 直出）
 
 STATIC_URL = '/static/'
-STATICFILES = os.path.join(BASE_DIR, 'static')
+STATICFILES = os.path.join(BASE_DIR, 'static')   # xyh：原始静态资源目录（项目自定义约定，非 Django 标准名）
 
 # 添加插件静态文件目录
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'plugins'),  # 让Django能找到插件的静态文件
+    os.path.join(BASE_DIR, 'plugins'),  # 让Django能找到插件的静态文件   # xyh：插件静态资源统一入口 plugins/<slug>/static/
 ]
 
 # Vite开发服务器URL（开发模式）
-VITE_DEV_SERVER_URL = 'http://localhost:5173'
+VITE_DEV_SERVER_URL = 'http://localhost:5173'   # xyh：前端热更新地址（blog_tags.vite_* 模板标签据此选 dev/build 资源）
 
-AUTH_USER_MODEL = 'accounts.BlogUser'
-LOGIN_URL = '/login/'
+AUTH_USER_MODEL = 'accounts.BlogUser'   # xyh：自定义用户模型（扩展头像/昵称/签名等字段）
+LOGIN_URL = '/login/'   # xyh：未登录跳转地址（@login_required 使用）
 
-TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-DATE_TIME_FORMAT = '%Y-%m-%d'
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'   # xyh：模板中展示时间格式（精确到秒）
+DATE_TIME_FORMAT = '%Y-%m-%d'   # xyh：日期展示格式
 
 # bootstrap color styles
 BOOTSTRAP_COLOR_TYPES = [
     'default', 'primary', 'success', 'info', 'warning', 'danger'
-]
+]   # xyh：后台/表单可选的 Bootstrap 语义色
 
 # paginate
-PAGINATE_BY = 10
+PAGINATE_BY = 10   # xyh：列表分页默认每页条数（ListView 的 paginate_by 引用）
 # http cache timeout
-CACHE_CONTROL_MAX_AGE = 2592000
+CACHE_CONTROL_MAX_AGE = 2592000   # xyh：30 天——静态资源 Cache-Control 的 max-age（秒）
 # cache setting
+# xyh：⑩缓存——默认 LocMemCache（单进程）；设置 DJANGO_REDIS_URL 后整体切换为 Redis
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'TIMEOUT': 10800,
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',   # xyh：进程内缓存，多进程部署各进程独立
+        'TIMEOUT': 10800,   # xyh：默认 TTL 3 小时（即 mixins.py 中缓存 queryset 的过期时长）
         'LOCATION': 'unique-snowflake',
     }
 }
@@ -298,30 +316,32 @@ if os.environ.get("DJANGO_REDIS_URL"):
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': f'redis://{os.environ.get("DJANGO_REDIS_URL")}',
+            'LOCATION': f'redis://{os.environ.get("DJANGO_REDIS_URL")}',   # xyh：整库切换为 Redis，多进程共享
         }
     }
 
-SITE_ID = 1
+SITE_ID = 1   # xyh：⑪多站点框架当前站点 ID（django.contrib.sites）
 BAIDU_NOTIFY_URL = os.environ.get('DJANGO_BAIDU_NOTIFY_URL') \
-                   or 'http://data.zz.baidu.com/urls?site=https://www.lylinux.net&token=1uAOGrMsUm5syDGn'
+                   or 'http://data.zz.baidu.com/urls?site=https://www.lylinux.net&token=1uAOGrMsUm5syDGn'   # xyh：⚠ 百度主动推送地址含硬编码 token，部署时用环境变量替换
 
 # Email:
+# xyh：⑫邮件——SMTP 凭据全部走环境变量；真正发信在 blog_signals.py（send_email_signal 接收器）
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = env_to_bool('DJANGO_EMAIL_TLS', False)
+EMAIL_USE_TLS = env_to_bool('DJANGO_EMAIL_TLS', False)   # xyh：TLS 与 SSL 互斥，按邮箱服务商选其一
 EMAIL_USE_SSL = env_to_bool('DJANGO_EMAIL_SSL', True)
 EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST') or 'smtp.mxhichina.com'
 EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT') or 465)
 EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_PASSWORD')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER   # xyh：默认发件人 = SMTP 账号
+SERVER_EMAIL = EMAIL_HOST_USER   # xyh：系统级邮件（异常告警）发件人
 # Setting debug=false did NOT handle except email notifications
-ADMINS = [('admin', os.environ.get('DJANGO_ADMIN_EMAIL') or 'admin@admin.com')]
+ADMINS = [('admin', os.environ.get('DJANGO_ADMIN_EMAIL') or 'admin@admin.com')]   # xyh：Django 内置异常告警收件人
 # WX ADMIN password(Two times md5)
 WXADMIN = os.environ.get(
-    'DJANGO_WXADMIN_PASSWORD') or '995F03AC401D6CABABAEF756FC4D43C7'
+    'DJANGO_WXADMIN_PASSWORD') or '995F03AC401D6CABABAEF756FC4D43C7'   # xyh：⑬微信机器人后台口令（二次 MD5 存储）；⚠ 生产用环境变量覆盖
 
+# xyh：⑭日志——按天切分，保留 5 天；控制台仅调试模式输出；ERROR 邮件告警
 LOG_PATH = os.path.join(BASE_DIR, 'logs')
 if not os.path.exists(LOG_PATH):
     os.makedirs(LOG_PATH, exist_ok=True)
@@ -340,22 +360,22 @@ LOGGING = {
     },
     'filters': {
         'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
+            '()': 'django.utils.log.RequireDebugFalse',   # xyh：仅生产模式生效（异常邮件）
         },
         'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+            '()': 'django.utils.log.RequireDebugTrue',   # xyh：仅调试模式生效（控制台）
         },
     },
     'handlers': {
         'log_file': {
             'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',   # xyh：按时间滚动，避免单文件无限膨胀
             'filename': os.path.join(LOG_PATH, 'djangoblog.log'),
-            'when': 'D',
+            'when': 'D',   # xyh：每天切分一个文件
             'formatter': 'verbose',
             'interval': 1,
             'delay': True,
-            'backupCount': 5,
+            'backupCount': 5,   # xyh：仅保留最近 5 天
             'encoding': 'utf-8'
         },
         'console': {
@@ -370,7 +390,7 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'django.utils.log.AdminEmailHandler'   # xyh：ERROR 级日志自动邮件给 ADMINS
         }
     },
     'loggers': {
@@ -382,6 +402,7 @@ LOGGING = {
     }
 }
 
+# xyh：静态资源查找器：文件系统 + 各 app static + compressor 压缩产物
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -389,21 +410,21 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 # 开发模式下禁用压缩，使用Vite处理静态资源
-COMPRESS_ENABLED = not DEBUG
+COMPRESS_ENABLED = not DEBUG   # xyh：调试模式关闭压缩（交给 Vite 构建后的产物）
 # 根据环境变量决定是否启用离线压缩
-COMPRESS_OFFLINE = os.environ.get('COMPRESS_OFFLINE', 'False').lower() == 'true'
+COMPRESS_OFFLINE = os.environ.get('COMPRESS_OFFLINE', 'False').lower() == 'true'   # xyh：离线压缩=预编译产物，生产推荐开启
 
 # 压缩输出目录
 COMPRESS_OUTPUT_DIR = 'compressed'
 
 # 压缩文件名模板 - 包含哈希值用于缓存破坏
-COMPRESS_CSS_HASHING_METHOD = 'mtime'
+COMPRESS_CSS_HASHING_METHOD = 'mtime'   # xyh：以文件修改时间参与哈希，内容变更即换名（缓存破坏）
 COMPRESS_JS_HASHING_METHOD = 'mtime'
 
 # 高级CSS压缩过滤器
 COMPRESS_CSS_FILTERS = [
     # 创建绝对URL
-    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.css_default.CssAbsoluteFilter',   # xyh：相对 URL 转绝对，便于独立压缩
     # CSS压缩器 - 高压缩等级
     'compressor.filters.cssmin.CSSCompressorFilter',
 ]
@@ -415,7 +436,7 @@ COMPRESS_JS_FILTERS = [
 ]
 
 # 压缩缓存配置
-COMPRESS_CACHE_BACKEND = 'default'
+COMPRESS_CACHE_BACKEND = 'default'   # xyh：压缩产物元数据缓存位置（复用 CACHES.default）
 COMPRESS_CACHE_KEY_FUNCTION = 'compressor.cache.simple_cachekey'
 
 # 预压缩配置
@@ -435,30 +456,31 @@ COMPRESS_CSS_COMPRESSOR = 'compressor.css.CssCompressor'
 COMPRESS_JS_COMPRESSOR = 'compressor.js.JsCompressor'
 
 # 静态文件缓存配置
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'   # xyh：生产用带清单的存储，文件名带哈希
 
 # 浏览器缓存配置（通过中间件或服务器配置）
 COMPRESS_URL = STATIC_URL
 COMPRESS_ROOT = STATIC_ROOT
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+# xyh：⑮媒体文件与安全头
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')   # xyh：用户上传（头像/图床）落盘目录
 MEDIA_URL = '/media/'
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+X_FRAME_OPTIONS = 'SAMEORIGIN'   # xyh：仅允许同源 iframe 嵌入（防点击劫持）
 
 
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'   # xyh：新模型主键统一 BigAutoField（Django 3.2+ 推荐）
 
 # Plugin System
+# xyh：⑯插件系统——插件目录与启用白名单；由 djangoblog/apps.py ready() 加载（见 plugin_manage/loader.py）
 PLUGINS_DIR = BASE_DIR / 'plugins'
 ACTIVE_PLUGINS = [
-    'article_copyright',
-    'reading_time',
-    'external_links',
-    'view_count',
-    'seo_optimizer',
-    'image_lazy_loading',
-    'article_recommendation',
+    'article_copyright',   # xyh：文章版权声明挂件
+    'reading_time',        # xyh：阅读时长估算
+    'external_links',      # xyh：外链自动标注/加图标
+    'view_count',          # xyh：浏览计数统计
+    'seo_optimizer',       # xyh：SEO 增强（meta/结构化数据）
+    'image_lazy_loading',  # xyh：图片懒加载
+    'article_recommendation',   # xyh：相关文章推荐
     'cloudflare_cache',  # Cloudflare缓存管理插件
 ]
-
