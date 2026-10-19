@@ -1,0 +1,127 @@
+@startuml
+' ============================================================
+' 顺序图 2：用户登录（用户名/邮箱 + 密码，含"记住我"）
+' DjangoBlog 博客系统 · 软工3班4组 · 翟旌超（2415304340）
+' 依据真实代码：accounts/views.py(LoginView / LogoutView)
+'              accounts/forms.py(LoginForm)  accounts/urls.py
+'              djangoblog/base_views.py(LoginFormView / LogoutRedirectView)
+'              accounts/user_login_backend.py(EmailOrUsernameModelBackend)
+'              templates/account/login.html  djangoblog/settings.py 等
+' ============================================================
+title 顺序图2：用户登录（用户名/邮箱 + 密码，含"记住我"）\n—— DjangoBlog 博客系统（软工3班4组 · 翟旌超）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  MessageAlign left
+  ArrowColor #2563eb
+  ArrowFontColor #1e293b
+  ArrowFontSize 12
+  ParticipantBackgroundColor #f8fafc
+  ParticipantBorderColor #94a3b8
+  LifeLineBorderColor #cbd5e1
+  DividerBackgroundColor #eef4ff
+}
+skinparam NoteBackgroundColor #fffbe6
+skinparam NoteBorderColor #d4b106
+skinparam BoxPadding 8
+skinparam maxMessageSize 190
+
+actor "用户" as U #e8f1ff
+participant "浏览器\n登录页" as B #eef2f7
+participant "URL 路由\nurls.py" as R #eef2f7
+participant "LoginView\nviews.py" as V #e8f7ee
+participant "LoginForm\nforms.py" as F #f7f0e8
+participant "认证后端\nuser_login_backend.py" as A #faf0f7
+participant "BlogUser\naccounts/models.py" as M #faf0f7
+participant "Django 会话\nSession" as S #f0f0f0
+participant "缓存\nCache" as C #f0f0f0
+
+== 一、打开登录页 ==
+U -> B : [1] 打开 /login/\n（可带 ?next=原页面）
+B -> R : [2] GET /login/
+R -> V : [3] 路由到 LoginView
+note right of V
+  LoginView 继承 LoginFormView，dispatch() 上叠加：
+  [1]  sensitive_post_parameters('password') 密码脱敏
+  [2]  csrf_protect [3]  never_cache 禁缓存
+  get_context_data() 读取 next，缺省 '/'
+end note
+V --> B : [4] 返回登录表单<br/>（CSRF Token + next + remember）
+B --> U : [5] 显示登录页\n（含第三方登录图标入口）
+
+== 二、提交账号密码并认证 ==
+U -> B : [6] 输入用户名/邮箱 + 密码\n（可勾选"记住我"）并提交
+B -> R : [7] POST username/password/next/remember
+R -> V : [8] csrf_protect 校验 CSRF Token
+V -> F : [9] AuthenticationForm(data=POST, request=request)
+V -> A : [10] authenticate(username, password)
+A -> A : [11] 用户名含 '@' ?
+note right of A
+  含 '@' → 按 email 查询；
+  否则按 username 查询
+  （所以支持"用户名或邮箱"登录）
+end note
+A -> M : [12] queries: get(email=..)/get(username=..)
+alt 用户不存在
+    M --> A : 异常：DoesNotExist
+    A --> V : 返回 None
+else 用户存在
+    M --> A : [13] 返回 BlogUser
+    A -> A : [14] user.check_password(password)\n+ user_can_authenticate() 校验 is_active
+    alt 密码错误 或 账号未激活
+        A --> V : 返回 None
+    else 密码正确且已激活
+        A --> V : [15] 返回已认证用户
+    end
+end
+
+== 三、认证失败处理 ==
+alt 认证失败
+    V --> B : is_valid()=False\n返回表单 + 错误提示
+    B --> U : 提示"用户名或密码错误"/"账号不可用"
+    U -> B : 重新输入后再提交（回到步骤[6] ）
+end
+
+== 四、登录成功：写会话、定有效期、跳转 ==
+V -> C : [16] delete_sidebar_cache()
+V -> S : [17] auth.login(request, user)\n写入会话登录信息
+V -> V : [18] POST 是否带 remember ?
+alt 勾选「记住我」
+    V -> S : [19] session.set_expiry(2626560 秒 ≈ 30 天)
+else 未勾选
+    V -> S : [20] session.set_expiry(1209600 秒 = 14 天)
+end
+V -> V : [21] get_success_url() 取 next\n并做 url_has_allowed_host_and_scheme 校验
+note right of V
+  防"开放重定向"：
+  next 为站外地址时回退 success_url = '/'
+end note
+V -> B : [22] 302 跳转（next 或 '/'）
+V -> B : [23] set_cookie('logged_user','true',\nmax_age=有效期, httponly=False,\nsamesite='Lax')
+note right of B
+  logged_user 允许 JS 读取，
+  供前端渲染"已登录"状态
+end note
+B --> U : [24] 主动登录→首页；\n被拦截后登录→回原文章页
+
+== 五、退出登录（LogoutView，补充说明）==
+U -> B : [25] 请求 /logout/
+B -> R : [26] GET /logout/
+R -> V : [27] 路由到 LogoutView\n（LogoutRedirectView, never_cache）
+V -> S : [28] logout(request) 清登录会话
+V -> C : [29] delete_sidebar_cache()
+V --> B : [30] 302 → /login/\n并 delete_cookie('logged_user')
+
+legend bottom
+  <b>异常 / 分支汇总</b>
+  |用户名或邮箱不存在|认证后端返回 None → 表单报错，留在登录页|
+  |密码错误|check_password 比对失败 → 返回 None → 表单报错|
+  |账号未激活|user_can_authenticate() 判定 is_active=False → 登录失败（见顺序图1）|
+  |CSRF Token 非法|csrf_protect → 403 Forbidden|
+  |next 为站外地址|url_has_allowed_host_and_scheme 不通过 → 回退首页（防开放重定向）|
+  |登录有效期|勾选记住我 30 天（REMEMBER_ME_LOGIN_TTL）；否则 14 天（SESSION_COOKIE_AGE）|
+  |密码泄露风险|sensitive_post_parameters('password') 对日志与报错堆栈脱敏|
+  |第三方登录|登录页图标 → /oauth/oauthlogin?type=..，详见顺序图3|
+end legend
+@enduml

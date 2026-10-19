@@ -1,0 +1,130 @@
+@startuml
+' ============================================================
+' 顺序图 4：找回密码 / 重置密码（邮箱验证码 + 新密码）
+' DjangoBlog 博客系统 · 软工3班4组 · 翟旌超（2415304340）
+' 依据真实代码：accounts/views.py(ForgetPasswordEmailCode / ForgetPasswordView)
+'              accounts/forms.py(ForgetPasswordCodeForm / ForgetPasswordForm)
+'              accounts/utils.py(send_verify_email / set_code / get_code / verify)
+'              accounts/urls.py  djangoblog/utils.py(generate_code / send_email)
+'              templates/account/forget_password.html
+'              blog/static/account/js/account.js（点"获取验证码"发 AJAX）
+' ============================================================
+title 顺序图4：找回密码 / 重置密码（邮箱验证码 + 新密码）\n—— DjangoBlog 博客系统（软工3班4组 · 翟旌超）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  MessageAlign left
+  ArrowColor #2563eb
+  ArrowFontColor #1e293b
+  ArrowFontSize 12
+  ParticipantBackgroundColor #f8fafc
+  ParticipantBorderColor #94a3b8
+  LifeLineBorderColor #cbd5e1
+  DividerBackgroundColor #eef4ff
+}
+skinparam NoteBackgroundColor #fffbe6
+skinparam NoteBorderColor #d4b106
+skinparam BoxPadding 8
+skinparam maxMessageSize 190
+
+actor "用户" as U #e8f1ff
+participant "浏览器\n忘记密码页" as B #eef2f7
+participant "URL 路由\nurls.py" as R #eef2f7
+participant "ForgetPasswordEmailCode\nviews.py" as O #e8f7ee
+participant "ForgetPasswordView\nviews.py" as V #e8f7ee
+participant "表单\nforms.py" as F #f7f0e8
+participant "验证码工具\naccounts/utils.py" as T #f0f0f0
+participant "缓存\nCache" as C #f0f0f0
+participant "邮件信号\nblog_signals.py" as E #fdeaea
+participant "BlogUser\naccounts/models.py" as M #faf0f7
+participant "用户邮箱" as MB #f0f5ff
+
+== 一、申请邮箱验证码 ==
+U -> B : [1] 打开 /forget_password/
+B -> V : [2] GET → ForgetPasswordView\n渲染忘记密码表单
+V --> B : [3] 返回表单（email / 验证码 /\n新密码 / 确认新密码 + CSRF Token）
+note right of B
+  点"获取验证码"按钮触发
+  blog/static/account/js/account.js：
+  $.ajax POST /forget_password_code/，
+  携带 email + csrfmiddlewaretoken
+end note
+U -> B : [4] 填写邮箱，点"获取验证码"
+B -> R : [5] POST /forget_password_code/
+R -> O : [6] 路由到 ForgetPasswordEmailCode(View).post()
+O -> F : [7] ForgetPasswordCodeForm(request.POST)
+alt 邮箱格式非法 / 参数缺失
+    F --> O : 校验失败
+    O --> B : 异常：返回"错误的邮箱"文本
+    B --> U : 提示错误（不发送验证码）
+else 邮箱格式合法
+    F --> O : [8] cleaned_data['email']
+    O -> O : [9] code = generate_code()\n6 位随机数字
+    O -> E : [10] send_verify_email(email, code)
+    note right of E
+      正文："You are resetting the password,
+      the verification code is {code},
+      valid within 5 minutes…"
+      再由 send_email 派发 send_email_signal
+      交给信号接收函数 SMTP 发送
+    end note
+    E -> MB : [11] SMTP 投递验证码邮件
+    O -> C : [12] set_code(email, code)\n缓存 key=email，TTL=300 秒（5 分钟）
+    C --> O : [13] 写入成功
+    O --> B : [14] 返回 "ok"
+    B --> U : [15] 按钮变为"重新发送(60)"倒计时
+end
+
+== 二、提交新密码并重置 ==
+U -> B : [16] 填入验证码 + 新密码 + 确认密码并提交
+B -> R : [17] POST /forget_password/ + CSRF Token
+R -> V : [18] 路由到 ForgetPasswordView\n(SecureFormView: csrf_protect)
+V -> F : [19] 构造 ForgetPasswordForm 并校验
+note right of F
+  字段校验顺序（forms.py 中的字段顺序）：
+  new_password1 → new_password2 → email → code
+end note
+F -> F : [20] clean_new_password2()\n两次一致 + password_validation 强度
+alt 两次密码不一致 / 强度不足
+    F --> V : 校验失败："passwords do not match"
+    V --> B : 返回表单页 + 错误提示
+    B --> U : 修改后重新提交
+else 密码校验通过
+    F -> M : [21] clean_email()：该邮箱是否存在
+    alt 邮箱未注册
+        F --> V : 校验失败："email does not exist"
+        V --> B : 返回表单页 + 错误提示
+    else 邮箱已注册
+        F -> T : [22] clean_code() → verify(email, code)
+        T -> C : [23] get_code(email) 读缓存验证码
+        C --> T : [24] 返回缓存中的 code（可能已过期为空）
+        T --> F : [25] 与用户输入比对\n不一致则返回"Verification code error"
+        alt 验证码错误 / 已过期
+            F --> V : 校验失败："Verification code error"
+            V --> B : 返回表单页 + 错误提示
+            B --> U : 可重新点"获取验证码"
+        else 验证码正确
+            F --> V : [26] is_valid() = True
+            V -> M : [27] 按邮箱取用户 BlogUser.objects.get(email=..)
+            V -> V : [28] password = make_password(new_password2)\n(PBKDF2 哈希)
+            V -> M : [29] blog_user.save()\nUPDATE accounts_bloguser
+            M --> V : [30] 更新成功
+            V --> B : [31] 302 跳转 /login/
+            B --> U : [32] 用新密码登录（衔接顺序图2）
+        end
+    end
+end
+
+legend bottom
+  <b>异常 / 分支汇总</b>
+  |邮箱格式非法|ForgetPasswordCodeForm 校验失败 → 返回"错误的邮箱"，不发验证码|
+  |邮箱未注册|clean_email() → "email does not exist"，回表单页（提示里可看出邮箱是否注册过）|
+  |两次密码不一致|clean_new_password2() → "passwords do not match"|
+  |密码强度不足|password_validation.validate_password() 抛错，回表单页|
+  |验证码错误或超过 5 分钟|verify() 比对缓存失败 → "Verification code error"（缓存 TTL 300 秒后自动失效）|
+  |CSRF Token 非法|ForgetPasswordView 继承 SecureFormView → csrf_protect → 403|
+  |验证码生效范围|按邮箱为 key 存缓存（LocMemCache，多进程/多机部署需换 Redis 才能共享）|
+  |重置成功后|密码以 PBKDF2 哈希覆盖旧值，302 到 /login/ 用新密码登录|
+end legend
+@enduml

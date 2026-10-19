@@ -1,0 +1,136 @@
+@startuml
+' ============================================================
+' 顺序图 1：用户注册（含邮箱验证激活）
+' DjangoBlog 博客系统 · 软工3班4组 · 翟旌超（2415304340）
+' 依据真实代码：accounts/views.py(RegisterView / account_result)
+'              accounts/forms.py(RegisterForm)  accounts/urls.py
+'              templates/account/registration_form.html · result.html
+'              djangoblog/blog_signals.py(send_email_signal)  等
+' ============================================================
+title 顺序图1：用户注册（含邮箱验证激活）\n—— DjangoBlog 博客系统（软工3班4组 · 翟旌超）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  MessageAlign left
+  ArrowColor #2563eb
+  ArrowFontColor #1e293b
+  ArrowFontSize 12
+  ParticipantBackgroundColor #f8fafc
+  ParticipantBorderColor #94a3b8
+  LifeLineBorderColor #cbd5e1
+  DividerBackgroundColor #eef4ff
+}
+skinparam NoteBackgroundColor #fffbe6
+skinparam NoteBorderColor #d4b106
+skinparam BoxPadding 8
+skinparam maxMessageSize 190
+
+actor "访客" as U #e8f1ff
+participant "浏览器\n注册页" as B #eef2f7
+participant "URL 路由\nurls.py" as R #eef2f7
+participant "RegisterView\nviews.py" as V #e8f7ee
+participant "RegisterForm\nforms.py" as F #f7f0e8
+participant "BlogUser\naccounts/models.py" as M #faf0f7
+participant "邮件信号\nblog_signals.py" as E #fdeaea
+database "EmailSendLog\n邮件日志表" as L #f0f0f0
+participant "用户邮箱" as MB #f0f5ff
+
+== 一、提交注册表单 ==
+U -> B : [1] 打开 /register/
+B -> R : [2] GET /register/
+R -> V : [3] 路由到 RegisterView
+note right of V
+  RegisterView 继承 SecureFormView，
+  其 dispatch() 上有 csrf_protect（CSRF 保护）
+end note
+V --> B : [4] 返回注册表单（含 CSRF Token）
+note right of B
+  表单字段（RegisterForm 继承 UserCreationForm）：
+  username / email / password1 / password2
+  用户模型 AUTH_USER_MODEL = accounts.BlogUser
+end note
+U -> B : [5] 填写信息并提交
+B -> R : [6] POST 表单 + csrfmiddlewaretoken
+R -> V : [7] csrf_protect 校验 CSRF Token
+V -> F : [8] 构造 RegisterForm 并校验
+
+== 二、表单与业务校验（含异常分支）==
+F -> F : [9] clean_username()：用户名非法/重复 → 报错
+F -> M : [10] clean_email()：邮箱是否已存在
+M --> F : [11] 查询结果
+alt 邮箱已被注册
+    F --> V : 校验失败："email already exists"
+    V --> B : 返回表单页 + 错误提示
+    B --> U : 修改后重新提交
+else 邮箱可用
+    F -> F : [12] clean_password2()：两次一致 + 强度校验
+    alt 密码不一致或强度不足
+        F --> V : 校验失败："passwords do not match"
+        V --> B : 返回表单页 + 错误提示
+    else 校验全部通过
+        F --> V : [13] is_valid() = True
+    end
+end
+
+== 三、创建未激活账号并发送验证邮件 ==
+V -> F : [14] user = form.save(False)
+V -> V : [15] user.is_active = False\nuser.source = 'Register'
+V -> M : [16] user.save(True) → INSERT
+note right of M
+  password 以 PBKDF2 哈希入库；
+  is_active = False（未激活不能登录）；
+  source = 'Register'
+end note
+M --> V : [17] 返回新用户（含主键 id）
+V -> V : [18] sign = get_sha256(get_sha256(SECRET_KEY + id))
+V -> V : [19] 拼装验证链接\n.../account/result.html?type=validation&id=..&sign=..
+V -> E : [20] send_email(收件人/主题/正文)
+note right of E
+  send_email 只派发 send_email_signal；
+  真正发送在接收函数里：
+  EmailMultiAlternatives(...).send()
+end note
+E -> MB : [21] SMTP 投递验证邮件
+E -> L : [22] 写 EmailSendLog（成功/失败）
+V --> B : [23] 302 → 注册结果页
+B --> U : [24] 提示"注册成功，请验证邮箱后登录"
+
+== 四、点击邮件链接完成邮箱验证 ==
+U -> MB : [25] 打开邮箱点击验证链接
+MB -> B : [26] GET 验证链接
+B -> R : [27] 请求 account/result.html
+R -> V : [28] 路由到 account_result()
+V -> V : [29] 读取 GET 参数 type、id
+V -> M : [30] get_object_or_404(BlogUser, id=id)
+alt 用户不存在
+    M --> V : 异常：Http404
+    V --> B : 404 页面
+else 用户存在
+    M --> V : [31] 返回 BlogUser
+    alt 已激活（重复点击链接）
+        V --> B : [32] 302 直接回首页
+    else 未激活且 type=validation
+        V -> V : [33] 重算 c_sign 并与 sign 比对
+        alt sign 不匹配
+            V --> B : 异常：403 Forbidden
+        else sign 匹配
+            V -> M : [34] user.is_active = True → UPDATE
+            V --> B : [35] 渲染"验证成功"页
+            B --> U : [36] 提示可使用账号登录
+        end
+    end
+end
+
+legend bottom
+  <b>异常 / 分支汇总</b>
+  |邮箱已存在|RegisterForm.clean_email() → "email already exists"，回注册页|
+  |两次密码不一致|clean_password2() → "passwords do not match"，回注册页|
+  |CSRF 校验失败|SecureFormView 的 csrf_protect → 403，不进入业务逻辑|
+  |新账号未激活|is_active = False，登录被拒（见顺序图2）|
+  |验证链接被篡改|sign 与服务端重算值不一致 → 403 Forbidden|
+  |重复点击验证链接|is_active 已为 True → 302 直接回首页|
+  |邮件发送失败|仅记 EmailSendLog(send_result=False)，注册流程照常完成|
+  |验证成功后|用户前往 /login/ 登录，衔接顺序图2|
+end legend
+@enduml
