@@ -1,33 +1,135 @@
+# ============================================================
+# blog/management/commands/create_travel_data.py —— 一键灌入“旅游推荐”主题演示数据的管理命令
+# 作用：把库里的文章/分类/标签清空，重新写入 8 篇旅游主题的演示文章，
+#       让列表页、详情页、分类页、标签云一打开就有内容可看，不用手点后台一条条录。
+# 本文件包含：Command 类（BaseCommand 子类）—— 命令本体；
+#             handle() —— 命令真正入口，负责清空 → 造分类/标签/文章 → 清缓存 → 打印统计
+# 注释人：翟旌超（软件工程 3 班 2415304340，#zjc）
+# 说明：本次任务只添加中文注释，没有改动任何一行原有代码逻辑
+# ============================================================
+
+# ============================================================
+# 【先搞懂：什么是 management command（自定义管理命令）】
+# 1) Django 约定：在某个 app 下建 management/commands/ 目录，放一个 .py 文件，
+#    文件名就是命令名。本文件叫 create_travel_data.py，
+#    所以在仓库根目录执行 `python manage.py create_travel_data` 就会跑到它。
+# 2) 文件里必须有一个名为 Command 的类，且继承 django.core.management.base.BaseCommand；
+#    BaseCommand 包办了连数据库、解析参数、处理异常这些脏活，
+#    我们只需要实现 handle(self, *args, **options) —— 它就是命令的真正入口。
+# 3) *args / **options 是 BaseCommand 传进来的位置参数和选项字典（--verbosity 之类），
+#    本命令不带自定义参数，所以收下不解析；要加参数得另外实现 add_arguments(parser)。
+# 4) 用命令而不是“手点后台”的好处：数据准备可复现 —— 换机器、重装数据库后
+#    重新跑一遍，就能得到完全相同的初始演示数据。
+# ============================================================
+
+# —— Python 标准库 ——
+# 本命令只做 ORM 读写和 f-string 拼接，不需要额外标准库，故无 import。
+
+# —— 第三方（Django 框架）——
+# get_user_model：取项目当前配置的用户模型类（本项目用的是自定义用户表，
+#                 所以不能直接 import 默认的 User，也不该写死表名）
 from django.contrib.auth import get_user_model
+# BaseCommand：所有自定义管理命令的基类，同时提供 self.stdout / self.style 等输出工具
 from django.core.management.base import BaseCommand
 
+# —— 项目内模块 ——
+# 本命令要写入的三张表：文章（外键挂作者/分类，多对多挂标签）、分类、标签；
+# 分类与标签的 name 字段都有 unique=True 约束，这一点后面 get_or_create 会用到
 from blog.models import Article, Tag, Category
 
 
+# 【Command】—— 旅游推荐演示数据的生成命令
+# 参数：无（handle 的 *args/**options 由框架填充）
+# 返回：无返回值；副作用是往数据库写数据，并在终端打印一行统计
+# 说明：命令名 = 文件名，故执行方式是 `python manage.py create_travel_data`；
+#       它属于“开发/演示辅助”工具，不要在正式库上跑（原因见 handle 里的清空逻辑）。
 class Command(BaseCommand):
+    # help：`python manage.py help create_travel_data` 时显示的一句话说明
     help = 'replace test data with travel recommendation blog content'
 
+    # 【handle】—— 命令入口：清空旧数据 → 建分类/标签 → 建文章 → 清缓存 → 打印统计
+    # 参数：
+    #   *args   ：位置参数（本命令不使用）
+    #   **options：框架解析出的选项字典（本命令不使用）
+    # 返回：None；真正的结果是数据库里的数据，执行情况通过 self.stdout 反馈到终端
+    # 说明：整体是“先删后建”的思路 —— 演示数据要求每次跑出来完全一样，
+    #       与其逐条比对再更新（写起来啰嗦还容易漏），不如清空重建；
+    #       代价是库里原有文章会一起被删掉，这也是它只能在演示库上跑的原因。
     def handle(self, *args, **options):
+        # ------------------------------------------------------------
+        # —— 第一步：清空旧数据 ——
+        # 删除顺序有讲究：先删文章，再删标签和分类。
+        # 文章与分类是外键、与标签是多对多（中间表），先删“引用别人”的一方，
+        # 再删“被引用”的一方，就不会出现“分类下还挂着文章”的约束冲突；
+        # 这些外键本身多是 CASCADE（级联删除）能自动兜底，显式排好序只是更直观。
+        # 坑：Article.objects.all().delete() 删的是“全站文章”，
+        #     并不只删上一次本命令造的那几篇 —— 所以它天然不适合正式库。
         # 清空旧数据
         Article.objects.all().delete()
         Tag.objects.all().delete()
         Category.objects.all().delete()
 
+        # ------------------------------------------------------------
+        # —— 第二步：确定这批文章挂到谁名下 ——
+        # Article.author 是必填外键（null=False），必须先拿到一个用户对象。
+        # 优先取超级管理员：演示数据挂在管理员名下，后台登录后能直接打开编辑。
+        # 兜底链：没有超管 → 退而取库里第一个用户（哪怕只是普通注册用户），
+        #         这样“没建 admin 但已有注册账号”的库也能跑通。
+        # .filter(is_superuser=True).first() 取第一条超管；.first() 在无显式排序时按主键升序取。
+        # 坑：如果库里一个用户都没有，user 会一直是 None，
+        #     后面 Article.objects.create(author=None) 会直接撞数据库非空约束而报错；
+        #     所以跑本命令前，得先 `python manage.py createsuperuser` 或注册一个账号。
         user = get_user_model().objects.filter(is_superuser=True).first()
         if not user:
             user = get_user_model().objects.first()
 
+        # ------------------------------------------------------------
+        # —— 第三步：建 3 个分类 ——
+        # 用 dict 存“分类名 -> 分类对象”，是为了下一步造文章时
+        # 能用文章数据里写的字符串（如 '国内游'）直接取到分类对象：categories[data['category']]。
+        # 坑：这里用的是 create() 而不是 get_or_create()。
+        #     Category.name 有 unique=True，若第一步没清空就重复执行，第二次会因唯一约束报错；
+        #     现在能安全是因为刚刚删过分类 —— 这两步是强耦合的，删掉清理代码这里就会炸。
         # 分类
         categories = {}
         for name in ['国内游', '出境游', '旅行攻略']:
             categories[name] = Category.objects.create(name=name)
 
+        # ------------------------------------------------------------
+        # —— 第四步：建 11 个标签（含后来补充的“攻略”标签）——
+        # tag_names 是文章的“标签字典”：下面每篇文章的 tags 字段只能从这里取值，
+        # 写一个不在列表里的标签名，后面 tags[tag_name] 会直接 KeyError。
+        # “攻略”标签是配合第 7、8 篇“旅行攻略”分类文章补上的，
+        # 少了它，那两篇文章的 tags 就取不到对象而报错。
         # 标签
         tag_names = ['海岛', '美食', '亲子', '自驾', '徒步', '摄影', '避暑', '冬季', '自由行', '小众', '攻略']
+        # tags 同样是“标签名 -> 标签对象”的字典，供下面挂多对多关系时按名取值。
+        # 为什么这里用 get_or_create 而不是 create（幂等：重复执行不会重复插入）：
+        #   它先按 name 做一次 SELECT：
+        #   - 查不到 → 真的 INSERT 一行，并把 created 标志返回 True；
+        #   - 查到了 → 一行都不写，直接返回库里那条旧记录，created 为 False。
+        #   所以同一个标签跑 N 次，表里始终只有 1 行，
+        #   不会因为 Tag.name 的唯一约束报 IntegrityError，也不会产生重名标签。
+        # 说明：get_or_create 内部是“先查再插”，两条 SQL 之间不是原子操作，
+        #       高并发下仍可能撞唯一约束；本命令是单线程手动执行，不存在这个问题。
         tags = {}
         for name in tag_names:
+            # 左边两个返回值：标签对象 + created 布尔值；
+            # 下划线 _ 是“这个值我不要”的占位变量，因为我们只关心标签对象本身。
+            # 这正是“补攻略标签”那次改动后仍能反复安全执行的关键一行。
             tags[name], _ = Tag.objects.get_or_create(name=name)
 
+        # ------------------------------------------------------------
+        # —— 第五步：准备 8 篇演示文章的数据（此刻还只在内存里，没进库）——
+        # 每篇是一个 dict，字段名与 Article 模型字段对应，另外多两个“虚拟字段”：
+        #   category：分类名（字符串），入库时再换成 categories 里的分类对象；
+        #   tags    ：标签名列表（字符串），入库时再逐个换成 Tag 对象挂到多对多关系上。
+        # 这样写的好处是“数据与逻辑分离”：想换内容只改这个列表，下面的循环一行都不用动。
+        # body 直接用三引号字符串写 Markdown —— 前台会用 CommonMarkdown 渲染成 HTML，
+        # 所以正文里能光明正大写 # 号标题、- 列表、** 加粗。
+        # 内容分布：国内游 3 篇 + 出境游 3 篇 + 旅行攻略 2 篇，覆盖 3 个分类；
+        # 约束：category 名必须与第三步的 ['国内游','出境游','旅行攻略'] 完全一致，
+        #       tags 里的每个标签名必须都在 tag_names 里（含“攻略”），否则下面取值会 KeyError。
         # 文章
         articles = [
             {
@@ -214,6 +316,18 @@ class Command(BaseCommand):
             },
         ]
 
+        # ------------------------------------------------------------
+        # —— 第六步：把上面 8 条 dict 真正写进数据库 ——
+        # 逐篇调用 create()，每调一次就发一条 INSERT。
+        # 这里同样是 create() 而不是 get_or_create()，原因有两点：
+        #   1) Article.title 是 unique=True，重复插会撞标题唯一约束；
+        #   2) 但第一步已经把文章全删了，本次运行不存在重复。
+        # 也就是说：本命令能做到“重复执行结果一致”，靠的是“先清空”，
+        # 而不是靠唯一键兜底 —— 万一清理代码被去掉，第二次执行就会 IntegrityError。
+        # 另外两个固定字段的业务含义：
+        #   status='p' —— 已发布（p=Published），前台列表/详情立刻可见；
+        #   type='a'   —— 普通文章（a=Article），会进列表、归档、RSS；
+        #                 若写成 'p' 就变成独立页面，只按 URL 单独访问、不进列表。
         for data in articles:
             article = Article.objects.create(
                 title=data['title'],
@@ -223,12 +337,35 @@ class Command(BaseCommand):
                 status='p',
                 type='a',
             )
+            # 多对多关系要等文章有了主键才能写中间表，所以顺序必须是
+            # 先 create 出文章，再逐条 add 标签。
+            # article.tags 是多对多管理器；add() 只往“文章-标签”中间表插一行关联，
+            # 不会改动 Tag 表本身，因此同一个标签可以被多篇文章共用。
+            # 这里若标签名不在 tag_names 里，tags[tag_name] 会 KeyError —— 见第五步的约束说明。
             for tag_name in data['tags']:
                 article.tags.add(tags[tag_name])
 
+        # ------------------------------------------------------------
+        # —— 第七步：清缓存 ——
+        # 为什么把 import 写在函数体里而不是文件顶部：
+        #   djangoblog.utils 顶层会 import 一堆项目内模块，
+        #   放到文件顶部容易和 blog 应用形成循环导入；用到时再导入（延迟导入）最稳。
+        # cache 是 Django 的默认缓存对象（即 djangoblog.utils 里
+        # `from django.core.cache import cache` 拿到的那个），
+        # 本项目把分类树、标签云、站点设置都缓存了 10 小时，
+        # 数据刚被整体换掉，必须 clear() 清掉整片缓存，
+        # 否则前台还会显示已被删掉的文章和旧标签。
         from djangoblog.utils import cache
         cache.clear()
 
+        # 用 self.stdout.write 而不是 print：
+        #   management command 的输出走框架包了一层的 stdout，
+        #   测试时能被 call_command 捕获，也方便统一加风格。
+        # self.style.SUCCESS(...) 给文字套上绿色 ANSI 样式；
+        #   终端不支持颜色时 Django 会自动降级成纯文本，不会输出乱码。
+        # 打印的是“事后统计”而不是“插入了多少条”：
+        #   直接数表里现有行数，顺手也能验证“清空 + 重建”是否按预期完成
+        #   —— 正常结果应是 categories=3 tags=11 articles=8。
         self.stdout.write(self.style.SUCCESS(
             f"Done! categories={Category.objects.count()} "
             f"tags={Tag.objects.count()} articles={Article.objects.count()}"))
