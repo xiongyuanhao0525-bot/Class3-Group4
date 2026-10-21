@@ -1,0 +1,671 @@
+# pylint 结果 app=djangoblog
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m pylint --disable=import-error,relative-beyond-top-level,no-name-in-module --output-format=text D:\Class3-Group4\djangoblog
+# 退出码: 30
+
+************* Module djangoblog
+djangoblog\__init__.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\__init__.py:1:0: C0103: Constant name "default_app_config" doesn't conform to UPPER_CASE naming style (invalid-name)
+************* Module djangoblog.admin_site
+djangoblog\admin_site.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\admin_site.py:6:0: W0401: Wildcard import accounts.admin (wildcard-import)
+djangoblog\admin_site.py:7:0: W0401: Wildcard import blog.admin (wildcard-import)
+djangoblog\admin_site.py:8:0: W0401: Wildcard import blog.models (wildcard-import)
+djangoblog\admin_site.py:9:0: W0401: Wildcard import comments.admin (wildcard-import)
+djangoblog\admin_site.py:10:0: W0401: Wildcard import comments.models (wildcard-import)
+djangoblog\admin_site.py:12:0: W0401: Wildcard import oauth.admin (wildcard-import)
+djangoblog\admin_site.py:13:0: W0401: Wildcard import oauth.models (wildcard-import)
+djangoblog\admin_site.py:14:0: W0401: Wildcard import servermanager.admin (wildcard-import)
+djangoblog\admin_site.py:15:0: W0401: Wildcard import servermanager.models (wildcard-import)
+djangoblog\admin_site.py:18:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\admin_site.py:22:4: W0246: Useless parent or super() delegation in method '__init__' (useless-parent-delegation)
+djangoblog\admin_site.py:25:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\admin_site.py:18:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\admin_site.py:6:0: W0614: Unused import(s) BlogUserCreationForm, BlogUserChangeForm, forms, UserAdmin, UserChangeForm and UsernameField from wildcard import of accounts.admin (unused-wildcard-import)
+djangoblog\admin_site.py:7:0: W0614: Unused import(s) ArticleForm, makr_article_publish, draft_article, close_article_commentstatus, open_article_commentstatus, admin, get_user_model, reverse and format_html from wildcard import of blog.admin (unused-wildcard-import)
+djangoblog\admin_site.py:8:0: W0614: Unused import(s) logging, re, logger, LinkShowType, BaseModel, abstractmethod, settings, ValidationError, models, now, MDTextField, slugify, cache_decorator, cache, get_current_site, CacheTimeout and CacheKey from wildcard import of blog.models (unused-wildcard-import)
+djangoblog\admin_site.py:9:0: W0614: Unused import(s) disable_commentstatus, enable_commentstatus, CommentReactionAdmin and CommentReaction from wildcard import of comments.admin (unused-wildcard-import)
+************* Module djangoblog.apps
+djangoblog\apps.py:11:0: C0304: Final newline missing (missing-final-newline)
+djangoblog\apps.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\apps.py:3:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\apps.py:7:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\apps.py:10:8: C0415: Import outside toplevel (plugin_manage.loader.load_plugins) (import-outside-toplevel)
+djangoblog\apps.py:3:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+************* Module djangoblog.base_views
+djangoblog\base_views.py:17:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\base_views.py:39:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\base_views.py:59:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\base_views.py:86:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\base_views.py:107:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+************* Module djangoblog.blog_signals
+djangoblog\blog_signals.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\blog_signals.py:27:0: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\blog_signals.py:39:4: C0415: Import outside toplevel (servermanager.models.EmailSendLog) (import-outside-toplevel)
+djangoblog\blog_signals.py:48:11: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\blog_signals.py:49:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+djangoblog\blog_signals.py:27:30: W0613: Unused argument 'sender' (unused-argument)
+djangoblog\blog_signals.py:55:0: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\blog_signals.py:56:4: W0622: Redefining built-in 'id' (redefined-builtin)
+djangoblog\blog_signals.py:60:8: C0415: Import outside toplevel (djangoblog.utils.save_user_avatar) (import-outside-toplevel)
+djangoblog\blog_signals.py:55:36: W0613: Unused argument 'sender' (unused-argument)
+djangoblog\blog_signals.py:68:0: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\blog_signals.py:68:0: R0913: Too many arguments (6/5) (too-many-arguments)
+djangoblog\blog_signals.py:68:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+djangoblog\blog_signals.py:68:0: R0914: Too many local variables (21/15) (too-many-locals)
+djangoblog\blog_signals.py:90:19: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\blog_signals.py:91:16: E1205: Too many arguments for logging format string (logging-too-many-args)
+djangoblog\blog_signals.py:108:32: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\blog_signals.py:119:8: C0415: Import outside toplevel (blog.models.Article, blog.models.Category, blog.models.Tag) (import-outside-toplevel)
+djangoblog\blog_signals.py:138:19: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\blog_signals.py:143:16: C0415: Import outside toplevel (uuslug.slugify) (import-outside-toplevel)
+djangoblog\blog_signals.py:68:0: R0912: Too many branches (17/12) (too-many-branches)
+djangoblog\blog_signals.py:68:0: R0915: Too many statements (54/50) (too-many-statements)
+djangoblog\blog_signals.py:69:8: W0613: Unused argument 'sender' (unused-argument)
+djangoblog\blog_signals.py:71:8: W0613: Unused argument 'created' (unused-argument)
+djangoblog\blog_signals.py:72:8: W0613: Unused argument 'raw' (unused-argument)
+djangoblog\blog_signals.py:73:8: W0613: Unused argument 'using' (unused-argument)
+djangoblog\blog_signals.py:69:0: W0613: Unused argument 'kwargs' (unused-argument)
+djangoblog\blog_signals.py:174:0: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\blog_signals.py:174:23: W0613: Unused argument 'sender' (unused-argument)
+djangoblog\blog_signals.py:174:31: W0613: Unused argument 'request' (unused-argument)
+djangoblog\blog_signals.py:174:0: W0613: Unused argument 'kwargs' (unused-argument)
+************* Module djangoblog.constants
+djangoblog\constants.py:11:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+djangoblog\constants.py:37:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+djangoblog\constants.py:72:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+djangoblog\constants.py:89:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module djangoblog.elasticsearch_backend
+djangoblog\elasticsearch_backend.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\elasticsearch_backend.py:14:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\elasticsearch_backend.py:16:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+djangoblog\elasticsearch_backend.py:44:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:44:21: W0613: Unused argument 'index' (unused-argument)
+djangoblog\elasticsearch_backend.py:44:38: W0613: Unused argument 'commit' (unused-argument)
+djangoblog\elasticsearch_backend.py:49:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:53:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:53:20: W0613: Unused argument 'models' (unused-argument)
+djangoblog\elasticsearch_backend.py:53:33: W0613: Unused argument 'commit' (unused-argument)
+djangoblog\elasticsearch_backend.py:75:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:75:4: R0914: Too many local variables (22/15) (too-many-locals)
+djangoblog\elasticsearch_backend.py:148:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\elasticsearch_backend.py:150:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+djangoblog\elasticsearch_backend.py:173:27: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\elasticsearch_backend.py:180:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:180:35: W0613: Unused argument 'field' (unused-argument)
+djangoblog\elasticsearch_backend.py:180:42: W0613: Unused argument 'filter_type' (unused-argument)
+djangoblog\elasticsearch_backend.py:183:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:187:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:187:38: W0613: Unused argument 'preferred_query' (unused-argument)
+djangoblog\elasticsearch_backend.py:190:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:191:17: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+djangoblog\elasticsearch_backend.py:195:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\elasticsearch_backend.py:197:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\elasticsearch_backend.py:195:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\elasticsearch_backend.py:204:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\elasticsearch_backend.py:204:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module djangoblog.error_views
+djangoblog\error_views.py:36:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+djangoblog\error_views.py:56:44: W0613: Unused argument 'template_name' (unused-argument)
+djangoblog\error_views.py:78:31: W0613: Unused argument 'template_name' (unused-argument)
+djangoblog\error_views.py:98:47: W0613: Unused argument 'template_name' (unused-argument)
+djangoblog\error_views.py:120:41: W0613: Unused argument 'template_name' (unused-argument)
+************* Module djangoblog.feeds
+djangoblog\feeds.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\feeds.py:10:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\feeds.py:17:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:20:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:23:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:26:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:29:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:32:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:34:15: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\feeds.py:36:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:39:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\feeds.py:39:24: W0613: Unused argument 'item' (unused-argument)
+************* Module djangoblog.logentryadmin
+djangoblog\logentryadmin.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\logentryadmin.py:11:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\logentryadmin.py:33:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:33:33: W0613: Unused argument 'request' (unused-argument)
+djangoblog\logentryadmin.py:36:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:36:45: W0613: Unused argument 'obj' (unused-argument)
+djangoblog\logentryadmin.py:42:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:42:36: W0613: Unused argument 'request' (unused-argument)
+djangoblog\logentryadmin.py:42:45: W0613: Unused argument 'obj' (unused-argument)
+djangoblog\logentryadmin.py:45:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:53:20: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\logentryadmin.py:57:30: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\logentryadmin.py:65:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:71:16: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\logentryadmin.py:75:24: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\logentryadmin.py:83:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:84:19: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+djangoblog\logentryadmin.py:87:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\logentryadmin.py:88:18: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+************* Module djangoblog.mixins
+djangoblog\mixins.py:43:4: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\mixins.py:43:4: R0903: Too few public methods (0/2) (too-few-public-methods)
+djangoblog\mixins.py:20:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\mixins.py:111:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+djangoblog\mixins.py:70:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\mixins.py:145:8: C0415: Import outside toplevel (blog.models.Article) (import-outside-toplevel)
+djangoblog\mixins.py:118:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\mixins.py:209:8: C0415: Import outside toplevel (djangoblog.utils.cache) (import-outside-toplevel)
+djangoblog\mixins.py:213:12: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+djangoblog\mixins.py:218:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+djangoblog\mixins.py:232:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+djangoblog\mixins.py:264:0: W0223: Method 'get_queryset_cache_key' is abstract in class 'CachedListViewMixin' but is not overridden in child class 'ArticleListMixin' (abstract-method)
+djangoblog\mixins.py:264:0: W0223: Method 'get_queryset_data' is abstract in class 'CachedListViewMixin' but is not overridden in child class 'ArticleListMixin' (abstract-method)
+djangoblog\mixins.py:285:4: W0107: Unnecessary pass statement (unnecessary-pass)
+************* Module djangoblog.settings
+djangoblog\settings.py:307:0: C0301: Line too long (105/100) (line-too-long)
+djangoblog\settings.py:338:0: C0301: Line too long (110/100) (line-too-long)
+djangoblog\settings.py:464:0: C0305: Trailing newlines (trailing-newlines)
+djangoblog\settings.py:19:0: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\settings.py:289:0: C0103: Variable name "CACHES" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\settings.py:298:4: C0103: Variable name "CACHES" doesn't conform to snake_case naming style (invalid-name)
+************* Module djangoblog.settings_local
+djangoblog\settings_local.py:5:0: W0401: Wildcard import settings (wildcard-import)
+djangoblog\settings_local.py:5:0: W0614: Unused import(s) DATABASES, CACHES, os, sys, env_to_bool, SECRET_KEY, DEBUG, TESTING, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, INSTALLED_APPS, MIDDLEWARE, ROOT_URLCONF, TEMPLATES, WSGI_APPLICATION, AUTH_PASSWORD_VALIDATORS, LANGUAGES, LOCALE_PATHS, LANGUAGE_CODE, TIME_ZONE, USE_I18N, USE_L10N, USE_TZ, SESSION_COOKIE_AGE, REMEMBER_ME_LOGIN_TTL, ELASTICSEARCH_DSL, HAYSTACK_CONNECTIONS, HAYSTACK_SIGNAL_PROCESSOR, AUTHENTICATION_BACKENDS, STATIC_ROOT, STATIC_URL, STATICFILES, STATICFILES_DIRS, VITE_DEV_SERVER_URL, AUTH_USER_MODEL, LOGIN_URL, TIME_FORMAT, DATE_TIME_FORMAT, BOOTSTRAP_COLOR_TYPES, PAGINATE_BY, CACHE_CONTROL_MAX_AGE, SITE_ID, BAIDU_NOTIFY_URL, EMAIL_BACKEND, EMAIL_USE_TLS, EMAIL_USE_SSL, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_EMAIL, SERVER_EMAIL, ADMINS, WXADMIN, LOG_PATH, LOGGING, STATICFILES_FINDERS, COMPRESS_ENABLED, COMPRESS_OFFLINE, COMPRESS_OUTPUT_DIR, COMPRESS_CSS_HASHING_METHOD, COMPRESS_JS_HASHING_METHOD, COMPRESS_CSS_FILTERS, COMPRESS_JS_FILTERS, COMPRESS_CACHE_BACKEND, COMPRESS_CACHE_KEY_FUNCTION, COMPRESS_PRECOMPILERS, COMPRESS_MINT_DELAY, COMPRESS_MTIME_DELAY, COMPRESS_REBUILD_TIMEOUT, COMPRESS_CSS_COMPRESSOR, COMPRESS_JS_COMPRESSOR, STATICFILES_STORAGE, COMPRESS_URL, COMPRESS_ROOT, MEDIA_ROOT, MEDIA_URL, X_FRAME_OPTIONS, DEFAULT_AUTO_FIELD, PLUGINS_DIR, ACTIVE_PLUGINS and Path from wildcard import of settings (unused-wildcard-import)
+************* Module djangoblog.sitemap
+djangoblog\sitemap.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\sitemap.py:7:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\sitemap.py:11:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:14:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:18:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\sitemap.py:22:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:25:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:29:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\sitemap.py:33:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:36:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:40:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\sitemap.py:44:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:47:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:51:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\sitemap.py:55:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\sitemap.py:58:4: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module djangoblog.spider_notify
+djangoblog\spider_notify.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\spider_notify.py:9:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\spider_notify.py:11:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\spider_notify.py:16:15: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\spider_notify.py:20:4: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module djangoblog.tests
+djangoblog\tests.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\tests.py:3:0: W0401: Wildcard import djangoblog.utils (wildcard-import)
+djangoblog\tests.py:6:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\tests.py:7:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\tests.py:7:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\tests.py:10:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\tests.py:3:0: W0614: Unused import(s) logging, os, random, string, uuid, hashlib, hmac, bleach, markdown, requests, logger, get_max_articleid_commentid, cache_decorator, expire_view_cache, get_current_site, send_email, generate_code, get_blog_setting, save_user_avatar, delete_sidebar_cache, delete_view_cache, get_resource_url, ALLOWED_TAGS, ALLOWED_CLASSES, class_filter, ALLOWED_ATTRIBUTES, ALLOWED_PROTOCOLS, sanitize_html, settings, Site, cache and static from wildcard import of djangoblog.utils (unused-wildcard-import)
+************* Module djangoblog.test_base
+djangoblog\test_base.py:14:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+djangoblog\test_base.py:20:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\test_base.py:20:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_base.py:72:4: R0913: Too many arguments (6/5) (too-many-arguments)
+djangoblog\test_base.py:72:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+djangoblog\test_base.py:107:18: W0612: Unused variable 'created' (unused-variable)
+djangoblog\test_base.py:188:20: W0212: Access to a protected member _meta of a client class (protected-access)
+djangoblog\test_base.py:189:21: W0212: Access to a protected member _meta of a client class (protected-access)
+djangoblog\test_base.py:190:8: C0415: Import outside toplevel (django.urls.reverse) (import-outside-toplevel)
+djangoblog\test_base.py:195:20: W0212: Access to a protected member _meta of a client class (protected-access)
+djangoblog\test_base.py:196:21: W0212: Access to a protected member _meta of a client class (protected-access)
+djangoblog\test_base.py:197:8: C0415: Import outside toplevel (django.urls.reverse) (import-outside-toplevel)
+djangoblog\test_base.py:223:8: C0415: Import outside toplevel (django.http.HttpRequest) (import-outside-toplevel)
+djangoblog\test_base.py:236:8: C0415: Import outside toplevel (djangoblog.plugin_manage.hooks) (import-outside-toplevel)
+djangoblog\test_base.py:237:27: W0212: Access to a protected member _hooks of a client class (protected-access)
+djangoblog\test_base.py:234:44: W0613: Unused argument 'plugin' (unused-argument)
+djangoblog\test_base.py:242:8: C0415: Import outside toplevel (os) (import-outside-toplevel)
+djangoblog\test_base.py:240:33: W0613: Unused argument 'plugin_name' (unused-argument)
+djangoblog\test_base.py:256:8: C0415: Import outside toplevel (unittest.mock.Mock) (import-outside-toplevel)
+djangoblog\test_base.py:267:8: C0415: Import outside toplevel (unittest.mock.Mock) (import-outside-toplevel)
+djangoblog\test_base.py:277:8: C0415: Import outside toplevel (unittest.mock.patch) (import-outside-toplevel)
+djangoblog\test_base.py:283:8: C0415: Import outside toplevel (unittest.mock.patch) (import-outside-toplevel)
+djangoblog\test_base.py:5:0: W0611: Unused Permission imported from django.contrib.auth.models (unused-import)
+************* Module djangoblog.test_email_integration
+djangoblog\test_email_integration.py:24:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration.py:77:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:130:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration.py:187:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:207:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:216:8: W0612: Unused variable 'sent_to_nonexistent' (unused-variable)
+djangoblog\test_email_integration.py:233:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration.py:284:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:305:12: W0612: Unused variable 'author_notified' (unused-variable)
+djangoblog\test_email_integration.py:323:8: W0612: Unused variable 'replier' (unused-variable)
+djangoblog\test_email_integration.py:336:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:357:16: W0612: Unused variable 'commenter_notified' (unused-variable)
+djangoblog\test_email_integration.py:376:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:408:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration.py:432:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:465:8: W0612: Unused variable 'commenter' (unused-variable)
+djangoblog\test_email_integration.py:488:8: W0612: Unused variable 'comment' (unused-variable)
+djangoblog\test_email_integration.py:503:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:527:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration.py:546:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:573:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:594:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration.py:616:8: W0612: Unused variable 'response' (unused-variable)
+************* Module djangoblog.test_email_integration_complete
+djangoblog\test_email_integration_complete.py:24:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration_complete.py:90:12: C0415: Import outside toplevel (urllib.parse) (import-outside-toplevel)
+djangoblog\test_email_integration_complete.py:144:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration_complete.py:151:8: W0612: Unused variable 'user_count' (unused-variable)
+djangoblog\test_email_integration_complete.py:163:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration_complete.py:208:16: W0612: Unused variable 'reset_response' (unused-variable)
+djangoblog\test_email_integration_complete.py:221:16: W0612: Unused variable 'old_password_works' (unused-variable)
+djangoblog\test_email_integration_complete.py:254:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration_complete.py:282:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration_complete.py:325:4: R0914: Too many local variables (16/15) (too-many-locals)
+djangoblog\test_email_integration_complete.py:351:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+djangoblog\test_email_integration_complete.py:333:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration_complete.py:373:16: W0612: Unused variable 'article_link_match' (unused-variable)
+djangoblog\test_email_integration_complete.py:394:16: W0612: Unused variable 'reply_response' (unused-variable)
+djangoblog\test_email_integration_complete.py:442:8: W0612: Unused variable 'response' (unused-variable)
+djangoblog\test_email_integration_complete.py:468:12: W0612: Unused variable 'admin' (unused-variable)
+djangoblog\test_email_integration_complete.py:490:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_email_integration_complete.py:517:8: W0612: Unused variable 'register_response' (unused-variable)
+djangoblog\test_email_integration_complete.py:563:8: W0612: Unused variable 'commenter' (unused-variable)
+djangoblog\test_email_integration_complete.py:586:12: W0612: Unused variable 'author_notified' (unused-variable)
+djangoblog\test_email_integration_complete.py:12:0: W0611: Unused get_code imported from accounts.utils (unused-import)
+************* Module djangoblog.test_plugins
+djangoblog\test_plugins.py:11:0: W0401: Wildcard import djangoblog.plugin_manage.hook_constants (wildcard-import)
+djangoblog\test_plugins.py:23:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\test_plugins.py:23:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+djangoblog\test_plugins.py:25:8: W0212: Access to a protected member _hooks of a client class (protected-access)
+djangoblog\test_plugins.py:29:22: W0613: Unused argument 'context' (unused-argument)
+djangoblog\test_plugins.py:33:49: W0212: Access to a protected member _hooks of a client class (protected-access)
+djangoblog\test_plugins.py:34:29: W0212: Access to a protected member _hooks of a client class (protected-access)
+djangoblog\test_plugins.py:78:12: W0719: Raising too general exception: Exception (broad-exception-raised)
+djangoblog\test_plugins.py:97:8: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\test_plugins.py:135:32: W0613: Unused argument 'mock_logger' (unused-argument)
+djangoblog\test_plugins.py:154:8: C0415: Import outside toplevel (plugins.reading_time.plugin.ReadingTimePlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:160:8: C0415: Import outside toplevel (plugins.reading_time.plugin.ReadingTimePlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:182:8: C0415: Import outside toplevel (plugins.view_count.plugin.ViewCountPlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:201:8: C0415: Import outside toplevel (plugins.seo_optimizer.plugin.SeoOptimizerPlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:207:8: C0415: Import outside toplevel (plugins.seo_optimizer.plugin.SeoOptimizerPlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:208:8: W0612: Unused variable 'plugin' (unused-variable)
+djangoblog\test_plugins.py:221:8: C0415: Import outside toplevel (plugins.article_copyright.plugin.ArticleCopyrightPlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:238:8: C0415: Import outside toplevel (plugins.external_links.plugin.ExternalLinksPlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:244:8: C0415: Import outside toplevel (plugins.external_links.plugin.ExternalLinksPlugin) (import-outside-toplevel)
+djangoblog\test_plugins.py:247:8: W0612: Unused variable 'content' (unused-variable)
+djangoblog\test_plugins.py:5:0: W0611: Unused import os (unused-import)
+djangoblog\test_plugins.py:6:0: W0611: Unused Mock imported from unittest.mock (unused-import)
+djangoblog\test_plugins.py:11:0: W0614: Unused import(s) ARTICLE_DETAIL_LOAD, ARTICLE_UPDATE, ARTICLE_DELETE, POSITION_HOOKS, HEAD_RESOURCES_HOOK and BODY_RESOURCES_HOOK from wildcard import of djangoblog.plugin_manage.hook_constants (unused-wildcard-import)
+************* Module djangoblog.urls
+djangoblog\urls.py:30:0: C0301: Line too long (106/100) (line-too-long)
+djangoblog\urls.py:71:0: C0301: Line too long (109/100) (line-too-long)
+djangoblog\urls.py:74:0: C0301: Line too long (102/100) (line-too-long)
+djangoblog\urls.py:41:0: C0103: Constant name "handler404" doesn't conform to UPPER_CASE naming style (invalid-name)
+djangoblog\urls.py:42:0: C0103: Constant name "handler500" doesn't conform to UPPER_CASE naming style (invalid-name)
+djangoblog\urls.py:43:0: C0103: Constant name "handle403" doesn't conform to UPPER_CASE naming style (invalid-name)
+djangoblog\urls.py:46:17: W0613: Unused argument 'request' (unused-argument)
+djangoblog\urls.py:24:0: C0411: standard import "time" should be placed before third party imports "django.conf.settings", "django.conf.urls.i18n.i18n_patterns", "django.conf.urls.static.static" (...) "django.urls.re_path", "haystack.views.search_view_factory", "django.http.JsonResponse" (wrong-import-order)
+djangoblog\urls.py:23:0: C0412: Imports from package django are not grouped (ungrouped-imports)
+************* Module djangoblog.utils
+djangoblog\utils.py:334:13: C0303: Trailing whitespace (trailing-whitespace)
+djangoblog\utils.py:335:26: C0303: Trailing whitespace (trailing-whitespace)
+djangoblog\utils.py:341:0: C0303: Trailing whitespace (trailing-whitespace)
+djangoblog\utils.py:345:0: C0303: Trailing whitespace (trailing-whitespace)
+djangoblog\utils.py:32:4: C0415: Import outside toplevel (blog.models.Article) (import-outside-toplevel)
+djangoblog\utils.py:33:4: C0415: Import outside toplevel (comments.models.Comment) (import-outside-toplevel)
+djangoblog\utils.py:62:12: W0702: No exception type(s) specified (bare-except)
+djangoblog\utils.py:72:16: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+djangoblog\utils.py:77:16: W1201: Use lazy % formatting in logging functions (logging-not-lazy)
+djangoblog\utils.py:78:20: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\utils.py:101:4: C0415: Import outside toplevel (django.http.HttpRequest) (import-outside-toplevel)
+djangoblog\utils.py:102:4: C0415: Import outside toplevel (django.utils.cache.get_cache_key) (import-outside-toplevel)
+djangoblog\utils.py:110:20: W1202: Use lazy % formatting in logging functions (logging-format-interpolation)
+djangoblog\utils.py:110:20: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\utils.py:148:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\utils.py:153:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\utils.py:154:14: W0612: Unused variable 'toc' (unused-variable)
+djangoblog\utils.py:165:4: C0415: Import outside toplevel (djangoblog.blog_signals.send_email_signal) (import-outside-toplevel)
+djangoblog\utils.py:178:22: W0622: Redefining built-in 'dict' (redefined-builtin)
+djangoblog\utils.py:180:4: C0415: Import outside toplevel (urllib.parse.quote) (import-outside-toplevel)
+djangoblog\utils.py:181:20: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\utils.py:195:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+djangoblog\utils.py:198:8: C0415: Import outside toplevel (blog.models.BlogSettings) (import-outside-toplevel)
+djangoblog\utils.py:248:11: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\utils.py:221:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+djangoblog\utils.py:259:4: C0415: Import outside toplevel (blog.models.LinkShowType) (import-outside-toplevel)
+djangoblog\utils.py:262:8: W1201: Use lazy % formatting in logging functions (logging-not-lazy)
+djangoblog\utils.py:268:4: C0415: Import outside toplevel (django.core.cache.utils.make_template_fragment_key) (import-outside-toplevel)
+djangoblog\utils.py:275:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+djangoblog\utils.py:302:17: W0613: Unused argument 'tag' (unused-argument)
+djangoblog\utils.py:343:4: C0415: Import outside toplevel (re) (import-outside-toplevel)
+************* Module djangoblog.whoosh_cn_backend
+djangoblog\whoosh_cn_backend.py:17:0: C0301: Line too long (101/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:28:0: C0301: Line too long (102/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:41:0: C0301: Line too long (105/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:51:0: C0301: Line too long (122/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:183:0: C0301: Line too long (106/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:185:0: C0301: Line too long (102/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:187:0: C0301: Line too long (155/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:189:0: C0301: Line too long (106/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:198:0: C0301: Line too long (111/100) (line-too-long)
+djangoblog\whoosh_cn_backend.py:726:0: C0325: Unnecessary parens after 'del' keyword (superfluous-parens)
+djangoblog\whoosh_cn_backend.py:727:0: C0325: Unnecessary parens after 'del' keyword (superfluous-parens)
+djangoblog\whoosh_cn_backend.py:1:0: C0302: Too many lines in module (1093/1000) (too-many-lines)
+djangoblog\whoosh_cn_backend.py:51:15: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:32: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:47: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:63: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:81: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:99: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:106: W1401: Anomalous backslash in string: '\.'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:51:108: W1401: Anomalous backslash in string: '\d'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
+djangoblog\whoosh_cn_backend.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+djangoblog\whoosh_cn_backend.py:40:4: W0707: Consider explicitly re-raising using 'except ImportError as exc' and 'raise MissingDependency("The 'whoosh' backend requires the installation of 'Whoosh'. Please refer to the documentation.") from exc' (raise-missing-from)
+djangoblog\whoosh_cn_backend.py:56:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+djangoblog\whoosh_cn_backend.py:65:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\whoosh_cn_backend.py:65:0: R0902: Too many instance attributes (10/7) (too-many-instance-attributes)
+djangoblog\whoosh_cn_backend.py:83:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+djangoblog\whoosh_cn_backend.py:101:16: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:110:8: C0415: Import outside toplevel (haystack.connections) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:120:16: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:126:12: W0602: Using global for 'LOCALS' but no assignment is done (global-variable-not-assigned)
+djangoblog\whoosh_cn_backend.py:147:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:147:4: R0912: Too many branches (13/12) (too-many-branches)
+djangoblog\whoosh_cn_backend.py:158:12: W0612: Unused variable 'field_name' (unused-variable)
+djangoblog\whoosh_cn_backend.py:202:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:202:21: W0621: Redefining name 'index' from outer scope (line 26) (redefined-outer-name)
+djangoblog\whoosh_cn_backend.py:213:31: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:226:23: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\whoosh_cn_backend.py:234:24: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:234:24: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:202:38: W0613: Unused argument 'commit' (unused-argument)
+djangoblog\whoosh_cn_backend.py:247:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:259:15: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\whoosh_cn_backend.py:257:20: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:257:20: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:247:36: W0613: Unused argument 'commit' (unused-argument)
+djangoblog\whoosh_cn_backend.py:269:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:292:15: W0718: Catching too general exception Exception (broad-exception-caught)
+djangoblog\whoosh_cn_backend.py:286:24: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:286:24: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:291:24: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:269:33: W0613: Unused argument 'commit' (unused-argument)
+djangoblog\whoosh_cn_backend.py:306:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:317:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:324:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:349:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:349:4: R0913: Too many arguments (17/5) (too-many-arguments)
+djangoblog\whoosh_cn_backend.py:349:4: R0917: Too many positional arguments (17/5) (too-many-positional-arguments)
+djangoblog\whoosh_cn_backend.py:349:4: R0914: Too many local variables (36/15) (too-many-locals)
+djangoblog\whoosh_cn_backend.py:383:54: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:459:17: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:485:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+djangoblog\whoosh_cn_backend.py:349:4: R0911: Too many return statements (8/6) (too-many-return-statements)
+djangoblog\whoosh_cn_backend.py:349:4: R0912: Too many branches (38/12) (too-many-branches)
+djangoblog\whoosh_cn_backend.py:349:4: R0915: Too many statements (79/50) (too-many-statements)
+djangoblog\whoosh_cn_backend.py:355:12: W0613: Unused argument 'fields' (unused-argument)
+djangoblog\whoosh_cn_backend.py:362:12: W0613: Unused argument 'within' (unused-argument)
+djangoblog\whoosh_cn_backend.py:363:12: W0613: Unused argument 'dwithin' (unused-argument)
+djangoblog\whoosh_cn_backend.py:364:12: W0613: Unused argument 'distance_point' (unused-argument)
+djangoblog\whoosh_cn_backend.py:350:0: W0613: Unused argument 'kwargs' (unused-argument)
+djangoblog\whoosh_cn_backend.py:563:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:563:4: R0913: Too many arguments (7/5) (too-many-arguments)
+djangoblog\whoosh_cn_backend.py:563:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+djangoblog\whoosh_cn_backend.py:563:4: R0914: Too many local variables (25/15) (too-many-locals)
+djangoblog\whoosh_cn_backend.py:578:22: W0212: Access to a protected member _meta of a client class (protected-access)
+djangoblog\whoosh_cn_backend.py:603:17: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:636:20: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:563:4: R0912: Too many branches (20/12) (too-many-branches)
+djangoblog\whoosh_cn_backend.py:563:4: R0915: Too many statements (53/50) (too-many-statements)
+djangoblog\whoosh_cn_backend.py:564:0: W0613: Unused argument 'kwargs' (unused-argument)
+djangoblog\whoosh_cn_backend.py:578:8: W0612: Unused variable 'model_klass' (unused-variable)
+djangoblog\whoosh_cn_backend.py:678:4: R0914: Too many local variables (39/15) (too-many-locals)
+djangoblog\whoosh_cn_backend.py:708:20: W0621: Redefining name 'index' from outer scope (line 26) (redefined-outer-name)
+djangoblog\whoosh_cn_backend.py:737:24: W0621: Redefining name 're' from outer scope (line 7) (redefined-outer-name)
+djangoblog\whoosh_cn_backend.py:685:8: C0415: Import outside toplevel (haystack.connections) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:700:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+djangoblog\whoosh_cn_backend.py:737:24: W0404: Reimport 're' (imported line 7) (reimported)
+djangoblog\whoosh_cn_backend.py:737:24: C0415: Import outside toplevel (re) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:700:8: R1702: Too many nested blocks (6/5) (too-many-nested-blocks)
+djangoblog\whoosh_cn_backend.py:754:24: W0404: Reimport 're' (imported line 7) (reimported)
+djangoblog\whoosh_cn_backend.py:754:24: C0415: Import outside toplevel (re) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:755:24: C0415: Import outside toplevel (djangoblog.utils.CommonMarkdown) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:761:24: C0415: Import outside toplevel (django.utils.html.strip_tags) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:700:8: R1702: Too many nested blocks (7/5) (too-many-nested-blocks)
+djangoblog\whoosh_cn_backend.py:700:8: R1702: Too many nested blocks (7/5) (too-many-nested-blocks)
+djangoblog\whoosh_cn_backend.py:678:4: R0912: Too many branches (27/12) (too-many-branches)
+djangoblog\whoosh_cn_backend.py:678:4: R0915: Too many statements (69/50) (too-many-statements)
+djangoblog\whoosh_cn_backend.py:731:20: W0612: Unused variable 'ca' (unused-variable)
+djangoblog\whoosh_cn_backend.py:819:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:863:20: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:877:8: R1705: Unnecessary "elif" after "return", replace only that "elif" with "if" (no-else-return)
+djangoblog\whoosh_cn_backend.py:914:15: W0718: Catching too general exception BaseException (broad-exception-caught)
+djangoblog\whoosh_cn_backend.py:124:12: W0201: Attribute 'storage' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:131:12: W0201: Attribute 'storage' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:133:8: W0201: Attribute 'content_field_name' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:133:33: W0201: Attribute 'schema' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:135:8: W0201: Attribute 'parser' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:138:12: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:141:16: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:143:16: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:206:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:251:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:273:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:321:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:439:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:483:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:583:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:632:8: W0201: Attribute 'index' defined outside __init__ (attribute-defined-outside-init)
+djangoblog\whoosh_cn_backend.py:922:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\whoosh_cn_backend.py:924:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+djangoblog\whoosh_cn_backend.py:947:27: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:954:4: C0116: Missing function or method docstring (missing-function-docstring)
+djangoblog\whoosh_cn_backend.py:954:4: R0914: Too many local variables (17/15) (too-many-locals)
+djangoblog\whoosh_cn_backend.py:955:8: C0415: Import outside toplevel (haystack.connections) (import-outside-toplevel)
+djangoblog\whoosh_cn_backend.py:978:29: W0212: Access to a protected member _from_python of a client class (protected-access)
+djangoblog\whoosh_cn_backend.py:985:30: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:985:30: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:998:21: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:1029:28: W0212: Access to a protected member _from_python of a client class (protected-access)
+djangoblog\whoosh_cn_backend.py:1034:37: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1034:37: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:1044:25: W0212: Access to a protected member _from_python of a client class (protected-access)
+djangoblog\whoosh_cn_backend.py:1050:42: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1052:42: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1054:29: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1056:24: W0212: Access to a protected member _from_python of a client class (protected-access)
+djangoblog\whoosh_cn_backend.py:1057:22: W0212: Access to a protected member _from_python of a client class (protected-access)
+djangoblog\whoosh_cn_backend.py:1065:29: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1065:29: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:1078:11: C1802: Do not use `len(SEQUENCE)` without comparison to determine if a sequence is empty (use-implicit-booleaness-not-len)
+djangoblog\whoosh_cn_backend.py:1080:29: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1082:15: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+djangoblog\whoosh_cn_backend.py:1082:15: W1406: The u prefix for strings is no longer necessary in Python >=3.0 (redundant-u-string-prefix)
+djangoblog\whoosh_cn_backend.py:954:4: R0912: Too many branches (34/12) (too-many-branches)
+djangoblog\whoosh_cn_backend.py:954:4: R0915: Too many statements (73/50) (too-many-statements)
+djangoblog\whoosh_cn_backend.py:1091:0: C0115: Missing class docstring (missing-class-docstring)
+djangoblog\whoosh_cn_backend.py:1091:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+djangoblog\whoosh_cn_backend.py:15:0: C0411: standard import "datetime.datetime" should be placed before third party imports "six", "django.conf.settings", "django.core.exceptions.ImproperlyConfigured" (wrong-import-order)
+djangoblog\whoosh_cn_backend.py:27:0: W0611: Unused StemmingAnalyzer imported from whoosh.analysis (unused-import)
+djangoblog\whoosh_cn_backend.py:31:0: W0611: Unused ContextFragmenter imported from whoosh.highlight (unused-import)
+djangoblog\whoosh_cn_backend.py:32:0: W0611: Unused highlight imported from whoosh.highlight as whoosh_highlight (unused-import)
+************* Module djangoblog.wsgi
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[234:259]
+==djangoblog.test_email_integration_complete:[283:307]
+        self.client = Client()
+        mail.outbox = []
+
+        # 创建文章作者
+        self.author = BlogUser.objects.create_user(
+            username='author',
+            email='author@example.com',
+            password='password'
+        )
+
+        # 创建评论者
+        self.commenter = BlogUser.objects.create_user(
+            username='commenter',
+            email='commenter@example.com',
+            password='password'
+        )
+
+        # 创建分类和文章
+        self.category = Category.objects.create(
+            name='Test Category',
+            slug='test-category'
+        )
+
+        self.article = Article.objects.create( (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.elasticsearch_backend:[149:180]
+==djangoblog.whoosh_cn_backend:[923:955]
+        if hasattr(date, 'hour'):
+            return force_str(date.strftime('%Y%m%d%H%M%S'))
+        else:
+            return force_str(date.strftime('%Y%m%d000000'))
+
+    def clean(self, query_fragment):
+        """
+        Provides a mechanism for sanitizing user input before presenting the
+        value to the backend.
+
+        Whoosh 1.X differs here in that you can no longer use a backslash
+        to escape reserved characters. Instead, the whole word should be
+        quoted.
+        """
+        words = query_fragment.split()
+        cleaned_words = []
+
+        for word in words:
+            if word in self.backend.RESERVED_WORDS:
+                word = word.replace(word, word.lower())
+
+            for char in self.backend.RESERVED_CHARACTERS:
+                if char in word:
+                    word = "'%s'" % word
+                    break
+
+            cleaned_words.append(word)
+
+        return ' '.join(cleaned_words)
+
+    def build_query_fragment(self, field, filter_type, value): (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[261:283]
+==djangoblog.test_email_integration_complete:[309:330]
+            author=self.author,
+            category=self.category,
+            status='p',
+            type='a',
+            comment_status='o'
+        )
+
+        self.blog_settings, _ = BlogSettings.objects.get_or_create(
+            id=1,
+            defaults={
+                'site_name': 'Test Blog',
+                'comment_need_review': False
+            }
+        )
+
+    def test_complete_comment_notification_flow(self):
+        """测试完整的评论通知流程：发表评论 → 通知作者 → 作者查看 → 回复"""
+
+        # ============ 步骤1: 评论者登录并发表评论 ============
+        self.client.login(username='commenter', password='password')
+ (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[409:427]
+==djangoblog.test_email_integration_complete:[491:512]
+        self.client = Client()
+        mail.outbox = []
+
+        # 确保博客设置存在
+        BlogSettings.objects.get_or_create(
+            id=1,
+            defaults={
+                'site_name': 'Test Blog',
+                'comment_need_review': False
+            }
+        )
+
+    def test_complete_user_journey_with_emails(self):
+        """测试完整的用户旅程包含邮件"""
+        # 1. 用户注册
+        registration_data = {
+            'username': 'journeyuser',
+            'email': 'journey@example.com', (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[25:39]
+==djangoblog.test_email_integration_complete:[25:38]
+        self.client = Client()
+        mail.outbox = []
+
+        BlogSettings.objects.get_or_create(
+            id=1,
+            defaults={'site_name': 'Test Blog'}
+        )
+
+    def test_complete_registration_verification_flow(self):
+        """测试完整的注册验证流程：注册 → 发邮件 → 验证 → 成功"""
+
+        # ============ 步骤1: 用户注册 ============
+        registration_data = { (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[43:56]
+==djangoblog.test_email_integration_complete:[42:54]
+        }
+
+        # 提交注册表单
+        response = self.client.post(
+            reverse('account:register'),
+            registration_data,
+            follow=True
+        )
+
+        # 验证响应
+        self.assertEqual(response.status_code, 200)
+
+        # 验证用户已创建 (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[287:296]
+==djangoblog.test_email_integration_complete:[336:345]
+                'email': 'commenter@example.com',
+                'name': 'Commenter'
+            },
+            follow=True
+        )
+
+        # 验证评论已创建
+        comment = Comment.objects.filter(
+            article=self.article, (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[379:388]
+==djangoblog.test_email_integration_complete:[445:454]
+                'email': 'commenter@example.com',
+                'name': 'Commenter'
+            },
+            follow=True
+        )
+
+        # ============ 步骤3: 验证评论处于待审核状态 ============
+        comment = Comment.objects.filter(
+            article=self.article, (duplicate-code)
+djangoblog\wsgi.py:1:0: R0801: Similar lines in 2 files
+==djangoblog.test_email_integration:[365:378]
+==djangoblog.test_email_integration_complete:[433:444]
+        self.blog_settings.comment_need_review = True
+        self.blog_settings.save()
+
+        # 评论者登录
+        self.client.login(username='commenter', password='password')
+
+        # 清空邮件
+        mail.outbox = []
+
+        # 发表评论
+        response = self.client.post(
+            reverse('comments:postcomment', kwargs={'article_id': self.article.id}),
+            { (duplicate-code)
+djangoblog\wsgi.py:1:0: R0401: Cyclic import (djangoblog.blog_signals -> djangoblog.utils) (cyclic-import)
+
+-----------------------------------
+Your code has been rated at 7.63/10
+
