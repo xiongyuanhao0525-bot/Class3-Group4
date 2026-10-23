@@ -1,0 +1,113 @@
+# flake8 结果 app=blog
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m flake8 --max-line-length=120 --exclude=venv,frontend,migrations,__pycache__,locale,logs,whoosh_index,templates,doc,docs,deploy,plugins,static,node_modules D:\Class3-Group4\blog
+# 问题条数: 109
+
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.Category' imported but unused
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.Tag' imported but unused
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.Links' imported but unused
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.SideBar' imported but unused
+D:\Class3-Group4\blog\apps.py:31:25: F841 local variable 'manager' is assigned to but never used
+D:\Class3-Group4\blog\management\commands\sync_user_avatar.py:17:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\models.py:27:5: E741 ambiguous variable name 'I'
+D:\Class3-Group4\blog\models.py:440:121: E501 line too long (122 > 120 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:1:1: F401 'hashlib' imported but unused
+D:\Class3-Group4\blog\templatetags\blog_tags.py:5:1: F401 'urllib' imported but unused
+D:\Class3-Group4\blog\templatetags\blog_tags.py:60:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:65:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:80:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:88:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:91:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:103:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:107:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:110:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:188:1: E303 too many blank lines (4)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:220:5: F841 local variable 'site' is assigned to but never used
+D:\Class3-Group4\blog\templatetags\blog_tags.py:527:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:536:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:538:121: E501 line too long (141 > 120 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:540:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:543:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:547:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:587:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:592:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:597:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:599:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:611:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:614:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:668:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:670:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:677:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:680:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:688:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:694:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:702:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:708:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:714:1: E303 too many blank lines (4)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:718:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:723:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:732:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:733:14: W292 no newline at end of file
+D:\Class3-Group4\blog\test_admin.py:6:1: F401 'django.test.RequestFactory' imported but unused
+D:\Class3-Group4\blog\test_admin.py:7:1: F401 'django.urls.reverse' imported but unused
+D:\Class3-Group4\blog\test_admin.py:90:9: F401 'django.db.models' imported but unused
+D:\Class3-Group4\blog\test_article_business_logic.py:6:1: F401 'django.urls.reverse' imported but unused
+D:\Class3-Group4\blog\test_article_business_logic.py:72:9: F841 local variable 'original_pub_time' is assigned to but never used
+D:\Class3-Group4\blog\test_article_business_logic.py:328:20: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\blog\test_article_business_logic.py:546:9: F841 local variable 'original_mod_time' is assigned to but never used
+D:\Class3-Group4\blog\test_context_processors.py:166:9: F841 local variable 'draft_page' is assigned to but never used
+D:\Class3-Group4\blog\test_context_processors.py:192:9: F841 local variable 'result1' is assigned to but never used
+D:\Class3-Group4\blog\test_context_processors.py:289:9: F841 local variable 'result' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:5:1: F401 'unittest.mock.MagicMock' imported but unused
+D:\Class3-Group4\blog\test_middleware.py:102:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:137:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:152:13: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:206:9: F841 local variable 'time_parts' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:223:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:274:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_templatetags.py:9:1: F401 'blog.models.Article' imported but unused
+D:\Class3-Group4\blog\test_templatetags.py:10:1: F403 'from blog.templatetags.blog_tags import *' used; unable to detect undefined names
+D:\Class3-Group4\blog\test_templatetags.py:24:18: F405 'load_articletags' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:39:16: F405 'load_pagination_info' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:52:9: F841 local variable 'info' is assigned to but never used
+D:\Class3-Group4\blog\test_templatetags.py:52:16: F405 'load_pagination_info' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:61:18: F405 'highlight_search_term' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:68:18: F405 'highlight_search_term' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:74:18: F405 'highlight_search_term' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:80:18: F405 'highlight_content' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:86:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:94:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:176:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:186:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:192:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:199:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_views.py:7:1: F401 'blog.models.Article' imported but unused
+D:\Class3-Group4\blog\test_views.py:39:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_views.py:49:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\test_views.py:61:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\test_views.py:122:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\test_views.py:168:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\tests.py:28:9: F841 local variable 'site' is assigned to but never used
+D:\Class3-Group4\blog\tests.py:130:9: F841 local variable 'u' is assigned to but never used
+D:\Class3-Group4\blog\views.py:22:1: F401 'django.shortcuts.get_object_or_404' imported but unused
+D:\Class3-Group4\blog\views.py:23:1: F401 'django.shortcuts.render' imported but unused
+D:\Class3-Group4\blog\views.py:26:1: F401 'django.utils.translation.gettext_lazy as _' imported but unused
+D:\Class3-Group4\blog\views.py:41:1: F401 'djangoblog.plugin_manage.hook_constants.ARTICLE_CONTENT_HOOK_NAME' imported but unused
+D:\Class3-Group4\blog\views.py:46:1: F401 'djangoblog.mixins.ArticleListMixin' imported but unused
+D:\Class3-Group4\blog\views.py:217:121: E501 line too long (126 > 120 characters)
+D:\Class3-Group4\blog\views.py:220:121: E501 line too long (126 > 120 characters)
+D:\Class3-Group4\blog\views.py:236:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:244:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:252:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:257:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:262:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:267:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:321:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:328:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:362:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:369:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:407:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:414:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:561:1: F401 'djangoblog.error_views.page_not_found_view' imported but unused
+D:\Class3-Group4\blog\views.py:561:1: F401 'djangoblog.error_views.server_error_view' imported but unused
+D:\Class3-Group4\blog\views.py:561:1: F401 'djangoblog.error_views.permission_denied_view' imported but unused
+D:\Class3-Group4\blog\views.py:561:1: E402 module level import not at top of file

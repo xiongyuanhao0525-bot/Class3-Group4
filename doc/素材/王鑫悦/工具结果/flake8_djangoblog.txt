@@ -1,0 +1,155 @@
+# flake8 结果 app=djangoblog
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m flake8 --max-line-length=120 --exclude=venv,frontend,migrations,__pycache__,locale,logs,whoosh_index,templates,doc,docs,deploy,plugins,static,node_modules D:\Class3-Group4\djangoblog
+# 问题条数: 148
+
+D:\Class3-Group4\djangoblog\admin_site.py:6:1: F403 'from accounts.admin import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:7:1: F403 'from blog.admin import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:8:1: F403 'from blog.models import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:9:1: F403 'from comments.admin import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:10:1: F403 'from comments.models import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:12:1: F403 'from oauth.admin import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:13:1: F403 'from oauth.models import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:14:1: F403 'from servermanager.admin import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:15:1: F403 'from servermanager.models import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\admin_site.py:41:21: F405 'Article' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:41:30: F405 'ArticlelAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:42:21: F405 'Category' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:42:31: F405 'CategoryAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:43:21: F405 'Tag' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:43:26: F405 'TagAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:44:21: F405 'Links' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:44:28: F405 'LinksAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:45:21: F405 'SideBar' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:45:30: F405 'SideBarAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:46:21: F405 'BlogSettings' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:46:35: F405 'BlogSettingsAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:48:21: F405 'commands' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:48:31: F405 'CommandsAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:49:21: F405 'EmailSendLog' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:49:35: F405 'EmailSendLogAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:51:21: F405 'BlogUser' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:51:31: F405 'BlogUserAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:53:21: F405 'Comment' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:53:30: F405 'CommentAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:55:21: F405 'OAuthUser' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:55:32: F405 'OAuthUserAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:56:21: F405 'OAuthConfig' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\admin_site.py:56:34: F405 'OAuthConfigAdmin' may be undefined, or defined from star imports: accounts.admin, blog.admin, blog.models, comments.admin, comments.models, oauth.admin, oauth.models, servermanager.admin, servermanager.models
+D:\Class3-Group4\djangoblog\apps.py:3:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\apps.py:11:23: W291 trailing whitespace
+D:\Class3-Group4\djangoblog\apps.py:11:24: W292 no newline at end of file
+D:\Class3-Group4\djangoblog\elasticsearch_backend.py:93:22: E127 continuation line over-indented for visual indent
+D:\Class3-Group4\djangoblog\elasticsearch_backend.py:100:37: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\djangoblog\elasticsearch_backend.py:101:37: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\djangoblog\elasticsearch_backend.py:102:37: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\djangoblog\elasticsearch_backend.py:103:37: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\djangoblog\mixins.py:256:16: E127 continuation line over-indented for visual indent
+D:\Class3-Group4\djangoblog\plugin_manage\base_plugin.py:61:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\base_plugin.py:66:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\base_plugin.py:95:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\base_plugin.py:100:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\base_plugin.py:139:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\base_plugin.py:143:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\hook_constants.py:22:1: W391 blank line at end of file
+D:\Class3-Group4\djangoblog\plugin_manage\hooks.py:29:121: E501 line too long (123 > 120 characters)
+D:\Class3-Group4\djangoblog\plugin_manage\hooks.py:43:121: E501 line too long (124 > 120 characters)
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:10:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:42:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:46:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:53:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:60:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:64:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:66:92: W291 trailing whitespace
+D:\Class3-Group4\djangoblog\plugin_manage\loader.py:66:93: W292 no newline at end of file
+D:\Class3-Group4\djangoblog\settings.py:450:1: E303 too many blank lines (3)
+D:\Class3-Group4\djangoblog\settings.py:464:1: W391 blank line at end of file
+D:\Class3-Group4\djangoblog\settings_local.py:11:17: F405 'BASE_DIR' may be undefined, or defined from star imports: .settings
+D:\Class3-Group4\djangoblog\test_base.py:5:1: F401 'django.contrib.auth.models.Permission' imported but unused
+D:\Class3-Group4\djangoblog\test_base.py:73:23: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\djangoblog\test_email_integration.py:77:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:187:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:207:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:216:9: F841 local variable 'sent_to_nonexistent' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:284:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:305:13: F841 local variable 'author_notified' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:323:9: F841 local variable 'replier' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:336:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:357:17: F841 local variable 'commenter_notified' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:376:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:465:9: F841 local variable 'commenter' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:477:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:488:9: F841 local variable 'comment' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:503:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:546:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:573:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:594:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration.py:616:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:12:1: F401 'accounts.utils.get_code' imported but unused
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:144:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:151:9: F841 local variable 'user_count' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:208:17: F841 local variable 'reset_response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:221:17: F841 local variable 'old_password_works' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:254:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:333:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:373:17: F841 local variable 'article_link_match' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:394:17: F841 local variable 'reply_response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:442:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:468:13: F841 local variable 'admin' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:517:9: F841 local variable 'register_response' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:563:9: F841 local variable 'commenter' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_email_integration_complete.py:586:13: F841 local variable 'author_notified' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_plugins.py:5:1: F401 'os' imported but unused
+D:\Class3-Group4\djangoblog\test_plugins.py:6:1: F401 'unittest.mock.Mock' imported but unused
+D:\Class3-Group4\djangoblog\test_plugins.py:11:1: F403 'from djangoblog.plugin_manage.hook_constants import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\test_plugins.py:17:1: F401 'djangoblog.plugin_manage.hook_constants.HEAD_RESOURCES_HOOK' imported but unused
+D:\Class3-Group4\djangoblog\test_plugins.py:17:1: F401 'djangoblog.plugin_manage.hook_constants.BODY_RESOURCES_HOOK' imported but unused
+D:\Class3-Group4\djangoblog\test_plugins.py:32:24: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:33:23: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:34:43: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:41:24: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:42:38: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:52:24: F405 'ARTICLE_CREATE' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:53:26: F405 'ARTICLE_CREATE' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:68:24: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:69:24: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:71:38: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:83:24: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:84:24: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:87:38: F405 'ARTICLE_CONTENT_HOOK_NAME' may be undefined, or defined from star imports: djangoblog.plugin_manage.hook_constants
+D:\Class3-Group4\djangoblog\test_plugins.py:208:9: F841 local variable 'plugin' is assigned to but never used
+D:\Class3-Group4\djangoblog\test_plugins.py:247:9: F841 local variable 'content' is assigned to but never used
+D:\Class3-Group4\djangoblog\tests.py:3:1: F403 'from djangoblog.utils import *' used; unable to detect undefined names
+D:\Class3-Group4\djangoblog\tests.py:11:15: F405 'get_sha256' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\djangoblog\tests.py:13:13: F405 'CommonMarkdown' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\djangoblog\tests.py:31:16: F405 'parse_dict_to_url' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\djangoblog\urls.py:56:1: E305 expected 2 blank lines after class or function definition, found 1
+D:\Class3-Group4\djangoblog\urls.py:73:75: E203 whitespace before ','
+D:\Class3-Group4\djangoblog\utils.py:62:13: E722 do not use bare 'except'
+D:\Class3-Group4\djangoblog\utils.py:302:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\utils.py:311:1: E305 expected 2 blank lines after class or function definition, found 1
+D:\Class3-Group4\djangoblog\utils.py:313:23: W291 trailing whitespace
+D:\Class3-Group4\djangoblog\utils.py:328:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\djangoblog\utils.py:334:14: W291 trailing whitespace
+D:\Class3-Group4\djangoblog\utils.py:335:27: W291 trailing whitespace
+D:\Class3-Group4\djangoblog\utils.py:341:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\utils.py:345:1: W293 blank line contains whitespace
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:27:1: F401 'whoosh.analysis.StemmingAnalyzer' imported but unused
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:31:1: F401 'whoosh.highlight.ContextFragmenter' imported but unused
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:32:1: F401 'whoosh.highlight.highlight as whoosh_highlight' imported but unused
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:16: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:33: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:48: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:64: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:82: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:100: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:107: W605 invalid escape sequence '\.'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:109: W605 invalid escape sequence '\d'
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:51:121: E501 line too long (122 > 120 characters)
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:126:13: F824 `global LOCALS` is unused: name is never assigned in scope
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:187:121: E501 line too long (155 > 120 characters)
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:578:9: F841 local variable 'model_klass' is assigned to but never used
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:731:21: F841 local variable 'ca' is assigned to but never used
+D:\Class3-Group4\djangoblog\whoosh_cn_backend.py:1009:5: E129 visually indented line with same indent as next logical line
+
+[stderr]
+<unknown>:51: SyntaxWarning: invalid escape sequence '\d'
