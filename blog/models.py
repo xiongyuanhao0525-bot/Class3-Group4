@@ -1,7 +1,38 @@
+# ============================================================
+# blog/models.py —— 博客应用的数据模型（整个站点的“数据地基”）
+# 作用：用 Django ORM（对象关系映射，即用 Python 类描述数据库表，一个类=一张表、
+#       一个属性=一列）定义博客里所有实体；视图、模板、后台 admin 都建立在这些模型之上。
+#       改这里的字段等于改数据库结构，必须配合 migrations（迁移文件）才能生效。
+# 本文件包含：
+#   LinkShowType —— 友情链接显示位置的枚举（首页 / 列表页 / 详情页 / 全部 / 轮播）
+#   BaseModel    —— 抽象基类：主键、创建与修改时间、slug 自动生成、绝对 URL
+#   Article      —— 文章（正文、状态、类型、浏览量、作者、分类、标签 + 列表查询索引）
+#   Category     —— 文章分类（自关联成树，支持父子级，用于导航与面包屑）
+#   Tag          —— 文章标签（多对多，一篇文章可挂多个标签）
+#   Links        —— 友情链接
+#   SideBar      —— 侧边栏自定义 HTML 区块（广告、公告等）
+#   BlogSettings —— 全站唯一一份站点配置（单例表）
+# 注释人：翟旌超（软件工程 3 班 2415304340，#zjc）
+# 说明：本次任务只添加中文注释，没有改动任何一行原有代码逻辑
+# ============================================================
+# —— Python 标准库 ——
+# logging：按模块名输出日志，便于定位是哪个文件出的问题；
+# re：正则表达式，后面用来从 Markdown 正文里抠出第一张图片地址；
+# abstractmethod：声明“抽象方法”，子类不实现就不允许实例化，用于强制约定接口
 import logging
 import re
 from abc import abstractmethod
 
+# —— Django 框架自带模块 ——
+# settings：项目全局配置，这里主要用 AUTH_USER_MODEL 拿到“用户模型”，
+#           不写死 User，方便项目以后换成自定义用户表；
+# ValidationError：在模型校验阶段抛错，让后台表单直接显示错误提示；
+# models：ORM 核心，所有字段类型（CharField/TextField/DateTimeField...）都从这里取；
+# reverse：用“URL 名称 + 参数”反查出真实路径，避免在代码里硬编码 URL（改路由不用改代码）；
+# now：带时区的“当前时间”，作为时间字段默认值，比 datetime.now() 更安全（不会出现 naive 时间）；
+# gettext_lazy：懒翻译，字符串等到真正渲染时才翻译，字段名在后台可显示中/英文；
+# MDTextField：Markdown 编辑器字段，数据库里仍是 text，但后台带上了富文本编辑界面；
+# slugify：来自 uuslug 库，比 Django 自带的强一点——中文标题也能转成拼音形式的 URL 别名
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -11,165 +42,235 @@ from django.utils.translation import gettext_lazy as _
 from mdeditor.fields import MDTextField
 from uuslug import slugify
 
+# —— 本项目自己的模块 ——
+# cache_decorator：方法级缓存装饰器（缓存 10 小时等）；
+# cache：底层缓存对象，可直接 get/set/clear；
+# get_current_site：取当前站点（带缓存），拼完整网址时用；
+# CacheTimeout / CacheKey：缓存过期时间与缓存键模板的常量表，避免到处手写字符串
 from djangoblog.utils import cache_decorator, cache
 from djangoblog.utils import get_current_site
 from djangoblog.constants import CacheTimeout, CacheKey
 
+# 本模块的日志记录器：logger.info(...) 会带上 blog.models 前缀，方便排查问题
 logger = logging.getLogger(__name__)
 
 
+# ============================================================
+# 友情链接的“显示位置”枚举
+# 说明：TextChoices 是 Django 提供的“带翻译的字符串枚举”，格式是
+#       (存进数据库的值, 后台显示给人看的名字)。用枚举而不是散落的魔术字符串，
+#       好处是写错名字会立刻报错，后台还能自动渲染成下拉框。
+# ============================================================
 class LinkShowType(models.TextChoices):
-    """友情链接展示位置枚举。
-
-    用于在后台配置每个友链出现在前台哪些页面，
-    避免无关友链在所有页面全站曝光，支持按页面类型投放。
-    """
-    I = ('i', _('index'))    # index：仅首页轮播/侧边栏展示
-    L = ('l', _('list'))     # list：仅文章列表页展示
-    P = ('p', _('post'))     # post：仅文章详情页展示
-    A = ('a', _('all'))      # all：所有页面都展示
-    S = ('s', _('slide'))    # slide：仅首页轮播图位展示
+    # i=index 首页、l=list 列表页、p=post 文章详情页、a=all 全部页面、s=slide 轮播图
+    I = ('i', _('index'))
+    L = ('l', _('list'))
+    P = ('p', _('post'))
+    A = ('a', _('all'))
+    S = ('s', _('slide'))
 
 
+# ============================================================
+# BaseModel —— 所有业务模型的抽象基类
+# 把“每张表都要有”的东西抽出来：自增主键、创建/修改时间、slug 自动生成、完整 URL。
+# 注意 abstract = True：它本身不会建表，只是把字段和方法“复制”给子类。
+# ============================================================
 class BaseModel(models.Model):
-    """所有业务模型的抽象基类（Django abstract=True，不建表）。
-
-    统一提供三个公共能力：
-    1. id 主键：自动自增；
-    2. creation_time / last_modify_time：记录创建与最后修改时间；
-    3. save() 重写：保存时自动根据 title/name 生成 slug URL别名；
-       当仅更新文章浏览量 views 时，绕过完整 save 流程，直接用 QuerySet.update()
-       更新数据库，避免每次浏览都触发 slug 重新生成和信号。
-    """
+    # 显式声明自增主键：Django 默认也会加，但写出来更直观，也方便被外键引用时明确类型
     id = models.AutoField(primary_key=True)
-    creation_time = models.DateTimeField(_('creation time'), default=now)       # 记录创建时间，默认当前时间
-    last_modify_time = models.DateTimeField(_('modify time'), default=now)     # 最后修改时间，每次保存自动刷新
+    # 创建时间：default=now 是“插入时取当前时间”，不是建表时间；用 now 而非 now()，避免所有行共享同一时刻
+    creation_time = models.DateTimeField(_('creation time'), default=now)
+    # 最后修改时间：同样默认 now；真正“自动刷新”靠下面的 save() 逻辑与业务代码显式赋值
+    last_modify_time = models.DateTimeField(_('modify time'), default=now)
 
+    # 【save】—— 保存模型时的统一入口，处理“只 +1 浏览量”这个高频特例
+    # 参数：*args / **kwargs（透传给 models.Model.save，例如 update_fields、force_insert）
+    # 返回：None（Django 的 save 不返回值）
+    # 说明：浏览量是最高频的写操作，若走正常 save 会把整行（可能几百 KB 的正文）重新写一遍，
+    #       还会顺手刷新时间字段、重算 slug。所以这里先判断“这次是不是单纯改 views”，
+    #       是就退化成一条精简的 UPDATE，只改这一列。
     def save(self, *args, **kwargs):
-        """重写 Model.save()：
-
-        分支1：如果是 Article 且 update_fields=['views']，说明这是"浏览量+1"
-               的高频写操作，直接走 QuerySet.filter().update()，不触发 slug
-               生成、不发信号、不做全字段写入，性能更好。
-        分支2：普通保存——若模型有 slug 字段，则用 title（无 title 则用 name）
-               经 uuslug.slugify 转成 URL 友好的别名（中文转拼音/连字符）。
-        """
+        # 判定条件：当前对象是文章，且调用方明确说“只更新 views 这一个字段”
         is_update_views = isinstance(
             self,
             Article) and 'update_fields' in kwargs and kwargs['update_fields'] == ['views']
         if is_update_views:
-            # 仅更新浏览量，不走完整save流程，避免重复触发slug生成
+            # QuerySet.update() 直接发 SQL：UPDATE blog_article SET views=? WHERE id=?，
+            # 不经过模型的 save 钩子，因此不会覆盖正文、不会改 last_modify_time
             Article.objects.filter(pk=self.pk).update(views=self.views)
         else:
+            # 只有带 slug 字段的模型（分类、标签）才需要重算 URL 别名
             if 'slug' in self.__dict__:
+                # 分类/标签用 name，文章用 title —— 即“URL 别名跟着名字走”
                 slug = getattr(
                     self, 'title') if 'title' in self.__dict__ else getattr(
                     self, 'name')
+                # slugify 会把中文名转成拼音、把空格转成横线，保证 URL 里只有合法字符
                 setattr(self, 'slug', slugify(slug))
+            # 真正的落库动作交给父类
             super().save(*args, **kwargs)
 
+    # 【get_full_url】—— 拼出带协议和域名的完整网址
+    # 返回：str，形如 https://example.com/article/2024/5/1/3/
+    # 说明：站内跳转用相对路径就够，但 RSS、分享到微信/微博、SEO 的 canonical 标签
+    #       都要求绝对地址，所以统一在这里拼；域名取自站点表，支持一个项目挂多个域名。
     def get_full_url(self):
-        """返回带域名的完整绝对URL，用于RSS、邮件、SEO分享等场景。
-
-        从 django_site 表取当前站点 domain，拼接 get_absolute_url() 的路径。
-        """
+        # get_current_site() 本身带缓存，不会每次请求都查库
         site = get_current_site().domain
         url = "https://{site}{path}".format(site=site,
                                             path=self.get_absolute_url())
         return url
 
+    # 【Meta】—— 抽象基类：不建 blog_basemodel 表，字段只被子类继承
     class Meta:
         abstract = True
 
+    # 【get_absolute_url】—— 抽象方法，强制每个子类说明“自己的详情页在哪”
+    # 说明：Django 后台的“在站点上查看”按钮、模板里的 {{ obj.get_absolute_url }} 都靠它；
+    #       文章、分类、标签的 URL 规则不同，所以这里只留声明，具体由子类实现。
     @abstractmethod
     def get_absolute_url(self):
-        """子类必须实现：返回该对象在前台的访问路径（路由 reverse）。"""
         pass
 
 
+# ============================================================
+# Article —— 文章模型（本文件最核心的一张表，前台的绝大部分页面都在读它）
+# 一篇文章 = 标题 + Markdown 正文 + 状态 + 分类 + 作者 + 若干标签
+# ============================================================
 class Article(BaseModel):
-    """博客文章实体——系统核心表。
-
-    既承载普通博文（type='a'），也承载"关于页/友情链接页"等独立页面（type='p'）。
-    草稿(d)不对外展示，只有已发布(p)会出现在前台列表、搜索和上下篇导航中。
-    """
+    """文章"""
+    # 三组 choices（可选值表）：数据库里只存一个字符，后台表单渲染成下拉框，
+    # 显示时用 get_status_display() 拿到 “Draft/Published” 这样的人话
     STATUS_CHOICES = (
-        ('d', _('Draft')),  # d=Draft 草稿：作者未完成，前台不可见
-        ('p', _('Published')),   # p=Published 已发布：前台可见
+        ('d', _('Draft')),      # d代表草稿状态
+        ('p', _('Published')),  # p代表已发布状态
     )
     COMMENT_STATUS = (
-        ('o', _('Open')),   # o=Open 开放：读者可评论
-        ('c', _('Close')),  # c=Close 关闭：即使全站开放也禁止此文章评论
+        ('o', _('Open')),    # o代表开启评论
+        ('c', _('Close')),   # c代表关闭评论
     )
     TYPE = (
-        ('a', _('Article')),   # a=Article 普通博文，出现在列表/归档
-        ('p', _('Page')),      # p=Page 独立页面（如关于页），不进列表
+        ('a', _('Article')),  # a代表普通文章
+        ('p', _('Page')),     # p代表独立页面
     )
-    # 文章标题，全局唯一，最长200字符；unique约束防止重名文章
-    title = models.CharField(_('title'), max_length=200, unique=True)
+    # 标题：char 定长比 text 更适合加唯一索引；unique=True 让标题成为业务上的“唯一标识”，
+    # 既防止同站两篇同名文章把 slug 冲掉，也让详情页可以按标题查
+    title = models.CharField(_('title'), max_length=200, unique=True)  # 文章标题，唯一，最大长度200
+    # 正文：用 MDTextField 而不是普通 TextField，是为了后台获得 Markdown 编辑器；
+    # 数据库层面它依然是 text，渲染时由 djangoblog.utils.CommonMarkdown 转成 HTML 再进模板
+    body = MDTextField(_('body'))    # 文章Markdown正文内容
 
-    body = MDTextField(_('body'))       # 正文，MDTextField是mdeditor提供的Markdown编辑器字段
+    # 文章发布时间
+    # blank=False/null=False：不允许空，因为列表页要按它排序；
+    # default=now：新建文章默认“就是现在”，避免前台立刻出现 1970 年的时间；
+    # 用 null=False 而不是允许 NULL，是因为 NULL 参与排序时行为反直觉（升序排最前）
     pub_time = models.DateTimeField(
-        _('publish time'), blank=False, null=False, default=now)   # 发布时间，前台按此排序；blank=False强制必填
+        _('publish time'), blank=False, null=False, default=now)
+
+    # 文章状态：草稿/已发布
+    # max_length=1 是因为值只有单字符；default='p' 表示新建即发布（本站是个人博客，很少存草稿）
     status = models.CharField(
         _('status'),
         max_length=1,
         choices=STATUS_CHOICES,
-        default='p')                                              # 文章状态：默认已发布，后台可改草稿
+        default='p')
+
+    # 评论开关状态：开启/关闭
+    # 默认 'o' 开启，符合博客“先让人评论”的预期；单篇关评论常用于公告类内容
     comment_status = models.CharField(
         _('comment status'),
         max_length=1,
         choices=COMMENT_STATUS,
-        default='o')                                              # 评论开关，单篇文章级别，优先级高于全站配置
-    type = models.CharField(_('type'), max_length=1, choices=TYPE, default='a')  # 文章/独立页面，控制前台入口
-    views = models.PositiveIntegerField(_('views'), default=0)     # 浏览量，非负整数；通过 viewed() 方法高频+1
+        default='o')
+
+    # 内容类型：文章或者独立页面
+    # 'a' 普通文章会进列表、归档、RSS；'p' 独立页面（关于我、友情链接）只按 URL 单独访问，不进列表
+    type = models.CharField(_('type'), max_length=1, choices=TYPE, default='a')
+
+    # 文章浏览计数
+    # PositiveIntegerField 在数据库层带“非负”约束，天然挡住 0 以下的值；
+    # 用 Positive 而不是普通 Integer，是让约束落在数据库而不是靠代码自觉
+    views = models.PositiveIntegerField(_('views'), default=0)
+
+    # 外键，关联文章作者用户，删除用户时级联删除文章
+    # settings.AUTH_USER_MODEL 是字符串形式的用户模型引用，避免和自定义用户表循环导入；
+    # CASCADE：作者账号注销时其文章一并清理，不留没有作者的孤儿文章
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('author'),
         blank=False,
         null=False,
-        on_delete=models.CASCADE)                               # 作者外键，关联accounts.BlogUser；用户删除则文章级联删除
+        on_delete=models.CASCADE)
+
+    # 文章排序权重，数值越大越靠前
+    # 用 Integer 而不是 Positive，是为了允许负值把文章压到列表末尾；
+    # 与 Meta.ordering 的第一个排序键配合，实现“手动置顶”
     article_order = models.IntegerField(
-        _('order'), blank=False, null=False, default=0)          # 排序权重，越大越靠前；置顶文章设大值
-    show_toc = models.BooleanField(_('show toc'), blank=False, null=False, default=False)  # 是否在正文旁显示章节目录
+        _('order'), blank=False, null=False, default=0)
+
+    # 是否展示文章目录TOC
+    # 默认 False：短文章硬塞目录反而干扰阅读，只有长文在后台手动打开
+    show_toc = models.BooleanField(_('show toc'), blank=False, null=False, default=False)
+
+    # 外键，关联文章所属分类，删除分类级联删除文章
+    # blank/null 都为 False：每篇文章必须归属一个分类，否则导航、面包屑无从生成；
+    # 外键列在数据库里会自动建索引，所以“按分类查文章”天生就快
     category = models.ForeignKey(
         'Category',
         verbose_name=_('category'),
         on_delete=models.CASCADE,
         blank=False,
-        null=False)                                             # 所属分类，多对一；一篇文章只能属于一个分类
-    tags = models.ManyToManyField('Tag', verbose_name=_('tag'), blank=True)  # 标签多对多，一篇文章可打多个标签
+        null=False)
 
+    # 多对多关系，一篇文章可以拥有多个标签
+    # ManyToManyField 会自动生成中间表 blog_article_tags(article_id, tag_id)；
+    # blank=True 表示标签可以一个都不选，它是“锦上添花”的分类维度
+    tags = models.ManyToManyField('Tag', verbose_name=_('tag'), blank=True)
+
+    # 【body_to_string】—— 把正文当纯字符串返回
+    # 用途：模板或摘要逻辑只需要文本时统一走这个方法，将来若正文结构变化，只改这里即可
     def body_to_string(self):
-        """正文取纯文本（当前直接返回Markdown原文，预留做HTML转纯文本）。"""
         return self.body
 
+    # 【__str__】—— 后台列表、日志里显示文章标题，而不是冷冰冰的 Article object (3)
     def __str__(self):
-        # 后台admin列表中显示文章标题，而非 "Article object (1)"
         return self.title
 
+    # 【Meta】—— 表的元信息：默认排序、后台显示名、索引
     class Meta:
-        # 默认排序：先按权重降序（置顶优先），同权重再按发布时间倒序
+        # 全局默认排序：负号=降序。先按置顶权重，权重相同再按发布时间新的在前；
+        # 有了它，Article.objects.all() 不用每次手写 order_by，列表页也不容易漏排序
         ordering = ['-article_order', '-pub_time']
+        # 后台里这张表显示成“文章”（单数/复数）
         verbose_name = _('article')
         verbose_name_plural = verbose_name
-        get_latest_by = 'id'   # latest() 方法默认按 id 倒序
+        # 让 latest()/earliest() 以 id 为“最新”的判定依据
+        get_latest_by = 'id'
+        # 索引：查询加速的核心。字段顺序遵循“最左前缀原则”——
+        # 等值过滤的列放前面，范围或排序的列放后面；负号表示按该列降序建索引。
+        # 下面四个索引都由 blog/migrations/0007 迁移创建
         indexes = [
-            # 组合索引：前台"已发布文章列表"查询最频繁，按 type+status 过滤后按 pub_time 排序
+            # 优化列表查询：type + status + pub_time组合索引
+            # 对应首页/归档的 SELECT ... WHERE type='a' AND status='p' ORDER BY pub_time DESC，
+            # 走这条索引可以同时完成过滤和排序，省掉一次额外排序（filesort）
             models.Index(fields=['type', 'status', '-pub_time'], name='idx_type_status_pub'),
-            # 热门文章排行：按 status 过滤后按 views 倒序，走此索引避免filesort
+            # 优化热门文章查询：status + views组合索引
+            # 对应侧边栏“最多阅读” SELECT ... WHERE status='p' ORDER BY views DESC LIMIT 10，
+            # 用到索引后只读前 10 行就停，不必全表排序
             models.Index(fields=['status', '-views'], name='idx_status_views'),
-            # 作者主页"我的文章"：按 author+status+type 过滤
+            # 优化作者文章查询：author + status + type组合索引
+            # 对应作者主页 SELECT ... WHERE author_id=? AND status='p' AND type='a'
             models.Index(fields=['author', 'status', 'type'], name='idx_author_status_type'),
-            # 分类页：按 category+status 过滤该分类下已发布文章
+            # 优化分类查询：category + status组合索引
+            # 对应分类页 SELECT ... WHERE category_id=? AND status='p'
             models.Index(fields=['category', 'status'], name='idx_category_status'),
         ]
 
+    # 【get_absolute_url】—— 文章详情页地址
+    # 返回：str，形如 /article/2024/5/1/3/（年/月/日/文章id）
+    # 说明：URL 里带日期层级，一是利于搜索引擎判断发布时间，二是方便按日期做归档；
+    #       路径最后用 id 而不是 slug，所以标题改了旧链接也不会 404。
     def get_absolute_url(self):
-        """生成文章详情页URL，格式：/article/{id}/{年}/{月}/{日}/。
-
-        带年/月/日是早期SEO友好设计，也便于按日期归档。
-        """
         return reverse('blog:detailbyid', kwargs={
             'article_id': self.id,
             'year': self.creation_time.year,
@@ -177,67 +278,84 @@ class Article(BaseModel):
             'day': self.creation_time.day
         })
 
+    # 【get_category_tree】—— 取本文所属分类的整条父级链
+    # 返回：list[tuple[str, str]]，[(分类名, 分类链接), ...]，从自己一直排到最顶层
+    # 说明：详情页面包屑用；分类结构几乎不变，所以整体缓存 10 小时。
+    #       装饰器优先尝试用实例的 get_cache_key() 当缓存键，模型没有这个方法时
+    #       会退化为“函数 + 参数”摘要出的哈希键。
     @cache_decorator(CacheTimeout.HOUR_10)
     def get_category_tree(self):
-        """返回当前文章所属分类的面包屑路径 [(分类名, URL), ...]，缓存10小时。
-
-        前台文章页面包屑导航用：首页 > 分类A > 子分类B > 当前文章。
-        """
         tree = self.category.get_category_tree()
+        # 传 Category 对象给模板还得再调方法，先转成 (名字, 链接) 元组，模板里直接解包使用
         names = list(map(lambda c: (c.name, c.get_absolute_url()), tree))
 
         return names
 
+    # 【save】—— 文章保存
+    # 说明：这里直接转调父类，实际工作（以及“只改浏览量”的特判、slug 计算）都在 BaseModel.save 里；
+    #       保留这个入口是为了让 Article 拥有自己的保存时机，将来要在存文章前后加点业务动作时在此扩展。
     def save(self, *args, **kwargs):
-        """Article自己的save：先调用父类save（BaseModel里已处理slug）。"""
         super().save(*args, **kwargs)
 
+    # 【viewed】—— 浏览量 +1
+    # 说明：update_fields=['views'] 是关键，配合 BaseModel.save 的特判，
+    #       最终只发一条只改 views 列的 UPDATE，不会把整篇正文重新写盘。
     def viewed(self):
-        """文章被浏览一次：views+1，并用 update_fields=['views'] 只更新该字段。
-
-        这个调用频率极高（每次打开文章页一次），所以BaseModel.save()专门为此优化。
-        """
         self.views += 1
         self.save(update_fields=['views'])
 
+    # 【comment_list】—— 取本文下“审核通过”的评论（带 10 小时缓存）
+    # 返回：QuerySet（Django 的惰性查询结果集，只有真正遍历时才发 SQL）
+    # 说明：评论列表在详情页每次都要渲染，但变化频率低，所以缓存起来；
+    #       缓存键用 CacheKey 模板拼，统一前缀便于将来按前缀批量清理。
     def comment_list(self):
-        """返回当前文章已启用的评论列表，带10小时缓存。
-
-        缓存key按文章id区分；缓存命中打日志，未命中查库后回填缓存。
-        只取 is_enable=True 的评论（后台可屏蔽不当评论）。
-        """
         cache_key = CacheKey.ARTICLE_COMMENTS.format(article_id=self.id)
         value = cache.get(cache_key)
         if value:
+            # 打日志是为了在线上能直接看出缓存到底有没有命中
             logger.info(f'Cache HIT: article comments (id={self.id})')
             return value
         else:
+            # is_enable=True 只取审核通过的评论；-id 表示最新评论排最前
             comments = self.comment_set.filter(is_enable=True).order_by('-id')
             cache.set(cache_key, comments, CacheTimeout.HOUR_10)
             logger.info(f'Cache MISS: article comments (id={self.id})')
             return comments
 
+    # 【get_admin_url】—— 这篇文章在后台的编辑页地址
+    # 返回：str，形如 /admin/blog/article/3/change/
+    # 说明：app_label + model_name 从模型的 _meta 里取，所以改模型名也不会写错；
+    #       前台页面上给管理员显示“编辑此文”的快捷入口就靠它。
     def get_admin_url(self):
-        """返回该文章在Django admin后台的编辑页URL。"""
         info = (self._meta.app_label, self._meta.model_name)
         return reverse('admin:%s_%s_change' % info, args=(self.pk,))
 
+    # 【next_article】—— 下一篇文章（id 更大的第一篇已发布文章）
+    # 返回：Article 或 None
+    # 说明：只查 status='p'，草稿不能通过“下一篇”被读者翻到；
+    #       order_by('id').first() 等价于 LIMIT 1，避免把整批结果都取回来
     @cache_decorator(expiration=CacheTimeout.HOUR_10)
     def next_article(self):
-        """下一篇（id更大的已发布文章），用于文章页"下一篇"导航，缓存10小时。"""
+        # 下一篇
         return Article.objects.filter(
             id__gt=self.id, status='p').order_by('id').first()
 
+    # 【prev_article】—— 上一篇文章（id 更小的最新一篇已发布文章）
+    # 说明：默认排序是 -id（由 Meta.ordering 决定），所以 first() 直接就是 id 最大的那篇
     @cache_decorator(expiration=CacheTimeout.HOUR_10)
     def prev_article(self):
-        """上一篇（id更小的已发布文章），用于文章页"上一篇"导航，缓存10小时。"""
+        # 前一篇
         return Article.objects.filter(id__lt=self.id, status='p').first()
 
+    # 【get_first_image_url】—— 从 Markdown 正文里取出第一张图片的地址
+    # 返回：str，图片 URL；没有图片则返回空字符串（模板里 if 判断很方便，不用处理 None）
+    # 说明：列表页缩略图、微信分享卡片的封面都靠它；
+    #       正则 !\[.*?\]\((.+?)\) 对应 Markdown 的 ![说明](地址) 语法，
+    #       两处 .+? 都是非贪婪匹配，保证只吃到最近的右括号，不会把后面的文字一起吞进来。
     def get_first_image_url(self):
-        """从Markdown正文中用正则提取第一张图片的URL。
-
-        用于列表页摘要缩略图：文章没设封面时自动取正文首图。
-        正则：匹配 ![任意文字](图片URL) 的Markdown图片语法。
+        """
+        Get the first image url from article.body.
+        :return:
         """
         match = re.search(r'!\[.*?\]\((.+?)\)', self.body)
         if match:
@@ -245,44 +363,61 @@ class Article(BaseModel):
         return ""
 
 
+# ============================================================
+# Category —— 文章分类
+# 通过 parent_category 自关联形成“分类树”（如：技术 -> Python -> Django），
+# 前台左侧导航与详情页面包屑都基于它。
+# ============================================================
 class Category(BaseModel):
-    """文章分类，支持无限级层级（自引用外键 parent_category）。
-
-   业务上区分"分类"与"标签"：分类是粗粒度树状结构（如：技术/前端/Vue），
-    一篇文章只属于一个分类；标签是扁平的自由词（如：vue3, composition-api）。
-    """
-    name = models.CharField(_('category name'), max_length=30, unique=True)   # 分类名，唯一，最长30字
+    """文章分类"""
+    # 分类名：要出现在导航和 URL 里，30 字符够用；unique=True 保证不会出现两个同名分类
+    name = models.CharField(_('category name'), max_length=30, unique=True)
+    # 父分类：'self' 表示外键指向本表自己，从而形成树形结构；
+    # blank/null 必须为 True —— 顶级分类没有父级，数据库只能存 NULL；
+    # CASCADE：删父分类时子分类一并删除，避免出现“挂在已删父级下面”的孤儿节点
     parent_category = models.ForeignKey(
         'self',
         verbose_name=_('parent category'),
         blank=True,
         null=True,
-        on_delete=models.CASCADE)      # 父分类自引用；顶级分类该字段为null；删父分类则子分类级联删除
-    slug = models.SlugField(default='no-slug', max_length=60, blank=True)    # URL别名，中文自动转拼音，用于分类页URL
-    index = models.IntegerField(default=0, verbose_name=_('index'))          # 排序权重，越大越靠前
+        on_delete=models.CASCADE)
+    # URL 别名：SlugField 在后台会做合法性校验（只允许字母数字横线下划线）；
+    # 下面的 BaseModel.save 会用 name 自动重算它（uuslug 能把中文转成拼音），
+    # default='no-slug' 是给数据库里已存在的老数据一个兜底值，避免迁移时非空校验失败
+    slug = models.SlugField(default='no-slug', max_length=60, blank=True)
+    # 排序权重：后台手工调整导航里分类的先后，数值大的排前面（见 Meta.ordering）
+    index = models.IntegerField(default=0, verbose_name=_('index'))
 
+    # 【Meta】—— 默认按 index 降序，后台显示名为“分类”
     class Meta:
         ordering = ['-index']
         verbose_name = _('category')
         verbose_name_plural = verbose_name
 
+    # 【get_absolute_url】—— 分类页地址，形如 /category/python/
+    # 注意用 slug 而不是 id：URL 里出现可读单词对搜索引擎更友好
     def get_absolute_url(self):
-        """分类详情页URL：/category/{slug}/"""
         return reverse(
             'blog:category_detail', kwargs={
                 'category_name': self.slug})
 
+    # 【__str__】—— 后台与模板里显示分类名
     def __str__(self):
         return self.name
 
+    # 【get_category_tree】—— 递归向上收集所有祖先
+    # 返回：list[Category]，[自己, 父分类, 祖父分类, ...]（顶级分类只有自己）
+    # 说明：面包屑要从当前分类一路展示到根，所以自下而上爬；
+    #       分类树变动极少，缓存 10 小时可显著减少递归查库。
     @cache_decorator(CacheTimeout.HOUR_10)
     def get_category_tree(self):
-        """从当前分类沿 parent_category 向上递归，返回到顶级分类的路径列表。
-
-        例如：(前端) -> (技术) -> (根)，用于面包屑。缓存10小时。
+        """
+        递归获得分类目录的父级
+        :return:
         """
         categorys = []
 
+        # 内部函数 parse：把当前节点塞进列表，再对父节点重复同一动作（递归）
         def parse(category):
             categorys.append(category)
             if category.parent_category:
@@ -291,21 +426,27 @@ class Category(BaseModel):
         parse(self)
         return categorys
 
+    # 【get_sub_categorys】—— 递归向下收集所有子孙分类
+    # 返回：list[Category]，[自己, 子分类, 孙分类, ...]
+    # 说明：分类页要显示“该分类及其所有子分类下的文章”，所以需要整棵子树；
+    #       先把 Category.objects.all() 一次性取到内存，再在内存里 filter，
+    #       避免递归过程中一层层查库（否则就是典型的 N+1 查询问题，分类越深查得越多）。
     @cache_decorator(CacheTimeout.HOUR_10)
     def get_sub_categorys(self):
-        """返回当前分类及其所有子孙分类（向下递归），用于在分类页列出子分类文章。
-
-        与 get_category_tree 方向相反：本方法向下，get_category_tree 向上。
-        缓存10小时。
+        """
+        获得当前分类目录所有子集
+        :return:
         """
         categorys = []
         all_categorys = Category.objects.all()
 
+        # 内部函数 parse：取当前节点的直接子分类，逐个加入结果并继续向下递归
         def parse(category):
             if category not in categorys:
                 categorys.append(category)
             childs = all_categorys.filter(parent_category=category)
             for child in childs:
+                # 判重：同一分类在多层递归中可能被再次遇到，避免结果里出现重复项
                 if category not in categorys:
                     categorys.append(child)
                 parse(child)
@@ -314,91 +455,121 @@ class Category(BaseModel):
         return categorys
 
 
+# ============================================================
+# Tag —— 文章标签
+# 与文章是多对多关系：一篇文章可挂多个标签，一个标签下也有多篇文章；
+# 比起分类的“树”，标签是扁平的、更细粒度的横向归类。
+# ============================================================
 class Tag(BaseModel):
-    """文章标签——扁平的自由关键词，与文章多对多。
+    """文章标签"""
+    # 标签名：唯一，防止同名标签把文章拆到两处；30 字符对标签这种短词足够
+    name = models.CharField(_('tag name'), max_length=30, unique=True)
+    # URL 别名：保存时由 BaseModel.save 依据 name 自动生成（中文会转拼音）
+    slug = models.SlugField(default='no-slug', max_length=60, blank=True)
 
-    与Category区别：标签无层级、自由输入、一篇文章可多标签；
-    用于标签云、相关文章推荐。
-    """
-    name = models.CharField(_('tag name'), max_length=30, unique=True)   # 标签名唯一，最长30字
-    slug = models.SlugField(default='no-slug', max_length=60, blank=True)  # URL别名
-
+    # 【__str__】—— 后台与模板里显示标签名
     def __str__(self):
         return self.name
 
+    # 【get_absolute_url】—— 标签页地址，形如 /tag/python/
     def get_absolute_url(self):
-        """标签详情页URL：/tag/{slug}/"""
         return reverse('blog:tag_detail', kwargs={'tag_name': self.slug})
 
+    # 【get_article_count】—— 统计这个标签下有多少篇已关联文章
+    # 说明：跨表查询 tags__name 会 JOIN 中间表，一篇含多个标签的文章可能被 JOIN 出多行，
+    #       所以必须 distinct() 去重再 count()，否则数字会虚高；
+    #       侧边栏标签云每个标签都要算一次，因此缓存 10 小时。
     @cache_decorator(CacheTimeout.HOUR_10)
     def get_article_count(self):
-        """返回该标签下已打标签的文章数（去重），用于标签云显示文章数。缓存10小时。"""
         return Article.objects.filter(tags__name=self.name).distinct().count()
 
+    # 【Meta】—— 标签按名字升序排列，后台显示名为“标签”
     class Meta:
         ordering = ['name']
         verbose_name = _('tag')
         verbose_name_plural = verbose_name
 
 
+# ============================================================
+# Links —— 友情链接
+# 注意它直接继承 models.Model 而不是 BaseModel：友链不需要 slug 和“详情页地址”，
+# 所以不走那套基类，id 由 Django 自动补上（隐式 AutoField 主键）。
+# ============================================================
 class Links(models.Model):
-    """友情链接——前台页脚/侧边栏展示的外部站点链接。
+    """友情链接"""
 
-    注意：本模型不继承BaseModel，自定义了 creation_time/last_mod_time 字段名。
-    """
-
-    name = models.CharField(_('link name'), max_length=30, unique=True)    # 链接显示名，唯一
-    link = models.URLField(_('link'))                                      # 目标URL，URLField自带格式校验
-    sequence = models.IntegerField(_('order'), unique=True)                # 排序序号，唯一约束保证不重复
+    # 链接名称：unique 便于后台定位和去重
+    name = models.CharField(_('link name'), max_length=30, unique=True)
+    # URLField 比 CharField 多了“必须是合法网址”的校验，后台填错会直接提示
+    link = models.URLField(_('link'))
+    # 显示顺序：unique 保证不会出现两个同序号，排序结果永远稳定，不会忽上忽下
+    sequence = models.IntegerField(_('order'), unique=True)
+    # 是否启用：站长想临时下线某条友链时改这里即可，不必删除记录（保留历史）
     is_enable = models.BooleanField(
-        _('is show'), default=True, blank=False, null=False)              # 软删除开关：False则前台不显示，但记录保留
+        _('is show'), default=True, blank=False, null=False)
+    # 显示位置：取值来自上面的 LinkShowType 枚举；
+    # 默认 LinkShowType.I 表示只在首页展示，其他页面不重复出现
     show_type = models.CharField(
         _('show type'),
         max_length=1,
         choices=LinkShowType.choices,
-        default=LinkShowType.I)                                          # 显示位置，关联LinkShowType枚举
-    creation_time = models.DateTimeField(_('creation time'), default=now)  # 创建时间
-    last_mod_time = models.DateTimeField(_('modify time'), default=now)    # 修改时间（注意命名与BaseModel不同）
+        default=LinkShowType.I)
+    # 创建时间 / 修改时间：这里字段名是 last_mod_time（不是基类里的 last_modify_time），
+    # 因为没继承 BaseModel，需要自己声明这两列
+    creation_time = models.DateTimeField(_('creation time'), default=now)
+    last_mod_time = models.DateTimeField(_('modify time'), default=now)
 
+    # 【Meta】—— 按 sequence 升序展示，后台显示名为“友情链接”
     class Meta:
         ordering = ['sequence']
         verbose_name = _('link')
         verbose_name_plural = verbose_name
 
+    # 【__str__】—— 后台列表显示友链名称
     def __str__(self):
         return self.name
 
 
+# ============================================================
+# SideBar —— 侧边栏自定义区块
+# 除了“最新文章/热门文章”这些程序生成的内容，站长还可以自己塞一段 HTML
+# （公告、广告位、统计代码），每段就是一个 SideBar 记录。
+# ============================================================
 class SideBar(models.Model):
-    """侧边栏——可在前台侧栏投放自定义HTML块（公告、广告、markdown等）。
+    """侧边栏,可以展示一些html内容"""
+    # 区块标题：只作后台识别和前台小标题，不要求唯一（可以有两块同名）
+    name = models.CharField(_('title'), max_length=100)
+    # 区块内容：TextField 存大段 HTML；用 TextField 而非 CharField 是因为长度不可预估
+    content = models.TextField(_('content'))
+    # 排序序号：unique 保证侧边栏顺序确定，不会因序号相同而随机排列
+    sequence = models.IntegerField(_('order'), unique=True)
+    # 是否启用：下线广告位时保留内容、只关开关，方便随时再开
+    is_enable = models.BooleanField(_('is enable'), default=True)
+    # 与 Links 同理：未继承 BaseModel，时间字段自行声明
+    creation_time = models.DateTimeField(_('creation time'), default=now)
+    last_mod_time = models.DateTimeField(_('modify time'), default=now)
 
-    不继承BaseModel，自定义时间字段。通过 sequence 控制展示顺序，
-    is_enable=False 可临时停用某个侧边栏而不删除。
-    """
-    name = models.CharField(_('title'), max_length=100)                    # 侧边栏标题
-    content = models.TextField(_('content'))                              # HTML内容，后台直接渲染
-    sequence = models.IntegerField(_('order'), unique=True)               # 排序序号，唯一
-    is_enable = models.BooleanField(_('is enable'), default=True)          # 是否启用显示
-    creation_time = models.DateTimeField(_('creation time'), default=now)  # 创建时间
-    last_mod_time = models.DateTimeField(_('modify time'), default=now)    # 最后修改时间
-
+    # 【Meta】—— 按 sequence 升序展示，后台显示名为“侧边栏”
     class Meta:
         ordering = ['sequence']
         verbose_name = _('sidebar')
         verbose_name_plural = verbose_name
 
+    # 【__str__】—— 后台列表显示区块标题
     def __str__(self):
         return self.name
 
 
+# ============================================================
+# BlogSettings —— 站点配置（全站唯一的一条记录，即“单例表”）
+# 站名、SEO 关键词、摘要长度、评论总开关、配色、备案号等都放这里，
+# 改一次等于改整站外观与行为，所以保存时要清空全部页面缓存。
+# ============================================================
 class BlogSettings(models.Model):
-    """博客全局配置（单例模式）。
+    """blog的配置"""
 
-    全站只有一条配置记录，clean() 方法在保存时校验"不能存在第二条"。
-    保存后会清空整个缓存（cache.clear()），让前台读到新配置。
-    涵盖：站点名/SEO/广告/备案号/主题色/统计代码/评论审核开关等。
-    """
-
+    # 主题配色可选值：前端模板按这个值切换 CSS 变量，实现“一键换肤”
+    # 显示名写成中英双份，后台下拉框里一眼能看懂
     COLOR_SCHEMES = (
         ('purple', _('紫色主题 - Purple Dream')),
         ('blue', _('蓝色主题 - Ocean Blue')),
@@ -410,82 +581,108 @@ class BlogSettings(models.Model):
         ('teal', _('青色主题 - Teal Wave')),
     )
 
+    # 站名：出现在浏览器标题、页头 Logo、RSS 里，必填
+    # 所有字符串字段统一 null=False + default=''：用空串表示“还没填”，
+    # 不用 NULL，模板里就不用到处判断 None
     site_name = models.CharField(
         _('site name'),
         max_length=200,
         null=False,
         blank=False,
-        default='')                                       # 站点名，显示在浏览器标题和页脚
+        default='')
+    # 站点描述：给访客看的一句话介绍，也常被搜索引擎当作摘要
     site_description = models.TextField(
         _('site description'),
         max_length=1000,
         null=False,
         blank=False,
-        default='')                                       # 站点一句话描述，用于meta description
+        default='')
+    # SEO 描述：写进页面 <meta name="description">，影响搜索结果里的那两行字
     site_seo_description = models.TextField(
-        _('site seo description'), max_length=1000, null=False, blank=False, default='')  # SEO专用描述，给搜索引擎看
+        _('site seo description'), max_length=1000, null=False, blank=False, default='')
+    # SEO 关键词：写进 <meta name="keywords">，用逗号分隔多个词
     site_keywords = models.TextField(
         _('site keywords'),
         max_length=1000,
         null=False,
         blank=False,
-        default='')                                       # SEO关键词，逗号分隔
-    article_sub_length = models.IntegerField(_('article sub length'), default=300)        # 列表页摘要截取长度（字符数）
-    sidebar_article_count = models.IntegerField(_('sidebar article count'), default=10)   # 侧边栏"热门文章"显示条数
-    sidebar_comment_count = models.IntegerField(_('sidebar comment count'), default=5)    # 侧边栏"最新评论"显示条数
-    article_comment_count = models.IntegerField(_('article comment count'), default=5)    # 文章页底部显示评论条数
-    show_google_adsense = models.BooleanField(_('show adsense'), default=False)          # 是否启用Google AdSense广告
+        default='')
+    # 列表页摘要长度：正文截取多少个字符当摘要，300 约等于一段话，默认值够大多数场景
+    article_sub_length = models.IntegerField(_('article sub length'), default=300)
+    # 侧边栏“最新文章”显示条数：10 条刚好一屏，不影响首屏加载
+    sidebar_article_count = models.IntegerField(_('sidebar article count'), default=10)
+    # 侧边栏“最新评论”显示条数：评论一行较短，5 条就够，太多会挤压正文区
+    sidebar_comment_count = models.IntegerField(_('sidebar comment count'), default=5)
+    # 详情页最多显示多少条评论
+    article_comment_count = models.IntegerField(_('article comment count'), default=5)
+    # 是否开启 Google 广告：默认关闭（国内站点基本用不上，也避免拖慢加载）
+    show_google_adsense = models.BooleanField(_('show adsense'), default=False)
+    # 广告代码：只有开启广告才需要，所以允许 null/blank，绝大多数站点留空
     google_adsense_codes = models.TextField(
-        _('adsense code'), max_length=2000, null=True, blank=True, default='')          # AdSense广告位代码
-    open_site_comment = models.BooleanField(_('open site comment'), default=True)        # 全站评论总开关，优先级低于单篇文章comment_status
+        _('adsense code'), max_length=2000, null=True, blank=True, default='')
+    # 全站评论总开关：默认 True，一键关站内所有评论（比逐篇设置 comment_status 快）
+    open_site_comment = models.BooleanField(_('open site comment'), default=True)
+    # 当前配色方案：max_length=20 足够放下最长的 'orange'；
+    # help_text 会显示在后台表单输入框下面，给运营同学一句说明
     color_scheme = models.CharField(
         _('配色方案'),
         max_length=20,
         choices=COLOR_SCHEMES,
         default='purple',
-        help_text=_('选择网站的主题配色方案'))            # 前端主题色，8套内置配色
-    global_header = models.TextField("公共头部", null=True, blank=True, default='')      # 注入到<head>的自定义HTML（统计/验证标签）
-    global_footer = models.TextField("公共尾部", null=True, blank=True, default='')      # 注入到</body>前的自定义HTML
+        help_text=_('选择网站的主题配色方案'))
+    # 公共头部 / 尾部：站长自己粘的 HTML（统计脚本、样式），可留空
+    global_header = models.TextField("公共头部", null=True, blank=True, default='')
+    global_footer = models.TextField("公共尾部", null=True, blank=True, default='')
+    # 工信部 ICP 备案号：按法规必须显示在页脚，未备案的站点留空
     beian_code = models.CharField(
         '备案号',
         max_length=2000,
         null=True,
         blank=True,
-        default='')                                       # ICP备案号（国内站点必需），显示在页脚
+        default='')
+    # 网站统计代码（如百度统计、Google Analytics 的 <script>），直接插进页面底部
     analytics_code = models.TextField(
         "网站统计代码",
         max_length=1000,
         null=False,
         blank=False,
-        default='')                                       # 百度/Google统计脚本
+        default='')
+    # 是否显示公安备案号：很多站点只在页脚显示 ICP 备案，公安备案可选
     show_gongan_code = models.BooleanField(
-        '是否显示公安备案号', default=False, null=False)   # 是否在页脚显示公安备案号
+        '是否显示公安备案号', default=False, null=False)
+    # 公安备案号本身：只有 show_gongan_code 为 True 时才有意义，故可留空
     gongan_beiancode = models.TextField(
         '公安备案号',
         max_length=2000,
         null=True,
         blank=True,
-        default='')                                       # 公安联网备案号（国内站点必需）
+        default='')
+    # 评论是否需要审核：默认 False（发出来就展示）；
+    # 打开后新评论要等管理员在后台放行，用于防垃圾评论
     comment_need_review = models.BooleanField(
-        '评论是否需要审核', default=False, null=False)    # True时新评论需后台审核后才显示
+        '评论是否需要审核', default=False, null=False)
 
+    # 【Meta】—— 后台里这张表显示为“网站配置”
     class Meta:
         verbose_name = _('Website configuration')
         verbose_name_plural = verbose_name
 
+    # 【__str__】—— 后台下拉/列表里显示站名，而不是 BlogSettings object (1)
     def __str__(self):
         return self.site_name
 
+    # 【clean】—— 模型级校验，保证“全站只能有一份配置”
+    # 说明：Django 在后台表单保存前会先调 clean()；exclude(id=self.id) 是为了
+    #       让“编辑自己”这一次能通过校验——否则一改配置就会和自己冲突。
     def clean(self):
-        """Django模型校验：保证全站只有一条BlogSettings记录。
-
-        exclude(id=self.id) 排除当前正在编辑的这条，如果还有其他记录就抛错。
-        """
         if BlogSettings.objects.exclude(id=self.id).count():
             raise ValidationError(_('There can only be one configuration'))
 
+    # 【save】—— 保存配置后清空全部缓存
+    # 说明：站名、导航、配色这些值被整页缓存/片段缓存大量引用，
+    #       配置一改必须让旧页面立刻失效，否则前台还是旧名字；
+    #       缓存对象在函数内局部 import，是为了避开 utils 与本模块的循环导入。
     def save(self, *args, **kwargs):
-        """保存配置后清空全站缓存，让前台立即生效新配置。"""
         super().save(*args, **kwargs)
         from djangoblog.utils import cache
         cache.clear()

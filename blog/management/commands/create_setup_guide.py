@@ -1,25 +1,102 @@
+# ============================================================
+# blog/management/commands/create_setup_guide.py —— 一键“种”出一篇建站教程文章的管理命令
+# 作用：给刚部署好的空站点灌入一篇已发布的 Markdown 教程（DjangoBlog 从零搭建指南），
+#       顺带把“技术教程”分类和 5 个技术标签建好，让首页/分类页立刻有内容可看；
+#       属于“初始化演示数据”脚本，不参与 HTTP 请求，只由运维手动执行一次。
+# 本文件包含：Command 类（management command 本体）、handle 方法（唯一入口，
+#             流程：查作者 → 建分类 → 建标签 → 准备标题正文 → get_or_create 文章
+#             → 新建立即挂标签 / 已存在则回写正文 → 清缓存）
+# 注释人：翟旌超（软件工程 3 班 2415304340，#zjc）
+# 说明：本次任务只添加中文注释，没有改动任何一行原有代码逻辑
+# ============================================================
+#
+# 【先搞懂：什么是 management command（Django 管理命令）】
+# 一句话：它就是一个放在 <应用>/management/commands/ 目录下的一次性脚本，
+#        用 `python manage.py 文件名` 来跑；本文件的文件名是 create_setup_guide.py，
+#        所以执行 `python manage.py create_setup_guide` 跑的就是这里。
+# 1) 命令名从哪来：Django 启动时会把每个已安装 app 的 management/commands/ 目录扫一遍，
+#    把里面的每个 .py 模块导入一次；模块名去掉 .py 就是命令名。因此该目录必须有 __init__.py，
+#    文件名也不能和系统命令重名（否则会盖住 Django 自带的同名命令）。
+# 2) 类名为什么必须是 Command：扫描到模块后 Django 只找名为 Command 的类，
+#    实例化后执行 run_from_argv() → 最终调用 handle()。类名写错就等于没有这个命令。
+# 3) handle() 是入口：真正的业务逻辑全写在 handle 里；想给命令加参数就实现
+#    add_arguments(self, parser)，用 parser.add_argument('--force', action='store_true')
+#    这类写法声明，参数解析结果会以 options['force'] 的形式传进 handle。
+#    本文件没有实现 add_arguments，所以它不带任何命令行开关，直接裸跑即可；
+#    多写的参数会被 Django 解析进 *args 后忽略掉。
+# 4) 退出码约定：正常跑完返回 None 就是 0；要表达失败应抛 CommandError，
+#    Django 会打红字并返回非 0，方便 CI/脚本判断。
+# 5) self.stdout.write(...) 是官方推荐的输出方式：它比 print 更好，因为输出目标可被
+#    调用方替换、能被测试捕获、还能套 self.style 上色；注意它默认不换行，
+#    需要换行时要自己传 ending='\n'。本文件统一用 self.style.SUCCESS 打绿色成功提示。
+#
+# 【这个命令到底生成/写入什么】
+# - 不写文件、不建目录、也没有文件路径要拼：所有数据都经 ORM 写进数据库。
+#   所以本文件不需要 open(...)，也就没有 encoding='utf-8' 显式指定 —— 中文字符集
+#   由数据库连接层决定（settings 里 MySQL 的 OPTIONS={'charset': 'utf8mb4'}）；
+#   而 Python 3 源码文件默认就是 UTF-8，故也不需要 # -*- coding: utf-8 -*- 声明。
+# - 读的数据：User（挑一个超级管理员当作者）、Category、Tag（用 get_or_create 拿到或建出）、
+#   Article（按 title 查，已存在就不重复创建）。
+# - 写的数据：1 个分类、最多 5 个标签、1 篇文章（Markdown 正文即下面的 body 字符串），
+#   以及文章与标签的多对多关联；最后清一次缓存，避免旧的页面缓存继续生效。
+#
+# —— Django 框架 ——
+# get_user_model()：按 settings.AUTH_USER_MODEL 取“当前生效的用户模型类”，
+# 不直接 import User，换自定义用户模型或避免循环导入时才不会出问题
 from django.contrib.auth import get_user_model
+# BaseCommand：所有管理命令的基类，Django 靠它把命令挂到 manage.py 上，
+# 它提供了 self.stdout / self.style 这些给命令用的工具
 from django.core.management.base import BaseCommand
 
+# —— 项目内模块 ——
+# 命令本质就是“用 ORM 批量造数据”，所以直接复用 blog 应用的数据模型：
+# Article（文章，正文用 Markdown 字段）、Tag（标签，多对多）、Category（分类，外键）
 from blog.models import Article, Tag, Category
 
 
+# 【Command】—— 管理命令的壳子，只负责“挂名字 + 提供输出工具”，业务全在 handle 里
+# 说明：Django 扫到本模块后只认这个名字的类，改名命令就消失；继承 BaseCommand
+# 才能拿到 self.stdout（输出）、self.style（上色）、self.handle 的调用链
 class Command(BaseCommand):
+    # help：命令的一句话说明，`python manage.py help create_setup_guide` 会原样打印，
+    # 也是 `python manage.py` 列表里该命令后面的描述；因此要写清用途而不是写实现细节
     help = 'add a technical tutorial article about installing DjangoBlog'
 
+    # 【handle】—— 命令的唯一入口，`python manage.py create_setup_guide` 时被 Django 调用
+    # 参数：*args / **options 由命令行解析结果交进来；本命令没实现 add_arguments，
+    #       所以 options 里只有 Django 固定的 verbosity/settings 等，业务上用不到，直接忽略
+    # 返回：None —— 管理命令不向调用方返回数据，结果只通过 self.stdout 打印给人看；
+    #       真要表示失败应抛 CommandError（Django 会转成非 0 退出码）
+    # 说明：整体是“幂等”设计 —— 反复执行不会造出重复的分类/标签/文章，重启脚本很安全
     def handle(self, *args, **options):
+        # 作者必须是“人”而不是空值：Article.author 是外键且不允许空，
+        # 所以优先挑一个超级管理员当这篇文章的作者（后台里最容易认出来的那个账号）
         user = get_user_model().objects.filter(is_superuser=True).first()
+        # 兜底：站点还没建 superuser 时退化为“任意第一个用户”，
+        # 只为让命令不至于因为没作者而崩；一个用户都没有时这里仍会拿到 None，随后入库会报错
         if not user:
             user = get_user_model().objects.first()
 
+        # get_or_create 返回 (对象, 是否新建) 的二元组：分类按 name 查，
+        # 没有就建一个 —— 所以重复执行不会出现第二个“技术教程”分类；
+        # 这里用 _ 接住“是否新建”，因为脚本不关心它是新建还是复用
         category, _ = Category.objects.get_or_create(name='技术教程')
 
+        # 固定一份标签清单，既用于下面建标签，也用于后面给文章挂多对多关系
         tag_names = ['Django', 'Python', 'VSCode', 'Git', 'GitHub']
+        # 用 dict 做“标签名 → Tag 对象”的缓存，后面 article.tags.add() 时就不用再查库
         tags = {}
+        # 逐个 get_or_create：标签是弱实体，先保证它存在，再谈关联；
+        # 顺序遍历保证键值对齐全，重复执行同一份清单同样得到同样的 5 个标签
         for name in tag_names:
             tags[name], _ = Tag.objects.get_or_create(name=name)
 
+        # 标题：Article.title 在模型上是 unique 的，因此它天然成为“这篇文章”的业务主键，
+        # 下面 get_or_create 靠它判断是首次创建还是已存在
         title = '从零搭建 DjangoBlog：VSCode + Git + GitHub 完整指南'
+        # 正文是一整段三引号多行字符串（Markdown 原文，原样存库，渲染时才转 HTML）：
+        # 三引号让换行、引号、反引号代码块都不用转义，写长文最省事；
+        # 注意内容是“数据”不是代码，所以里面出现的中文、# 标题、表格都只是文本
         body = '''# 从零搭建 DjangoBlog：VSCode + Git + GitHub 完整指南
 
 本文记录从零开始搭建 DjangoBlog 博客系统的完整流程，涵盖开发环境准备、Git 配置、从 GitHub 克隆仓库、依赖安装、数据库配置以及项目启动。照着一步步做，就能在自己的电脑上跑起这套博客。
@@ -236,26 +313,51 @@ git pull origin main
 > 小提示：改了 `settings.py` 或站点配置后，记得执行 `python manage.py clear_cache` 清缓存，否则改动可能不会立即生效。
 '''
 
+        # 以 unique 的 title 作为“是否已种过这篇文章”的判定条件：
+        # 命中就返回老文章（created=False，defaults 整个被忽略），没命中才按 defaults 建新文章。
+        # 这样命令天然幂等 —— 重复执行不会产生第二篇同名文章，而模型层的 unique 约束
+        # 又保证不可能出现“两篇都被创建”的竞态后果
         article, created = Article.objects.get_or_create(
             title=title,
             defaults={
                 'body': body,
                 'category': category,
+                # 作者外键：必须是一个真实存在的用户，否则数据库外键约束直接报错
                 'author': user,
+                # 'p' = Published（已发布），走 Article.STATUS_CHOICES；
+                # 用已发布状态是为了命令跑完首页立刻能看到，而不是留一篇草稿
                 'status': 'p',
+                # 'a' = Article（普通文章），走 Article.TYPE；
+                # 另一个可选值 'p' 是独立页面，那种不进列表/归档，不适合教程文章
                 'type': 'a',
             },
         )
+        # 分支一：这次真的新建了文章 → 补上多对多标签关系
         if created:
+            # 多对多关系必须等主对象有主键（save 之后）才能 add，get_or_create 已经存过，
+            # 所以这里直接按缓存的 tags 字典逐个挂；文章与标签是 M2M，add 会写中间表
             for tag_name in tag_names:
                 article.tags.add(tags[tag_name])
+            # self.stdout.write 默认不换行，靠每次 write 把提示拼在自己的行上没意义，
+            # 这里只求“有一条可见的成功回执”，颜色用 SUCCESS（绿）
             self.stdout.write(self.style.SUCCESS(f'创建文章成功: {title}'))
+        # 分支二：文章早已存在 → 只把正文和分类刷新成最新版本
         else:
+            # 手动改这两个字段再 save：相当于“以本命令里的 body 为准”覆盖正文，
+            # 方便改了脚本里的教程内容后重跑一次就同步到线上文章
             article.body = body
             article.category = category
+            # save() 会把整行写回，但本次只改过 body/category 两个属性，
+            # views/pub_time/author/status 仍是库里读出来的原值，已有标签也不动，
+            # 这样就不会把线上积累的阅读数和发布时间冲掉
             article.save()
             self.stdout.write(self.style.SUCCESS(f'文章已存在，已更新: {title}'))
 
+        # 局部 import：只有命令跑到最后才需要缓存模块，放函数里可以避免模块级导入时
+        # 就依赖缓存配置；djangoblog.utils 里的 cache 正是 django.core.cache.cache（默认缓存实例）
         from djangoblog.utils import cache
+        # 全量 clear 而不是精确删某个 key：文章一变，首页列表、分类页、详情页、
+        # 侧边栏都可能被缓存过，逐个算 key 容易漏；这是低频运维命令，清空整库最省事也最可靠
         cache.clear()
+        # 最后一条提示：告诉执行者“内容已生效，不需要怀疑是缓存没刷新”
         self.stdout.write(self.style.SUCCESS('缓存已清理'))
