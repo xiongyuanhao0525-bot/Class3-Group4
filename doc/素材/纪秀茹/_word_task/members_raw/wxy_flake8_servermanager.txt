@@ -1,0 +1,8 @@
+# flake8 结果 app=servermanager
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m flake8 --max-line-length=120 --exclude=venv,frontend,migrations,__pycache__,locale,logs,whoosh_index,templates,doc,docs,deploy,plugins,static,node_modules D:\Class3-Group4\servermanager
+# 问题条数: 4
+
+D:\Class3-Group4\servermanager\api\__init__.py:1:1: W391 blank line at end of file
+D:\Class3-Group4\servermanager\robot.py:30:23: E127 continuation line over-indented for visual indent
+D:\Class3-Group4\servermanager\robot.py:169:9: F841 local variable 'e' is assigned to but never used
+D:\Class3-Group4\servermanager\tests.py:2:1: F401 'django.utils.timezone' imported but unused

@@ -3,6 +3,10 @@ from django.forms import ModelForm
 
 from .models import Comment
 
+# #jxr 评论提交表单：基于 Comment 模型自动生成
+# #jxr 只暴露 body 字段给用户输入，其余字段（作者/文章/审核状态/父评论）由视图层逻辑填充
+
+
 class CommentForm(ModelForm):
     """评论提交表单：基于 Comment 模型生成，只让用户填写正文"""
     parent_comment_id = forms.IntegerField(

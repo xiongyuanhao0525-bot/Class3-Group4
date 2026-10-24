@@ -1,0 +1,25 @@
+# flake8 结果 app=accounts
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m flake8 --max-line-length=120 --exclude=venv,frontend,migrations,__pycache__,locale,logs,whoosh_index,templates,doc,docs,deploy,plugins,static,node_modules D:\Class3-Group4\accounts
+# 问题条数: 21
+
+D:\Class3-Group4\accounts\test_admin.py:6:1: F401 'django.test.TestCase' imported but unused
+D:\Class3-Group4\accounts\test_admin.py:6:1: F401 'django.test.RequestFactory' imported but unused
+D:\Class3-Group4\accounts\test_admin.py:7:1: F401 'django.urls.reverse' imported but unused
+D:\Class3-Group4\accounts\test_user_business_logic.py:5:1: F401 'django.test.Client' imported but unused
+D:\Class3-Group4\accounts\test_user_business_logic.py:7:1: F401 'django.utils.timezone' imported but unused
+D:\Class3-Group4\accounts\tests.py:4:1: F401 'django.utils.translation.gettext_lazy as _' imported but unused
+D:\Class3-Group4\accounts\tests.py:8:1: F403 'from djangoblog.utils import *' used; unable to detect undefined names
+D:\Class3-Group4\accounts\tests.py:26:9: F841 local variable 'site' is assigned to but never used
+D:\Class3-Group4\accounts\tests.py:26:16: F405 'get_current_site' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:31:9: F841 local variable 'testuser' is assigned to but never used
+D:\Class3-Group4\accounts\tests.py:74:16: F405 'get_sha256' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:74:27: F405 'get_sha256' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:74:38: F405 'settings' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:86:9: F405 'delete_sidebar_cache' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:123:16: F405 'generate_code' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:156:16: F405 'generate_code' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:192:5: E303 too many blank lines (2)
+D:\Class3-Group4\accounts\tests.py:193:16: F405 'generate_code' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:207:1: W391 blank line at end of file
+D:\Class3-Group4\accounts\views.py:2:1: F401 'django.utils.translation.gettext_lazy as _' imported but unused
+D:\Class3-Group4\accounts\views.py:72:19: E127 continuation line over-indented for visual indent

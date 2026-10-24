@@ -1,0 +1,88 @@
+# pylint 结果 app=servermanager
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m pylint --disable=import-error,relative-beyond-top-level,no-name-in-module --output-format=text D:\Class3-Group4\servermanager
+# 退出码: 28
+
+************* Module servermanager.admin
+servermanager\admin.py:7:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+servermanager\admin.py:22:33: W0613: Unused argument 'request' (unused-argument)
+servermanager\admin.py:12:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+************* Module servermanager.apps
+servermanager\apps.py:6:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module servermanager.MemcacheStorage
+servermanager\MemcacheStorage.py:1:0: C0103: Module name "MemcacheStorage" doesn't conform to snake_case naming style (invalid-name)
+servermanager\MemcacheStorage.py:31:15: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+servermanager\MemcacheStorage.py:33:18: W0622: Redefining built-in 'id' (redefined-builtin)
+servermanager\MemcacheStorage.py:39:18: W0622: Redefining built-in 'id' (redefined-builtin)
+servermanager\MemcacheStorage.py:44:21: W0622: Redefining built-in 'id' (redefined-builtin)
+************* Module servermanager.models
+servermanager\models.py:11:0: C0103: Class name "commands" doesn't conform to PascalCase naming style (invalid-name)
+servermanager\models.py:20:4: C0115: Missing class docstring (missing-class-docstring)
+servermanager\models.py:20:4: R0903: Too few public methods (0/2) (too-few-public-methods)
+servermanager\models.py:11:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+servermanager\models.py:35:4: C0115: Missing class docstring (missing-class-docstring)
+servermanager\models.py:35:4: R0903: Too few public methods (0/2) (too-few-public-methods)
+servermanager\models.py:27:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module servermanager.robot
+servermanager\robot.py:106:0: W0622: Redefining built-in 'help' (redefined-builtin)
+servermanager\robot.py:51:4: C0415: Import outside toplevel (blog.templatetags.blog_tags.truncatechars_content) (import-outside-toplevel)
+servermanager\robot.py:75:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+servermanager\robot.py:70:20: W0613: Unused argument 'session' (unused-argument)
+servermanager\robot.py:85:13: W0613: Unused argument 'message' (unused-argument)
+servermanager\robot.py:85:22: W0613: Unused argument 'session' (unused-argument)
+servermanager\robot.py:97:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+servermanager\robot.py:94:21: W0613: Unused argument 'session' (unused-argument)
+servermanager\robot.py:106:9: W0613: Unused argument 'message' (unused-argument)
+servermanager\robot.py:106:18: W0613: Unused argument 'session' (unused-argument)
+servermanager\robot.py:130:12: W0613: Unused argument 'message' (unused-argument)
+servermanager\robot.py:130:21: W0613: Unused argument 'session' (unused-argument)
+servermanager\robot.py:137:11: W0613: Unused argument 'message' (unused-argument)
+servermanager\robot.py:137:20: W0613: Unused argument 'session' (unused-argument)
+servermanager\robot.py:169:15: W0718: Catching too general exception Exception (broad-exception-caught)
+servermanager\robot.py:169:8: W0612: Unused variable 'e' (unused-variable)
+servermanager\robot.py:175:4: C0116: Missing function or method docstring (missing-function-docstring)
+servermanager\robot.py:179:4: C0116: Missing function or method docstring (missing-function-docstring)
+servermanager\robot.py:209:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+servermanager\robot.py:226:12: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+servermanager\robot.py:187:4: R0911: Too many return statements (9/6) (too-many-return-statements)
+servermanager\robot.py:199:12: C0103: Attribute name "isAdmin" doesn't conform to snake_case naming style (invalid-name)
+servermanager\robot.py:210:16: C0103: Attribute name "isPasswordSet" doesn't conform to snake_case naming style (invalid-name)
+servermanager\robot.py:219:16: C0103: Attribute name "Count" doesn't conform to snake_case naming style (invalid-name)
+servermanager\robot.py:232:16: C0103: Attribute name "Command" doesn't conform to snake_case naming style (invalid-name)
+servermanager\robot.py:240:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module servermanager.tests
+servermanager\tests.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+servermanager\tests.py:14:0: C0115: Missing class docstring (missing-class-docstring)
+servermanager\tests.py:15:4: C0116: Missing function or method docstring (missing-function-docstring)
+servermanager\tests.py:15:4: C0103: Method name "setUp" doesn't conform to snake_case naming style (invalid-name)
+servermanager\tests.py:19:4: C0116: Missing function or method docstring (missing-function-docstring)
+servermanager\tests.py:23:4: C0116: Missing function or method docstring (missing-function-docstring)
+servermanager\tests.py:2:0: W0611: Unused timezone imported from django.utils (unused-import)
+************* Module servermanager.urls
+servermanager\urls.py:11:0: C0103: Constant name "app_name" doesn't conform to UPPER_CASE naming style (invalid-name)
+************* Module servermanager.api.commonapi
+servermanager\api\commonapi.py:31:0: C0301: Line too long (101/100) (line-too-long)
+servermanager\api\commonapi.py:26:13: W0621: Redefining name 'prompt' from outer scope (line 80) (redefined-outer-name)
+servermanager\api\commonapi.py:33:15: W0718: Catching too general exception Exception (broad-exception-caught)
+servermanager\api\commonapi.py:22:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+servermanager\api\commonapi.py:55:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+servermanager\api\commonapi.py:66:15: W0718: Catching too general exception BaseException (broad-exception-caught)
+servermanager\api\commonapi.py:73:19: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+************* Module servermanager.api.__init__
+servermanager\api\__init__.py:1:0: C0305: Trailing newlines (trailing-newlines)
+************* Module servermanager.migrations.0001_initial
+servermanager\migrations\0001_initial.py:17:0: C0301: Line too long (117/100) (line-too-long)
+servermanager\migrations\0001_initial.py:32:0: C0301: Line too long (117/100) (line-too-long)
+servermanager\migrations\0001_initial.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+servermanager\migrations\0001_initial.py:1:0: C0103: Module name "0001_initial" doesn't conform to snake_case naming style (invalid-name)
+servermanager\migrations\0001_initial.py:6:0: C0115: Missing class docstring (missing-class-docstring)
+servermanager\migrations\0001_initial.py:6:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module servermanager.migrations.0002_alter_emailsendlog_options_and_more
+servermanager\migrations\0002_alter_emailsendlog_options_and_more.py:15:0: C0301: Line too long (114/100) (line-too-long)
+servermanager\migrations\0002_alter_emailsendlog_options_and_more.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+servermanager\migrations\0002_alter_emailsendlog_options_and_more.py:1:0: C0103: Module name "0002_alter_emailsendlog_options_and_more" doesn't conform to snake_case naming style (invalid-name)
+servermanager\migrations\0002_alter_emailsendlog_options_and_more.py:6:0: C0115: Missing class docstring (missing-class-docstring)
+servermanager\migrations\0002_alter_emailsendlog_options_and_more.py:6:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+
+-----------------------------------
+Your code has been rated at 7.77/10
+

@@ -1,0 +1,17 @@
+# flake8 结果 app=comments
+# 命令: C:\Users\21939\AppData\Local\Doubao\User Data\sandbox_runtime\bases\772984f6fd3a8ae0ae7d2422cd7c2bfa\python\python.exe -m flake8 --max-line-length=120 --exclude=venv,frontend,migrations,__pycache__,locale,logs,whoosh_index,templates,doc,docs,deploy,plugins,static,node_modules D:\Class3-Group4\comments
+# 问题条数: 13
+
+D:\Class3-Group4\comments\models.py:10:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\comments\models.py:84:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\comments\models.py:128:91: W292 no newline at end of file
+D:\Class3-Group4\comments\test_comment_business_logic.py:5:1: F401 'django.test.Client' imported but unused
+D:\Class3-Group4\comments\test_comment_business_logic.py:677:9: F841 local variable 'reply_id' is assigned to but never used
+D:\Class3-Group4\comments\test_views.py:9:1: F401 'djangoblog.test_base.BaseTestCase' imported but unused
+D:\Class3-Group4\comments\test_views.py:125:9: F841 local variable 'comment' is assigned to but never used
+D:\Class3-Group4\comments\test_views.py:137:9: F841 local variable 'comment' is assigned to but never used
+D:\Class3-Group4\comments\tests.py:7:1: F403 'from comments.templatetags.comments_tags import *' used; unable to detect undefined names
+D:\Class3-Group4\comments\tests.py:101:16: F405 'parse_commenttree' may be undefined, or defined from star imports: comments.templatetags.comments_tags
+D:\Class3-Group4\comments\tests.py:103:16: F405 'show_comment_item' may be undefined, or defined from star imports: comments.templatetags.comments_tags
+D:\Class3-Group4\comments\utils.py:26:120: W291 trailing whitespace
+D:\Class3-Group4\comments\utils.py:28:26: W291 trailing whitespace

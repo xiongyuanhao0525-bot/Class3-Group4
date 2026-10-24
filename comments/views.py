@@ -1,14 +1,19 @@
 # Create your views here.
-from django.core.exceptions import ValidationError
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404
-from django.views import View
+from django.core.exceptions import ValidationError  # 业务校验异常
+from django.http import HttpResponseRedirect, JsonResponse  # 页面跳转 / JSON 响应
+from django.shortcuts import get_object_or_404  # 查对象，不存在则返回404
+from django.views import View  # Django 基础视图类
 
-from accounts.models import BlogUser
-from blog.models import Article
-from djangoblog.base_views import AuthenticatedFormView
-from .forms import CommentForm
-from .models import Comment, CommentReaction
+from accounts.models import BlogUser  # 自定义用户模型
+from blog.models import Article  # 文章模型
+from djangoblog.base_views import AuthenticatedFormView  # 自带登录校验 + CSRF 保护的基类视图
+from .forms import CommentForm  # 评论提交表单
+from .models import Comment, CommentReaction  # 评论与表情反应模型
+
+# #jxr 本模块提供两个视图：
+# #jxr 1) CommentPostView：文章详情页发表/回复评论（表单类视图，继承 AuthenticatedFormView）
+# #jxr 2) CommentReactionView：评论表情反应 API（GET 查统计 / POST 切换表情）
+
 
 class CommentPostView(AuthenticatedFormView):
     """
@@ -44,11 +49,12 @@ class CommentPostView(AuthenticatedFormView):
         article_id = self.kwargs['article_id']
         article = get_object_or_404(Article, pk=article_id)
 
+        # #jxr 文章关闭评论的两种状态：comment_status='c'（评论功能关闭）或 status='c'（文章关闭）
         if article.comment_status == 'c' or article.status == 'c':  # 文章已关闭评论
             raise ValidationError("该文章评论已关闭.")
         comment = form.save(False)        # 先不写入数据库
         comment.article = article         # 绑定所属文章
-        from djangoblog.utils import get_blog_setting
+        from djangoblog.utils import get_blog_setting  # #jxr 延迟导入：获取站点配置工具
         settings = get_blog_setting()
         if not settings.comment_need_review:  # 如果站点配置不需要审核，评论直接通过
             comment.is_enable = True
@@ -64,12 +70,16 @@ class CommentPostView(AuthenticatedFormView):
             "%s#div-comment-%d" %
             (article.get_absolute_url(), comment.pk))
 
+
 class CommentReactionView(View):
     """
     评论 Emoji 反应 API（点赞/表情回应）
     GET  /comment/<comment_id>/react  - 获取 reactions（公开）
     POST /comment/<comment_id>/react  - 切换 reaction（需要登录）
     """
+    # #jxr 设计要点：
+    # #jxr - GET 公开：任何人可查看某条已审核评论的表情统计
+    # #jxr - POST 需登录：未登录返回 401；同一用户对同一表情再点一次即"取消"（切换语义）
 
     def get(self, request, comment_id):
         """获取评论的 reactions 数据（公开访问）"""
@@ -105,6 +115,8 @@ class CommentReactionView(View):
             }, status=400)
 
         # 切换 reaction：已存在则删除（取消点赞），否则创建
+        # #jxr 依赖 models.CommentReaction 的 unique_together 唯一约束：
+        # #jxr get_or_create 在记录已存在时返回 (对象, False)，此时删除即可实现"取消"
         reaction, created = CommentReaction.objects.get_or_create(
             comment=comment,
             user=request.user,
