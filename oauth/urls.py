@@ -34,4 +34,13 @@ urlpatterns = [
     path(
         r'oauth/oauthlogin',
         views.oauthlogin,
-        name='oauthlogin')]
+        name='oauthlogin'),
+    # yjh: 功能点2：第三方账号绑定管理页 / 解绑接口（解绑仅接受 POST）
+    path(
+        r'oauth/bindings.html',
+        views.bindings,
+        name='bindings'),
+    path(
+        r'oauth/unbind/<int:oauthid>.html',
+        views.unbind,
+        name='unbind')]

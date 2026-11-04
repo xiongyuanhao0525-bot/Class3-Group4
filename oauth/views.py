@@ -19,6 +19,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseForbidden
@@ -29,6 +30,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
+from django.views.decorators.http import require_POST
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from djangoblog.blog_signals import oauth_user_login_signal
@@ -36,7 +38,7 @@ from djangoblog.utils import get_current_site
 from djangoblog.utils import send_email, get_sha256
 from oauth.forms import RequireEmailForm
 from .models import OAuthUser
-from .oauthmanager import get_manager_by_type, OAuthAccessTokenException
+from .oauthmanager import get_manager_by_type, get_oauth_apps, OAuthAccessTokenException
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +46,14 @@ logger = logging.getLogger(__name__)
 OAUTH_STATE_SESSION_KEY = 'oauth_state'
 
 
-def _build_state(request, oauth_type, nexturl):
+def _build_state(request, oauth_type, nexturl, bind=False):
     # yjh: 生成一次性随机 state 并写入 session，供回调时校验"本次授权确由本站发起"
     state = secrets.token_urlsafe(32)
     request.session[OAUTH_STATE_SESSION_KEY] = state
     request.session['oauth_state_type'] = oauth_type
     request.session['oauth_state_next'] = nexturl
+    # yjh: 标记本次授权是"已登录用户绑定新平台"，回调时据此走绑定逻辑而非登录
+    request.session['oauth_bind'] = bind
     return state
 
 
@@ -98,8 +102,10 @@ def oauthlogin(request):
         # yjh: 平台未启用或类型非法，直接回首页（静默失败，不暴露内部信息）
         return HttpResponseRedirect('/')
     nexturl = get_redirecturl(request)
+    # yjh: 已登录用户带 bind=1 进入时，本次授权用于"绑定新平台"，不是登录
+    bind = request.GET.get('bind') == '1' and request.user.is_authenticated
     # yjh: 跳转授权页前先生成 state 存 session，回调时校验
-    state = _build_state(request, type, nexturl)
+    state = _build_state(request, type, nexturl, bind)
     authorizeurl = manager.get_authorization_url(nexturl, state)
     return HttpResponseRedirect(authorizeurl)
 
@@ -154,6 +160,20 @@ def authorize(request):
         # yjh: Facebook token 超长会超出模型 150 字符限制，干脆不落库
         if type == 'facebook':
             user.token = ''
+        # yjh: 功能点2：已登录用户主动发起的绑定，直接把该第三方身份绑到当前账号
+        if request.session.pop('oauth_bind', False) and request.user.is_authenticated:
+            if user.author_id and user.author_id != request.user.id:
+                # yjh: 该第三方身份已属于别的本地账号，禁止抢占，避免账号劫持
+                logger.warning(
+                    '第三方身份已绑定其他账号，type=%s openid=%s', type, user.openid)
+                return HttpResponseRedirect(
+                    reverse('oauth:bindings') + '?result=conflict')
+            user.author = request.user
+            user.save()
+            logger.info('绑定第三方账号成功，user_id=%s type=%s',
+                        request.user.id, type)
+            return HttpResponseRedirect(
+                reverse('oauth:bindings') + '?result=bound')
         if user.email:
             # yjh: 有邮箱 → 直接走"绑定/创建本地账号 + 登录"分支（事务保证一致性）
             with transaction.atomic():
@@ -366,3 +386,53 @@ def bindsuccess(request, oauthid):
         'title': title,
         'content': content
     })
+
+
+# yjh: 功能点2：平台标识 → 中文名，用于账号管理页展示
+OAUTH_TYPE_NAMES = {
+    'weibo': '微博',
+    'google': 'Google',
+    'github': 'GitHub',
+    'facebook': 'FaceBook',
+    'qq': 'QQ',
+}
+
+
+@login_required
+def bindings(request):
+    # yjh: 功能点2：第三方账号管理页（已绑定项可解绑，未绑定平台可发起绑定）
+    bound_qs = OAuthUser.objects.filter(author=request.user)
+    bound_accounts = [
+        {'id': item.id,
+         'nickname': item.nickname,
+         'picture': item.picture,
+         'type_name': OAUTH_TYPE_NAMES.get(item.type, item.type)}
+        for item in bound_qs
+    ]
+    bound_types = {item.type for item in bound_qs}
+    available_apps = [
+        {'type': app.ICON_NAME,
+         'name': OAUTH_TYPE_NAMES.get(app.ICON_NAME, app.ICON_NAME)}
+        for app in get_oauth_apps() if app.ICON_NAME not in bound_types]
+    return render(request, 'oauth/oauth_bindings.html', {
+        'bound_accounts': bound_accounts,
+        'available_apps': available_apps,
+        'result': request.GET.get('result', ''),
+        # yjh: 账号没有可用密码且只剩一个绑定时禁止解绑，避免把自己锁在门外
+        'can_unbind': request.user.has_usable_password() or len(bound_accounts) > 1,
+    })
+
+
+@login_required
+@require_POST
+def unbind(request, oauthid):
+    # yjh: 功能点2：解绑第三方账号；只能操作自己名下的绑定，且必须 POST
+    oauthuser = get_object_or_404(OAuthUser, id=oauthid, author=request.user)
+    if not request.user.has_usable_password() and \
+            OAuthUser.objects.filter(author=request.user).count() <= 1:
+        logger.info('拒绝解绑最后一个登录方式，user_id=%s', request.user.id)
+        return HttpResponseRedirect(reverse('oauth:bindings') + '?result=last')
+    logger.info('解绑第三方账号，user_id=%s type=%s',
+                request.user.id, oauthuser.type)
+    oauthuser.delete()
+    return HttpResponseRedirect(reverse('oauth:bindings') + '?result=unbound')

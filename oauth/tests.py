@@ -4,11 +4,12 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import get_user_model
 from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
 from djangoblog.utils import get_sha256
-from oauth.models import OAuthConfig
+from oauth.models import OAuthConfig, OAuthUser
 from oauth.oauthmanager import BaseOauthManager
 
 
@@ -376,4 +377,101 @@ class OAuthStateSecurityTest(TestCase):
             f'/oauth/authorize?type=weibo&code=code&state={state}')
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
+
+
+class OAuthBindingViewTest(TestCase):
+    """功能点2：第三方账号绑定/解绑"""
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        OAuthConfig.objects.create(
+            type='weibo', appkey='appkey', appsecret='appsecret',
+            callback_url='http://testserver/oauth/authorize',
+            is_enable=True)
+        self.user = get_user_model().objects.create_user(
+            username='binduser', email='bind@example.com', password='password')
+        self.client.force_login(self.user)
+
+    def test_bindings_page_renders(self):
+        """账号管理页可正常打开，并列出可绑定平台"""
+        response = self.client.get(reverse('oauth:bindings'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('微博', response.content.decode())
+
+    @patch("oauth.oauthmanager.WBOauthManager.do_get")
+    @patch("oauth.oauthmanager.WBOauthManager.do_post")
+    def test_bind_third_party_account(self, mock_do_post, mock_do_get):
+        """已登录用户发起绑定后，第三方身份挂到当前账号（而不是登录成新账号）"""
+        mock_do_post.return_value = json.dumps(
+            {"access_token": "token", "uid": "uid-bind"})
+        mock_do_get.return_value = json.dumps({
+            "avatar_large": "avatar", "screen_name": "nick",
+            "id": "id", "email": "bind@example.com"})
+
+        response = self.client.get('/oauth/oauthlogin?type=weibo&bind=1')
+        state = _oauth_state(response.url)
+        response = self.client.get(
+            f'/oauth/authorize?type=weibo&code=code&state={state}')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('result=bound', response.url)
+        oauth_user = OAuthUser.objects.get(type='weibo', openid='id')
+        self.assertEqual(oauth_user.author_id, self.user.id)
+
+    def test_unbind_own_account(self):
+        """解绑自己的第三方账号"""
+        oauth_user = OAuthUser.objects.create(
+            author=self.user, openid='openid-unbind', nickname='nick',
+            type='weibo', token='token')
+
+        response = self.client.post(
+            reverse('oauth:unbind', kwargs={'oauthid': oauth_user.id}))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('result=unbound', response.url)
+        self.assertFalse(OAuthUser.objects.filter(id=oauth_user.id).exists())
+
+    def test_cannot_unbind_last_login_method(self):
+        """无可用密码且只剩一个绑定时，禁止解绑（防把自己锁在门外）"""
+        # 改密码会使已有 session 失效，因此先设为不可用密码再登录
+        self.user.set_unusable_password()
+        self.user.save()
+        self.client.force_login(self.user)
+        oauth_user = OAuthUser.objects.create(
+            author=self.user, openid='openid-last', nickname='nick',
+            type='weibo', token='token')
+
+        response = self.client.post(
+            reverse('oauth:unbind', kwargs={'oauthid': oauth_user.id}))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('result=last', response.url)
+        self.assertTrue(OAuthUser.objects.filter(id=oauth_user.id).exists())
+
+    def test_cannot_unbind_other_users_account(self):
+        """不能解绑别人名下的第三方账号"""
+        other = get_user_model().objects.create_user(
+            username='other', email='other@example.com', password='password')
+        oauth_user = OAuthUser.objects.create(
+            author=other, openid='openid-other', nickname='nick',
+            type='weibo', token='token')
+
+        response = self.client.post(
+            reverse('oauth:unbind', kwargs={'oauthid': oauth_user.id}))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(OAuthUser.objects.filter(id=oauth_user.id).exists())
+
+    def test_unbind_requires_post(self):
+        """解绑必须用 POST，GET 请求被拒绝（防 CSRF 式解绑）"""
+        oauth_user = OAuthUser.objects.create(
+            author=self.user, openid='openid-get', nickname='nick',
+            type='weibo', token='token')
+
+        response = self.client.get(
+            reverse('oauth:unbind', kwargs={'oauthid': oauth_user.id}))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(OAuthUser.objects.filter(id=oauth_user.id).exists())
 
