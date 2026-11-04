@@ -10,7 +10,9 @@ oauth/views.py
 #yjh 安全要点：回跳地址做白名单校验防开放重定向；邮箱确认链接用
     SECRET_KEY+id 的 SHA256 签名防伪；写库操作包在事务里保证一致性。
 """
+import hmac
 import logging
+import secrets
 # Create your views here.
 from urllib.parse import urlparse
 
@@ -37,6 +39,31 @@ from .models import OAuthUser
 from .oauthmanager import get_manager_by_type, OAuthAccessTokenException
 
 logger = logging.getLogger(__name__)
+
+# yjh: session 中保存 OAuth 一次性 state 的键名
+OAUTH_STATE_SESSION_KEY = 'oauth_state'
+
+
+def _build_state(request, oauth_type, nexturl):
+    # yjh: 生成一次性随机 state 并写入 session，供回调时校验"本次授权确由本站发起"
+    state = secrets.token_urlsafe(32)
+    request.session[OAUTH_STATE_SESSION_KEY] = state
+    request.session['oauth_state_type'] = oauth_type
+    request.session['oauth_state_next'] = nexturl
+    return state
+
+
+def _consume_state(request):
+    # yjh: 校验 state 并立即从 session 删除（一次性消费），通过返回 True
+    # yjh: 缺少 state（伪造回调）、session 无记录（跨站伪造）、值不匹配均拒绝
+    expected = request.session.pop(OAUTH_STATE_SESSION_KEY, None)
+    request.session.pop('oauth_state_type', None)
+    request.session.pop('oauth_state_next', None)
+    provided = request.GET.get('state') or ''
+    if not expected or not provided:
+        return False
+    # yjh: 用 compare_digest 做常量时间比较，避免时序侧信道
+    return hmac.compare_digest(expected, provided)
 
 
 def get_redirecturl(request):
@@ -71,7 +98,9 @@ def oauthlogin(request):
         # yjh: 平台未启用或类型非法，直接回首页（静默失败，不暴露内部信息）
         return HttpResponseRedirect('/')
     nexturl = get_redirecturl(request)
-    authorizeurl = manager.get_authorization_url(nexturl)
+    # yjh: 跳转授权页前先生成 state 存 session，回调时校验
+    state = _build_state(request, type, nexturl)
+    authorizeurl = manager.get_authorization_url(nexturl, state)
     return HttpResponseRedirect(authorizeurl)
 
 
@@ -82,6 +111,10 @@ def authorize(request):
         return HttpResponseRedirect('/')
     manager = get_manager_by_type(type)
     if not manager:
+        return HttpResponseRedirect('/')
+    # yjh: 功能点1：任何业务处理前先校验 state，阻断"伪造回调"式登录 CSRF
+    if not _consume_state(request):
+        logger.warning('oauth state 校验失败，疑似 CSRF 攻击，type=%s', type)
         return HttpResponseRedirect('/')
     # yjh: 第三方回调时携带的授权码 code（有效期很短，通常几分钟）
     code = request.GET.get('code', None)
@@ -98,7 +131,10 @@ def authorize(request):
     nexturl = get_redirecturl(request)
     if not rsp:
         # yjh: 拿 token 失败：重新生成授权 URL 让用户再走一遍授权流程
-        return HttpResponseRedirect(manager.get_authorization_url(nexturl))
+        # yjh: state 已被消费，重新发起前必须再生成一个新的
+        state = _build_state(request, type, nexturl)
+        return HttpResponseRedirect(
+            manager.get_authorization_url(nexturl, state))
     user = manager.get_oauth_userinfo()
     if user:
         if not user.nickname or not user.nickname.strip():

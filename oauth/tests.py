@@ -1,6 +1,6 @@
 import json
 from unittest.mock import patch
-from urllib.parse import unquote
+from urllib.parse import parse_qs, unquote, urlparse
 
 from django.conf import settings
 from django.contrib import auth
@@ -10,6 +10,12 @@ from django.urls import reverse
 from djangoblog.utils import get_sha256
 from oauth.models import OAuthConfig
 from oauth.oauthmanager import BaseOauthManager
+
+
+def _oauth_state(url):
+    # 从 oauthlogin 的跳转地址中取出本次授权流程的 state（回调时须原样带回）
+    return parse_qs(urlparse(url).query).get('state', [''])[0]
+
 
 
 # Create your tests here.
@@ -31,8 +37,10 @@ class OAuthConfigTest(TestCase):
         response = self.client.get('/oauth/oauthlogin?type=weibo')
         self.assertEqual(response.status_code, 302)
         self.assertTrue("api.weibo.com" in response.url)
+        state = _oauth_state(response.url)
 
-        response = self.client.get('/oauth/authorize?type=weibo&code=code')
+        response = self.client.get(
+            f'/oauth/authorize?type=weibo&code=code&state={state}')
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
 
@@ -225,8 +233,10 @@ class OauthLoginTest(TestCase):
         response = self.client.get('/oauth/oauthlogin?type=weibo')
         self.assertEqual(response.status_code, 302)
         self.assertTrue("api.weibo.com" in response.url)
+        state = _oauth_state(response.url)
 
-        response = self.client.get('/oauth/authorize?type=weibo&code=code')
+        response = self.client.get(
+            f'/oauth/authorize?type=weibo&code=code&state={state}')
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
 
@@ -237,7 +247,11 @@ class OauthLoginTest(TestCase):
         self.assertEqual(user.email, mock_user_info['email'])
         self.client.logout()
 
-        response = self.client.get('/oauth/authorize?type=weibo&code=code')
+        # 重新发起一次授权，拿到新的 state 才能通过回调校验
+        response = self.client.get('/oauth/oauthlogin?type=weibo')
+        state = _oauth_state(response.url)
+        response = self.client.get(
+            f'/oauth/authorize?type=weibo&code=code&state={state}')
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/')
 
@@ -264,8 +278,10 @@ class OauthLoginTest(TestCase):
         response = self.client.get('/oauth/oauthlogin?type=weibo')
         self.assertEqual(response.status_code, 302)
         self.assertTrue("api.weibo.com" in response.url)
+        state = _oauth_state(response.url)
 
-        response = self.client.get('/oauth/authorize?type=weibo&code=code')
+        response = self.client.get(
+            f'/oauth/authorize?type=weibo&code=code&state={state}')
 
         self.assertEqual(response.status_code, 302)
 
@@ -297,3 +313,67 @@ class OauthLoginTest(TestCase):
         self.assertEqual(user.username, mock_user_info['screen_name'])
         self.assertEqual(user.email, 'test@gmail.com')
         self.assertEqual(oauth_user.pk, oauth_user_id)
+
+
+class OAuthStateSecurityTest(TestCase):
+    """功能点1：OAuth state 参数校验（防登录 CSRF）"""
+
+    def setUp(self):
+        self.client = Client()
+        from django.core.cache import cache
+        cache.clear()
+        OAuthConfig.objects.create(
+            type='weibo', appkey='appkey', appsecret='appsecret',
+            callback_url='http://testserver/oauth/authorize',
+            is_enable=True)
+
+    @patch("oauth.oauthmanager.WBOauthManager.do_post")
+    def test_callback_without_state_is_rejected(self, mock_do_post):
+        """回调缺少 state（伪造回调）必须拒绝，且不触发换取 token"""
+        mock_do_post.return_value = json.dumps(
+            {"access_token": "access_token", "uid": "uid"})
+
+        response = self.client.get('/oauth/authorize?type=weibo&code=code')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        mock_do_post.assert_not_called()
+        self.assertFalse(auth.get_user(self.client).is_authenticated)
+
+    @patch("oauth.oauthmanager.WBOauthManager.do_post")
+    def test_callback_with_wrong_state_is_rejected(self, mock_do_post):
+        """state 被篡改（与 session 不一致）必须拒绝"""
+        mock_do_post.return_value = json.dumps(
+            {"access_token": "access_token", "uid": "uid"})
+
+        response = self.client.get('/oauth/oauthlogin?type=weibo')
+        response = self.client.get(
+            '/oauth/authorize?type=weibo&code=code&state=forged')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        mock_do_post.assert_not_called()
+
+    @patch("oauth.oauthmanager.WBOauthManager.do_post")
+    @patch("oauth.oauthmanager.WBOauthManager.do_get")
+    def test_state_cannot_be_replayed(self, mock_do_get, mock_do_post):
+        """同一个 state 只能用一次，重放必须拒绝"""
+        mock_do_post.return_value = json.dumps(
+            {"access_token": "access_token", "uid": "uid"})
+        mock_do_get.return_value = json.dumps({
+            "avatar_large": "avatar_large",
+            "screen_name": "screen_name1",
+            "id": "id",
+            "email": "email",
+        })
+
+        response = self.client.get('/oauth/oauthlogin?type=weibo')
+        state = _oauth_state(response.url)
+        self.client.get(f'/oauth/authorize?type=weibo&code=code&state={state}')
+
+        # 原样重放同一 state：session 中已消费，必须拒绝
+        response = self.client.get(
+            f'/oauth/authorize?type=weibo&code=code&state={state}')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+
