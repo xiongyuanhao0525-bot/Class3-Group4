@@ -42,8 +42,9 @@ class OAuthConfigTest(TestCase):
 
         response = self.client.get(
             f'/oauth/authorize?type=weibo&code=code&state={state}')
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/')
+        # 授权失败时展示友好提示页（功能点3），而不是静默跳首页
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('授权失败', response.content.decode())
 
 
 class OauthLoginTest(TestCase):
@@ -336,8 +337,8 @@ class OAuthStateSecurityTest(TestCase):
 
         response = self.client.get('/oauth/authorize?type=weibo&code=code')
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('授权请求已失效', response.content.decode())
         mock_do_post.assert_not_called()
         self.assertFalse(auth.get_user(self.client).is_authenticated)
 
@@ -351,8 +352,8 @@ class OAuthStateSecurityTest(TestCase):
         response = self.client.get(
             '/oauth/authorize?type=weibo&code=code&state=forged')
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('授权请求已失效', response.content.decode())
         mock_do_post.assert_not_called()
 
     @patch("oauth.oauthmanager.WBOauthManager.do_post")
@@ -375,8 +376,8 @@ class OAuthStateSecurityTest(TestCase):
         # 原样重放同一 state：session 中已消费，必须拒绝
         response = self.client.get(
             f'/oauth/authorize?type=weibo&code=code&state={state}')
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('授权请求已失效', response.content.decode())
 
 
 class OAuthBindingViewTest(TestCase):
@@ -474,4 +475,60 @@ class OAuthBindingViewTest(TestCase):
 
         self.assertEqual(response.status_code, 405)
         self.assertTrue(OAuthUser.objects.filter(id=oauth_user.id).exists())
+
+
+class OAuthFailureHintTest(TestCase):
+    """功能点3：授权失败友好提示与分阶段日志"""
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.client = Client()
+        OAuthConfig.objects.create(
+            type='weibo', appkey='appkey', appsecret='appsecret',
+            callback_url='http://testserver/oauth/authorize',
+            is_enable=True)
+        OAuthConfig.objects.create(
+            type='github', appkey='appkey', appsecret='appsecret',
+            callback_url='http://testserver/oauth/authorize',
+            is_enable=True)
+
+    def test_unsupported_type_shows_friendly_page(self):
+        """未知平台不再静默跳首页，而是给出提示页"""
+        response = self.client.get('/oauth/authorize?type=unknown')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('不支持的第三方登录方式', response.content.decode())
+
+    def test_token_failure_shows_friendly_page_and_logs(self):
+        """换取 token 失败：提示页 + 带阶段的 warning 日志"""
+        with self.assertLogs('oauth.views', level='WARNING') as logs:
+            response = self.client.get('/oauth/oauthlogin?type=github')
+            state = _oauth_state(response.url)
+            with patch("oauth.oauthmanager.GitHubOauthManager.do_post") as mock_do_post:
+                mock_do_post.return_value = 'error=bad_verification_code'
+                response = self.client.get(
+                    f'/oauth/authorize?type=github&code=code&state={state}')
+
+        self.assertEqual(response.status_code, 200)
+        page = response.content.decode()
+        self.assertIn('获取授权凭证失败', page)
+        self.assertIn('重新授权', page)
+        self.assertTrue(any('stage=token_failed' in line for line in logs.output))
+
+    @patch("oauth.oauthmanager.GitHubOauthManager.do_get")
+    @patch("oauth.oauthmanager.GitHubOauthManager.do_post")
+    def test_userinfo_failure_shows_friendly_page(
+            self, mock_do_post, mock_do_get):
+        """拉取用户信息失败：提示页而非静默回跳"""
+        mock_do_post.return_value = 'access_token=token&token_type=bearer'
+        mock_do_get.return_value = 'invalid json'
+
+        response = self.client.get('/oauth/oauthlogin?type=github')
+        state = _oauth_state(response.url)
+        response = self.client.get(
+            f'/oauth/authorize?type=github&code=code&state={state}')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('获取第三方用户信息失败', response.content.decode())
 

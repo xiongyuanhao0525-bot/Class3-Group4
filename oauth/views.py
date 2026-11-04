@@ -45,6 +45,39 @@ logger = logging.getLogger(__name__)
 # yjh: session 中保存 OAuth 一次性 state 的键名
 OAUTH_STATE_SESSION_KEY = 'oauth_state'
 
+# yjh: 平台标识 → 中文名（账号管理页与失败提示页共用）
+OAUTH_TYPE_NAMES = {
+    'weibo': '微博',
+    'google': 'Google',
+    'github': 'GitHub',
+    'facebook': 'FaceBook',
+    'qq': 'QQ',
+}
+
+# yjh: 功能点3：各类授权失败的友好提示文案（不暴露内部异常细节）
+OAUTH_ERROR_MESSAGES = {
+    'unsupported_type': '不支持的第三方登录方式，请返回登录页重试。',
+    'invalid_state': '授权请求已失效或来源不可信，请重新发起登录。',
+    'token_failed': '获取授权凭证失败，可能是授权已过期，请重新登录。',
+    'userinfo_failed': '获取第三方用户信息失败，请稍后重试。',
+}
+
+
+def _oauth_error(request, oauth_type, reason, detail=''):
+    # yjh: 功能点3：统一失败出口——渲染友好提示页；按"阶段"记录带上下文的日志
+    # yjh: state 失败返回 400（属于可疑请求），其余返回 200 便于用户自行重试
+    logger.warning(
+        'oauth 授权失败 type=%s stage=%s detail=%s ip=%s',
+        oauth_type, reason, detail, request.META.get('REMOTE_ADDR', '-'))
+    status = 400 if reason == 'invalid_state' else 200
+    return render(request, 'oauth/oauth_error.html', {
+        'type_name': OAUTH_TYPE_NAMES.get(oauth_type, oauth_type or '第三方平台'),
+        'oauth_type': oauth_type or '',
+        'message': OAUTH_ERROR_MESSAGES.get(reason, '登录失败，请稍后重试。'),
+        'stage': reason,
+    }, status=status)
+
+
 
 def _build_state(request, oauth_type, nexturl, bind=False):
     # yjh: 生成一次性随机 state 并写入 session，供回调时校验"本次授权确由本站发起"
@@ -114,25 +147,26 @@ def authorize(request):
     # yjh: 第三方登录回调入口（核心视图），完成"code → token → 用户 → 登录"全流程
     type = request.GET.get('type', None)
     if not type:
-        return HttpResponseRedirect('/')
+        # yjh: 功能点3：缺少平台标识 → 友好提示，而不是静默跳首页
+        return _oauth_error(request, type, 'unsupported_type')
     manager = get_manager_by_type(type)
     if not manager:
-        return HttpResponseRedirect('/')
+        # yjh: 功能点3：平台未启用或类型非法 → 友好提示
+        return _oauth_error(request, type, 'unsupported_type')
     # yjh: 功能点1：任何业务处理前先校验 state，阻断"伪造回调"式登录 CSRF
     if not _consume_state(request):
-        logger.warning('oauth state 校验失败，疑似 CSRF 攻击，type=%s', type)
-        return HttpResponseRedirect('/')
+        # yjh: 功能点3：state 失败属于可疑请求，返回 400 提示页
+        return _oauth_error(request, type, 'invalid_state')
     # yjh: 第三方回调时携带的授权码 code（有效期很短，通常几分钟）
     code = request.GET.get('code', None)
     try:
         rsp = manager.get_access_token_by_code(code)
     except OAuthAccessTokenException as e:
-        # yjh: 换 token 失败（code 过期/被重放等），记警告日志后回首页
-        logger.warning("OAuthAccessTokenException:" + str(e))
-        return HttpResponseRedirect('/')
+        # yjh: 功能点3：换 token 失败（code 过期/被重放等）→ 友好提示 + 阶段日志
+        return _oauth_error(request, type, 'token_failed', str(e))
     except Exception as e:
         # yjh: 兜底捕获网络超时等意外异常，rsp 置 None 走下方重新授权逻辑
-        logger.error(e)
+        logger.error('oauth 换取 token 异常 type=%s err=%s', type, e)
         rsp = None
     nexturl = get_redirecturl(request)
     if not rsp:
@@ -228,8 +262,8 @@ def authorize(request):
 
             return HttpResponseRedirect(url)
     else:
-        # yjh: 拉取用户信息失败（如接口异常），回跳原页面
-        return HttpResponseRedirect(nexturl)
+        # yjh: 功能点3：拉取用户信息失败 → 友好提示，不再静默回跳原页面
+        return _oauth_error(request, type, 'userinfo_failed')
 
 
 def emailconfirm(request, id, sign):
@@ -388,14 +422,7 @@ def bindsuccess(request, oauthid):
     })
 
 
-# yjh: 功能点2：平台标识 → 中文名，用于账号管理页展示
-OAUTH_TYPE_NAMES = {
-    'weibo': '微博',
-    'google': 'Google',
-    'github': 'GitHub',
-    'facebook': 'FaceBook',
-    'qq': 'QQ',
-}
+# yjh: 功能点2：第三方账号管理页与解绑视图
 
 
 @login_required
