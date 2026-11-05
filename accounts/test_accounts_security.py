@@ -1,14 +1,33 @@
 """
 accounts 模块安全功能测试
 
-覆盖功能：密码强度校验（注册、找回密码时校验长度 / 字符类型等强度并给出提示）
+覆盖两类功能：
+1. 密码强度校验（注册、找回密码时校验长度 / 字符类型等强度并给出提示）
+2. 登录失败锁定（连续 N 次失败后锁定一段时间，防暴力破解）
 """
-from django.test import TestCase
+from datetime import timedelta
+
+from django.core.cache import cache
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts import utils
 from accounts.forms import ForgetPasswordForm, RegisterForm
 from accounts.models import BlogUser
+
+
+def warm_up_site_setting():
+    """预热站点配置缓存，避免首次渲染页面时的 cache.clear() 冲掉统计状态
+
+    说明：模板里的 seo 上下文处理器会调用 djangoblog.utils.get_blog_setting()，
+    测试库第一次渲染页面时该函数会新建 BlogSettings 记录，而 BlogSettings.save()
+    里有一句 cache.clear()，会把本次测试写进缓存的数据一起清空——导致「按用户名
+    累计失败次数」只在第一个请求里生效。先预热一次，把记录建好，再清缓存即可。
+    真实环境里这条记录早已存在，不会触发该问题。
+    """
+    from djangoblog.utils import get_blog_setting
+    get_blog_setting()
 
 # 一个符合强度规则的密码：4 类字符、13 位、无连续/重复片段
 STRONG_PASSWORD = 'Blog@2026#Sec'
@@ -19,7 +38,6 @@ WEAK_PASSWORD = 'aaaa1111'
 # ---------------------------------------------------------------------------
 # 一、密码强度校验
 # ---------------------------------------------------------------------------
-
 
 class PasswordStrengthUtilsTest(TestCase):
     """utils.check_password_strength 的规则细节"""
@@ -159,3 +177,167 @@ class PasswordStrengthFormTest(TestCase):
             'new_password2': 'Zjc@2026#Reset',
         })
         self.assertTrue(form.is_valid(), form.errors)
+
+# ---------------------------------------------------------------------------
+# 二、登录失败锁定
+# ---------------------------------------------------------------------------
+
+class LoginLockUtilsTest(TestCase):
+    """utils 层的失败计数与锁定逻辑"""
+
+    def setUp(self):
+        cache.clear()
+        self.user = BlogUser.objects.create_user(
+            username='lockuser', email='lockuser@example.com',
+            password=STRONG_PASSWORD)
+
+    def test_failure_counter_and_auto_lock(self):
+        """连续失败达到上限后自动写入锁定时间"""
+        limit = utils.get_login_failure_limit()
+        for _ in range(limit - 1):
+            count, remaining = utils.register_login_failure(
+                self.user.username, user=self.user)
+            self.assertEqual(remaining, 0)
+
+        count, remaining = utils.register_login_failure(
+            self.user.username, user=self.user)
+        self.assertEqual(count, limit)
+        self.assertGreater(remaining, 0)
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_login_locked())
+
+    def test_reset_after_success(self):
+        """登录成功后计数与锁定状态被清空"""
+        utils.register_login_failure(self.user.username, user=self.user)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.failed_login_count, 1)
+
+        utils.reset_login_failures(self.user, self.user.username)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.failed_login_count, 0)
+        self.assertIsNone(self.user.lock_until)
+        self.assertEqual(utils.get_login_lock_remaining(
+            self.user.username, user=self.user), 0)
+
+    def test_lock_message(self):
+        """锁定提示文案包含分钟数"""
+        message = utils.build_login_lock_message(900)
+        self.assertIn('锁定', message)
+        self.assertIn('15 分钟', message)
+
+    @override_settings(LOGIN_FAILURE_LIMIT=3, LOGIN_LOCK_SECONDS=60)
+    def test_settings_override(self):
+        """阈值可通过 settings 配置"""
+        self.assertEqual(utils.get_login_failure_limit(), 3)
+        self.assertEqual(utils.get_login_lock_seconds(), 60)
+
+        for _ in range(2):
+            _, remaining = utils.register_login_failure(
+                self.user.username, user=self.user)
+            self.assertEqual(remaining, 0)
+
+        _, remaining = utils.register_login_failure(
+            self.user.username, user=self.user)
+        self.assertGreater(remaining, 0)
+
+    def test_unknown_username_uses_cache(self):
+        """不存在的用户名同样被计数并锁定（防止撞库试探）"""
+        limit = utils.get_login_failure_limit()
+        remaining = 0
+        for _ in range(limit):
+            _, remaining = utils.register_login_failure('ghost-user')
+        self.assertGreater(remaining, 0)
+        self.assertGreater(
+            utils.get_login_lock_remaining('ghost-user'), 0)
+
+
+class LoginLockViewTest(TestCase):
+    """登录视图接入失败锁定"""
+
+    def setUp(self):
+        # 顺序很重要：先清空缓存，让预热真的落库建记录；再清一次，避免上一个
+        # 用例留下的（已随事务回滚的）站点配置残留在缓存里。
+        cache.clear()
+        warm_up_site_setting()
+        cache.clear()
+        self.user = BlogUser.objects.create_user(
+            username='viewuser', email='viewuser@example.com',
+            password=STRONG_PASSWORD)
+        self.url = reverse('account:login')
+
+    def _login(self, password):
+        return self.client.post(self.url, {
+            'username': self.user.username,
+            'password': password,
+        })
+
+    def _fail_until_locked(self):
+        """连续用错误密码登录，直到触发锁定，返回最后一次响应"""
+        limit = utils.get_login_failure_limit()
+        response = None
+        for _ in range(limit):
+            response = self._login('Wrong@Pass2026')
+        return response
+
+    def test_failed_login_shows_remaining_attempts(self):
+        """失败一次后提示还可以再试几次"""
+        response = self._login('Wrong@Pass2026')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '再失败')
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.failed_login_count, 1)
+
+    def test_lock_after_limit_failures(self):
+        """连续失败达到上限后锁定并返回 429"""
+        response = self._fail_until_locked()
+        self.assertEqual(response.status_code, 429)
+        self.assertContains(response, '锁定', status_code=429)
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_login_locked())
+
+    def test_locked_user_rejected_even_with_correct_password(self):
+        """锁定期内即使密码正确也无法登录"""
+        self._fail_until_locked()
+        self.client.post(reverse('account:logout'))
+
+        response = self._login(STRONG_PASSWORD)
+        self.assertEqual(response.status_code, 429)
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_successful_login_resets_failure_count(self):
+        """失败几次后登录成功，计数归零"""
+        for _ in range(2):
+            self._login('Wrong@Pass2026')
+
+        response = self._login(STRONG_PASSWORD)
+        self.assertIn(response.status_code, [301, 302])
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.failed_login_count, 0)
+        self.assertIsNone(self.user.lock_until)
+
+    def test_lock_expires_and_allows_login(self):
+        """锁定时间过期后可以正常登录"""
+        self._fail_until_locked()
+        self.user.refresh_from_db()
+
+        # 把锁定时间改成过去，模拟锁定期已过
+        self.user.lock_until = timezone.now() - timedelta(seconds=1)
+        self.user.save(update_fields=['lock_until'])
+
+        response = self._login(STRONG_PASSWORD)
+        self.assertIn(response.status_code, [301, 302])
+
+    def test_unknown_username_locked_via_cache(self):
+        """不存在的用户名连续失败后同样返回锁定提示"""
+        limit = utils.get_login_failure_limit()
+        response = None
+        for _ in range(limit):
+            response = self.client.post(self.url, {
+                'username': 'ghost-user',
+                'password': 'Wrong@Pass2026',
+            })
+        self.assertEqual(response.status_code, 429)

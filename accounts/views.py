@@ -117,9 +117,20 @@ class LoginView(LoginFormView):
         return super(LoginView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
+        request = self.request
+        username = self._submitted_username()
+        user = self._get_user_by_username(username)
+
+        # 一、账号还在锁定期内：即使密码正确也不允许登录，直接返回锁定提示（429）
+        lock_remaining = utils.get_login_lock_remaining(username, user=user)
+        if lock_remaining:
+            return self._render_locked(username, lock_remaining)
+
         form = AuthenticationForm(data=self.request.POST, request=self.request)
 
         if form.is_valid():
+            # 登录成功：清空失败计数与锁定状态
+            utils.reset_login_failures(form.get_user(), username)
             delete_sidebar_cache()
             logger.info(self.redirect_field_name)
 
@@ -145,9 +156,63 @@ class LoginView(LoginFormView):
             return response
             # return HttpResponseRedirect('/')
         else:
-            return self.render_to_response({
-                'form': form
-            })
+            return self._register_failure(form)
+
+    def form_invalid(self, form):
+        """用户名/密码错误：累计失败次数，达到阈值后锁定账号"""
+        return self._register_failure(form)
+
+    def _submitted_username(self):
+        return (self.request.POST.get('username') or '').strip()
+
+    def _get_user_by_username(self, username):
+        """按用户名取用户对象，不存在时返回 None（用于失败计数与锁定判断）"""
+        if not username:
+            return None
+        return get_user_model().objects.filter(username=username).first()
+
+    def _register_failure(self, form):
+        """记录一次登录失败，并把剩余可试次数或锁定提示写回表单"""
+        username = self._submitted_username()
+        user = self._get_user_by_username(username)
+
+        lock_remaining = utils.get_login_lock_remaining(username, user=user)
+        if lock_remaining:
+            return self._render_locked(username, lock_remaining)
+
+        if not username:
+            # 连用户名都没填，不做计数
+            return self.render_to_response(self.get_context_data(form=form))
+
+        count, lock_remaining = utils.register_login_failure(
+            username, user=user)
+        if lock_remaining:
+            logger.warning(
+                '账号 %s 连续登录失败 %d 次，已锁定 %d 秒',
+                username, count, lock_remaining)
+            return self._render_locked(username, lock_remaining)
+        else:
+            fail_limit = utils.get_login_failure_limit()
+            lock_minutes = max(1, utils.get_login_lock_seconds() // 60)
+            form.add_error(
+                None,
+                '用户名或密码错误，再失败 %d 次后账号将被临时锁定 %d 分钟' % (
+                    max(fail_limit - count, 1), lock_minutes))
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def _render_locked(self, username, lock_remaining):
+        """渲染"账号已被临时锁定"的登录页"""
+        logger.warning('账号 %s 处于登录锁定期，剩余 %d 秒', username, lock_remaining)
+        locked_form = AuthenticationForm(
+            data=self.request.POST, request=self.request)
+        locked_form.add_error(None, utils.build_login_lock_message(lock_remaining))
+        response = self.render_to_response({
+            'form': locked_form,
+            'lock_remaining': lock_remaining,
+        })
+        response.status_code = 429
+        return response
 
     def get_success_url(self):
 

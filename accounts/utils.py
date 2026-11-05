@@ -1,9 +1,12 @@
 import logging
+import math
 import re
 import typing
 from datetime import timedelta
 
+from django.conf import settings
 from django.core.cache import cache
+from django.utils import timezone
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
@@ -186,6 +189,123 @@ def password_strength_level(password: str) -> str:
     if score <= 4:
         return 'medium'
     return 'strong'
+
+
+# ---------------------------------------------------------------------------
+# 二、登录失败锁定（防暴力破解）
+#
+# 同一账号连续失败 LOGIN_FAILURE_LIMIT 次后锁定 LOGIN_LOCK_SECONDS 秒；
+# 存在用户走数据库字段（可在 admin 里看到），不存在的用户名走缓存（同样计数，
+# 避免撞库试探），锁定后即使密码正确也不允许登录。
+# ---------------------------------------------------------------------------
+
+LOGIN_FAILURE_LIMIT = 5
+LOGIN_LOCK_SECONDS = 15 * 60
+LOGIN_FAILURE_WINDOW_SECONDS = 15 * 60
+
+_LOGIN_LOCK_CACHE_PREFIX = 'accounts:login-lock:'
+
+
+def get_login_failure_limit() -> int:
+    return int(getattr(settings, 'LOGIN_FAILURE_LIMIT', LOGIN_FAILURE_LIMIT))
+
+
+def get_login_lock_seconds() -> int:
+    return int(getattr(settings, 'LOGIN_LOCK_SECONDS', LOGIN_LOCK_SECONDS))
+
+
+def get_login_failure_window_seconds() -> int:
+    return int(getattr(
+        settings, 'LOGIN_FAILURE_WINDOW_SECONDS', LOGIN_FAILURE_WINDOW_SECONDS))
+
+
+def _lock_cache_key(username: str) -> str:
+    return '%s%s' % (_LOGIN_LOCK_CACHE_PREFIX, (username or '').strip().lower())
+
+
+def _cached_lock_remaining(username: str, now=None) -> int:
+    """读取缓存里（用户不存在的情况）的锁定剩余秒数"""
+    now = now or timezone.now()
+    state = cache.get(_lock_cache_key(username)) or {}
+    lock_until = state.get('lock_until')
+    if not lock_until:
+        return 0
+    remaining = lock_until - now.timestamp()
+    return int(math.ceil(remaining)) if remaining > 0 else 0
+
+
+def get_login_lock_remaining(username: str, user=None, now=None) -> int:
+    """获取账号剩余锁定秒数，0 表示未锁定
+
+    Args:
+        username: 本次登录提交的用户名
+        user: 用户名对应的用户对象；不存在时传 None
+        now: 当前时间，测试时可注入
+    """
+    now = now or timezone.now()
+    if user is not None:
+        return user.get_lock_remaining_seconds(now)
+    return _cached_lock_remaining(username, now)
+
+
+def register_login_failure(username: str, user=None, now=None) -> typing.Tuple[int, int]:
+    """记录一次登录失败
+
+    Args:
+        username: 本次登录提交的用户名
+        user: 用户名对应的用户对象；不存在时传 None
+        now: 当前时间，测试时可注入
+    Returns:
+        (累计失败次数, 剩余锁定秒数)，剩余锁定秒数大于 0 表示本次失败触发了锁定
+    """
+    now = now or timezone.now()
+    limit = get_login_failure_limit()
+    lock_seconds = get_login_lock_seconds()
+    window_seconds = get_login_failure_window_seconds()
+
+    if user is not None:
+        count = user.register_login_failure(
+            limit=limit,
+            lock_seconds=lock_seconds,
+            window_seconds=window_seconds,
+            now=now)
+        remaining = user.get_lock_remaining_seconds(now)
+        if remaining:
+            logger.warning('账号 %s 连续登录失败 %d 次，锁定 %d 秒', username, count, remaining)
+        return count, remaining
+
+    # 用户名不存在：用缓存按用户名计数，超过次数同样锁定
+    key = _lock_cache_key(username)
+    state = cache.get(key) or {}
+    count = int(state.get('count') or 0)
+    last_at = state.get('last_at')
+    if last_at and (now.timestamp() - last_at) > window_seconds:
+        count = 0
+    count += 1
+
+    new_state = {'count': count, 'last_at': now.timestamp(), 'lock_until': None}
+    remaining = 0
+    if count >= limit:
+        new_state['lock_until'] = (now + timedelta(seconds=lock_seconds)).timestamp()
+        new_state['count'] = 0
+        remaining = lock_seconds
+        logger.warning('用户名 %s 连续登录失败 %d 次，锁定 %d 秒', username, limit, lock_seconds)
+
+    cache.set(key, new_state, max(lock_seconds, window_seconds) * 2)
+    return count, remaining
+
+
+def reset_login_failures(user, username: str = '') -> None:
+    """登录成功后清空失败计数与锁定状态"""
+    if user is not None:
+        user.reset_login_failures()
+    cache.delete(_lock_cache_key(username or getattr(user, 'username', '')))
+
+
+def build_login_lock_message(remaining_seconds: int) -> str:
+    """构造锁定提示文案"""
+    minutes = max(1, int(math.ceil(remaining_seconds / 60.0)))
+    return '该账号因连续登录失败已被临时锁定，请约 %d 分钟后再试' % minutes
 
 
 # ---------------------------------------------------------------------------
