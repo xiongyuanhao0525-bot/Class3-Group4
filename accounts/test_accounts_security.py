@@ -1,9 +1,10 @@
 """
 accounts 模块安全功能测试
 
-覆盖两类功能：
+覆盖三类功能：
 1. 密码强度校验（注册、找回密码时校验长度 / 字符类型等强度并给出提示）
 2. 登录失败锁定（连续 N 次失败后锁定一段时间，防暴力破解）
+3. 找回密码验证码（重发倒计时 + 发送次数限制）
 """
 from datetime import timedelta
 
@@ -33,6 +34,8 @@ def warm_up_site_setting():
 STRONG_PASSWORD = 'Blog@2026#Sec'
 # 明显的弱密码：只有小写字母 + 数字，且有重复字符
 WEAK_PASSWORD = 'aaaa1111'
+# 验证码节流测试专用邮箱：不要用 admin@admin.com，避免与既有用例互相影响
+CODE_EMAIL = 'code-throttle@example.com'
 
 
 # ---------------------------------------------------------------------------
@@ -341,3 +344,119 @@ class LoginLockViewTest(TestCase):
                 'password': 'Wrong@Pass2026',
             })
         self.assertEqual(response.status_code, 429)
+
+# ---------------------------------------------------------------------------
+# 三、找回密码验证码节流
+# ---------------------------------------------------------------------------
+
+class VerificationCodeThrottleUtilsTest(TestCase):
+    """验证码发送节流的工具函数（重发倒计时 + 发送次数限制）"""
+
+    def setUp(self):
+        cache.clear()
+        utils.reset_code_send_state(CODE_EMAIL)
+
+    def test_first_send_is_allowed(self):
+        """没发过的时候既不用等，也没到次数上限"""
+        self.assertEqual(utils.get_code_resend_remaining(CODE_EMAIL), 0)
+        self.assertFalse(utils.is_code_send_limited(CODE_EMAIL))
+
+    def test_resend_needs_countdown(self):
+        """发过一次后要等满间隔才能再发"""
+        now = timezone.now()
+        interval = utils.get_code_resend_interval()
+        utils.record_code_sent(CODE_EMAIL, now=now)
+
+        self.assertEqual(
+            utils.get_code_resend_remaining(CODE_EMAIL, now=now), interval)
+        self.assertGreater(utils.get_code_resend_remaining(
+            CODE_EMAIL, now=now + timedelta(seconds=interval - 1)), 0)
+        self.assertEqual(utils.get_code_resend_remaining(
+            CODE_EMAIL, now=now + timedelta(seconds=interval)), 0)
+
+    @override_settings(CODE_SEND_LIMIT=3, CODE_SEND_WINDOW=3600,
+                       CODE_RESEND_INTERVAL=0)
+    def test_send_count_limit(self):
+        """一个窗口内发满次数后被限制"""
+        now = timezone.now()
+        for _ in range(3):
+            utils.record_code_sent(CODE_EMAIL, now=now)
+
+        self.assertTrue(utils.is_code_send_limited(CODE_EMAIL, now=now))
+        self.assertGreater(
+            utils.get_code_send_window_remaining(CODE_EMAIL, now=now), 0)
+
+    @override_settings(CODE_SEND_LIMIT=3, CODE_SEND_WINDOW=60,
+                       CODE_RESEND_INTERVAL=0)
+    def test_window_expiry_resets_count(self):
+        """窗口过去后次数自动清零，可以重新发"""
+        now = timezone.now()
+        for _ in range(3):
+            utils.record_code_sent(CODE_EMAIL, now=now)
+
+        later = now + timedelta(seconds=61)
+        self.assertFalse(utils.is_code_send_limited(CODE_EMAIL, now=later))
+        self.assertEqual(
+            utils.get_code_send_state(CODE_EMAIL, now=later)['count'], 0)
+        self.assertEqual(
+            utils.get_code_send_window_remaining(CODE_EMAIL, now=later), 0)
+
+    def test_reset_code_send_state(self):
+        """清空状态后可以立刻重新发送"""
+        utils.record_code_sent(CODE_EMAIL)
+        utils.reset_code_send_state(CODE_EMAIL)
+
+        self.assertEqual(utils.get_code_resend_remaining(CODE_EMAIL), 0)
+        self.assertFalse(utils.is_code_send_limited(CODE_EMAIL))
+
+
+@override_settings(
+    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+class VerificationCodeThrottleViewTest(TestCase):
+    """发送验证码接口接入节流"""
+
+    def setUp(self):
+        cache.clear()
+        utils.reset_code_send_state(CODE_EMAIL)
+        self.url = reverse('account:forget_password_code')
+
+    def _post_code(self, email=CODE_EMAIL):
+        return self.client.post(self.url, {'email': email})
+
+    def test_first_request_sends_code(self):
+        """首次请求正常发送，并告知前端倒计时秒数"""
+        response = self._post_code()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'ok')
+        self.assertEqual(
+            response['X-Code-Resend-After'],
+            str(utils.get_code_resend_interval()))
+
+    def test_second_request_is_throttled(self):
+        """倒计时内重复请求被拒绝（429 + retry_after）"""
+        self._post_code()
+        response = self._post_code()
+
+        self.assertEqual(response.status_code, 429)
+        data = response.json()
+        self.assertEqual(data['status'], 'too_frequent')
+        self.assertGreater(data['retry_after'], 0)
+
+    @override_settings(CODE_SEND_LIMIT=2, CODE_SEND_WINDOW=3600,
+                       CODE_RESEND_INTERVAL=0)
+    def test_send_count_limit_returns_limited(self):
+        """超过次数上限后返回 limited"""
+        self.assertEqual(self._post_code().status_code, 200)
+        self.assertEqual(self._post_code().status_code, 200)
+
+        response = self._post_code()
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response.json()['status'], 'limited')
+
+    def test_invalid_email_keeps_old_contract(self):
+        """邮箱非法时仍然返回原来的纯文本提示"""
+        response = self._post_code('not-an-email')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), '错误的邮箱')

@@ -309,6 +309,108 @@ def build_login_lock_message(remaining_seconds: int) -> str:
 
 
 # ---------------------------------------------------------------------------
+# 三、找回密码验证码的发送节流（重发倒计时 + 发送次数限制）
+#
+#   * 两次发送之间至少间隔 CODE_RESEND_INTERVAL 秒（重发倒计时）
+#   * 同一邮箱在 CODE_SEND_WINDOW 秒内最多发送 CODE_SEND_LIMIT 次
+# ---------------------------------------------------------------------------
+
+CODE_RESEND_INTERVAL = 60
+CODE_SEND_LIMIT = 5
+CODE_SEND_WINDOW = 60 * 60
+
+_CODE_STATE_CACHE_PREFIX = 'accounts:code-state:'
+
+
+def get_code_resend_interval() -> int:
+    return int(getattr(settings, 'CODE_RESEND_INTERVAL', CODE_RESEND_INTERVAL))
+
+
+def get_code_send_limit() -> int:
+    return int(getattr(settings, 'CODE_SEND_LIMIT', CODE_SEND_LIMIT))
+
+
+def get_code_send_window() -> int:
+    return int(getattr(settings, 'CODE_SEND_WINDOW', CODE_SEND_WINDOW))
+
+
+def _code_state_key(email: str) -> str:
+    return '%s%s' % (_CODE_STATE_CACHE_PREFIX, (email or '').strip().lower())
+
+
+def get_code_send_state(email: str, now=None) -> dict:
+    """读取某个邮箱的验证码发送状态
+
+    Returns:
+        {'sent_at': float|None, 'count': int, 'window_start': float|None}
+        sent_at 为上次发送时间戳，count 为当前窗口内已发送次数。
+    """
+    now = now or timezone.now()
+    raw = cache.get(_code_state_key(email)) or {}
+    if not isinstance(raw, dict):
+        raw = {}
+
+    count = int(raw.get('count') or 0)
+    window_start = raw.get('window_start')
+    if count and (not window_start or (now.timestamp() - window_start) > get_code_send_window()):
+        # 计数窗口已过期，重新计数
+        count = 0
+        window_start = None
+
+    return {'sent_at': raw.get('sent_at'), 'count': count, 'window_start': window_start}
+
+
+def get_code_resend_remaining(email: str, now=None) -> int:
+    """距离可以再次发送验证码还需要等待的秒数，0 表示可以立即发送"""
+    now = now or timezone.now()
+    sent_at = get_code_send_state(email, now)['sent_at']
+    if not sent_at:
+        return 0
+
+    interval = get_code_resend_interval()
+    elapsed = now.timestamp() - sent_at
+    if elapsed >= interval:
+        return 0
+    return int(math.ceil(interval - elapsed))
+
+
+def is_code_send_limited(email: str, now=None) -> bool:
+    """该邮箱在当前窗口内的发送次数是否已经用完"""
+    return get_code_send_state(email, now)['count'] >= get_code_send_limit()
+
+
+def get_code_send_window_remaining(email: str, now=None) -> int:
+    """距离发送次数窗口重置（可以再发满次数）还有多少秒"""
+    now = now or timezone.now()
+    window_start = get_code_send_state(email, now)['window_start']
+    if not window_start:
+        return 0
+    remaining = get_code_send_window() - (now.timestamp() - window_start)
+    return int(math.ceil(remaining)) if remaining > 0 else 0
+
+
+def record_code_sent(email: str, now=None) -> dict:
+    """记录一次验证码发送，返回记录后的状态"""
+    now = now or timezone.now()
+    state = get_code_send_state(email, now)
+    new_state = {
+        'sent_at': now.timestamp(),
+        'count': state['count'] + 1,
+        'window_start': state['window_start'] or now.timestamp(),
+    }
+    cache.set(
+        _code_state_key(email),
+        new_state,
+        max(get_code_send_window(), get_code_resend_interval()))
+    return new_state
+
+
+def reset_code_send_state(email: str) -> None:
+    """清空某个邮箱的发送状态（主要用于测试与排障）"""
+    cache.delete(_code_state_key(email))
+
+
+# ---------------------------------------------------------------------------
 # 四、验证码相关（原有逻辑）
 # ---------------------------------------------------------------------------
 

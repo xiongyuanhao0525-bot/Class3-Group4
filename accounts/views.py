@@ -1,4 +1,7 @@
 import logging
+import math
+
+from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib import auth
@@ -277,6 +280,16 @@ class ForgetPasswordView(SecureFormView):
 
 
 class ForgetPasswordEmailCode(View):
+    """发送找回密码的邮箱验证码
+
+    除了原来的「发一封验证码邮件」，这里还加了两道节流（防刷）：
+    1. 重发倒计时：同一邮箱两次发送之间至少要隔 CODE_RESEND_INTERVAL 秒，
+       前端按钮据此做倒计时，后端再校验一次，防止绕过前端直接刷接口；
+    2. 发送次数限制：同一邮箱在一个统计窗口内最多发 CODE_SEND_LIMIT 封，
+       超过就锁定到窗口结束，避免邮箱被当成免费短信/邮件通道。
+    被节流时返回 429 + JSON（含 retry_after 剩余秒数），前端可直接读出倒计时；
+    正常发送仍返回纯文本 "ok"，与旧接口保持兼容。
+    """
 
     def post(self, request: HttpRequest):
         form = ForgetPasswordCodeForm(request.POST)
@@ -284,8 +297,33 @@ class ForgetPasswordEmailCode(View):
             return HttpResponse("错误的邮箱")
         to_email = form.cleaned_data["email"]
 
+        # 第一道：一个窗口内的发送次数是否已用完
+        if utils.is_code_send_limited(to_email):
+            retry_after = utils.get_code_send_window_remaining(to_email)
+            logger.warning(
+                '邮箱 %s 验证码发送次数已达上限，需等待 %d 秒', to_email, retry_after)
+            return JsonResponse({
+                'status': 'limited',
+                'message': '该邮箱获取验证码过于频繁，请 %d 分钟后再试' % max(
+                    1, int(math.ceil(retry_after / 60.0))),
+                'retry_after': retry_after,
+            }, status=429)
+
+        # 第二道：距离上一次发送是否还没满倒计时
+        resend_remaining = utils.get_code_resend_remaining(to_email)
+        if resend_remaining:
+            return JsonResponse({
+                'status': 'too_frequent',
+                'message': '请 %d 秒后再获取验证码' % resend_remaining,
+                'retry_after': resend_remaining,
+            }, status=429)
+
         code = generate_code()
         utils.send_verify_email(to_email, code)
         utils.set_code(to_email, code)
+        utils.record_code_sent(to_email)
 
-        return HttpResponse("ok")
+        response = HttpResponse("ok")
+        # 让前端知道下一次可用的倒计时秒数，避免前后端两个常量各写一遍
+        response['X-Code-Resend-After'] = str(utils.get_code_resend_interval())
+        return response
