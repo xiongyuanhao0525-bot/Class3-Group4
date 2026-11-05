@@ -18,7 +18,7 @@ import uuid
 # timezone 时区、_ 翻译、csrf_exempt 免除 CSRF 校验、DetailView/ListView 通用视图
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.templatetags.static import static
@@ -168,6 +168,18 @@ class ArticleDetailView(DetailView):
     pk_url_kwarg = 'article_id'
     # 在模板中用 {{ article }} 这个名字访问当前文章
     context_object_name = "article"
+
+    # chj 新增：定时发布校验
+    # 拿到文章后先判断——如果 pub_time 在未来，说明是"定时发布"还没到点；
+    # 这时匿名访问直接 404，只有作者本人或管理员能提前看到。
+    def get_object(self, queryset=None):
+        article = super().get_object(queryset)
+        if article.pub_time > timezone.now() and article.status == 'p':
+            user = self.request.user
+            is_owner = user.is_authenticated and user == article.author
+            if not (is_owner or user.is_staff):
+                raise Http404('该文章尚未到发布时间')
+        return article
 
     def get_context_data(self, **kwargs):
         # 1) 评论表单：渲染页面底部的“写评论”输入框
