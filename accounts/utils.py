@@ -1,3 +1,5 @@
+import logging
+import re
 import typing
 from datetime import timedelta
 
@@ -7,7 +9,188 @@ from django.utils.translation import gettext_lazy as _
 
 from djangoblog.utils import send_email
 
+logger = logging.getLogger(__name__)
+
 _code_ttl = timedelta(minutes=5)
+
+# ---------------------------------------------------------------------------
+# 一、密码强度校验
+#
+# 注册、修改密码（找回密码）时统一走 check_password_strength，规则如下：
+#   1. 长度 8 ~ 64 个字符
+#   2. 至少包含 3 类字符：小写字母 / 大写字母 / 数字 / 特殊符号
+#   3. 不能是常见弱口令（123456、password 之类）
+#   4. 不能包含用户名（邮箱相似度由 Django 自带的 UserAttributeSimilarityValidator 负责）
+#   5. 不能出现 4 位以上的连续字符（1234、abcd、qwerty）或重复字符（aaaa）
+# ---------------------------------------------------------------------------
+
+PASSWORD_MIN_LENGTH = 8
+PASSWORD_MAX_LENGTH = 64
+PASSWORD_MIN_CHAR_TYPES = 3
+PASSWORD_MIN_REPEAT_RUN = 4
+PASSWORD_MIN_SEQUENCE_LEN = 4
+
+# 字符类型 -> 中文名称，用于拼装提示语
+CHAR_TYPE_LABELS = {
+    'lower': '小写字母',
+    'upper': '大写字母',
+    'digit': '数字',
+    'special': '特殊符号',
+}
+
+# 常见弱口令（统一小写比较）
+WEAK_PASSWORDS = {
+    '12345678', '123456789', '1234567890', '11111111', '00000000',
+    'password', 'password1', 'password123', 'p@ssw0rd', 'passw0rd',
+    'qwertyuiop', 'qwerty123', '1qaz2wsx', 'qwer1234', 'asdf1234',
+    'abc12345', 'abcd1234', 'a1234567', 'aa123456', 'admin123',
+    'admin888', 'iloveyou', 'woaini1314', 'zxcvbnm123',
+}
+
+# 键盘行与字母表，用于识别连续字符
+_SEQUENCES = (
+    '0123456789',
+    'abcdefghijklmnopqrstuvwxyz',
+    'qwertyuiop',
+    'asdfghjkl',
+    'zxcvbnm',
+)
+
+# 表单上展示给用户的规则说明
+PASSWORD_RULES_TEXT = (
+    '密码需 8-64 个字符，且至少包含 3 类字符（小写字母、大写字母、数字、特殊符号）；'
+    '不能是常见弱口令，不能包含用户名，不能出现 4 位以上连续或重复的字符。'
+)
+
+
+def password_char_types(password: str) -> typing.List[str]:
+    """返回密码中出现的字符类型列表，取值 lower/upper/digit/special
+
+    Args:
+        password: 待检查的密码
+    Returns:
+        出现的字符类型列表（可能为空）
+    """
+    types = []
+    if not password:
+        return types
+    if re.search(r'[a-z]', password):
+        types.append('lower')
+    if re.search(r'[A-Z]', password):
+        types.append('upper')
+    if re.search(r'\d', password):
+        types.append('digit')
+    if re.search(r'[^0-9a-zA-Z]', password):
+        types.append('special')
+    return types
+
+
+def has_sequential_chars(password: str, length: int = PASSWORD_MIN_SEQUENCE_LEN) -> bool:
+    """密码中是否含有 length 位以上的顺序字符（正序或倒序）
+
+    例如 1234、abcd、qwerty、4321。
+    """
+    if not password:
+        return False
+    lowered = password.lower()
+    for seq in _SEQUENCES:
+        for start in range(len(seq) - length + 1):
+            chunk = seq[start:start + length]
+            if chunk in lowered or chunk[::-1] in lowered:
+                return True
+    return False
+
+
+def has_repeated_chars(password: str, length: int = PASSWORD_MIN_REPEAT_RUN) -> bool:
+    """密码中是否含有 length 个以上连续重复的同一字符，例如 aaaa
+
+    比较时忽略大小写，因此 Aaaa 同样视为 4 个连续重复字符。
+    """
+    if not password:
+        return False
+    return re.search(r'(.)\1{%d,}' % (length - 1), password,
+                     re.IGNORECASE) is not None
+
+
+def check_password_strength(password: str, username: str = '') -> typing.List[str]:
+    """校验密码强度
+
+    Args:
+        password: 待校验密码
+        username: 用户名，用于检查密码是否包含用户名
+    Returns:
+        错误信息列表；为空列表表示密码强度合格
+    """
+    errors = []
+
+    if not password:
+        return ['密码不能为空']
+
+    if len(password) < PASSWORD_MIN_LENGTH:
+        errors.append('密码长度不能少于 %d 个字符（当前 %d 个）' % (
+            PASSWORD_MIN_LENGTH, len(password)))
+    if len(password) > PASSWORD_MAX_LENGTH:
+        errors.append('密码长度不能超过 %d 个字符（当前 %d 个）' % (
+            PASSWORD_MAX_LENGTH, len(password)))
+
+    types = password_char_types(password)
+    if len(types) < PASSWORD_MIN_CHAR_TYPES:
+        missing = '、'.join(
+            label for key, label in CHAR_TYPE_LABELS.items() if key not in types)
+        errors.append(
+            '密码至少需要包含 %d 类字符（小写字母、大写字母、数字、特殊符号），'
+            '当前 %d 类，还缺少：%s' % (
+                PASSWORD_MIN_CHAR_TYPES, len(types), missing))
+
+    if password.lower() in WEAK_PASSWORDS:
+        errors.append('该密码属于常见弱口令，容易被猜解，请更换')
+
+    if username and len(username) >= 3 and username.lower() in password.lower():
+        errors.append('密码不能包含用户名')
+
+    if has_sequential_chars(password):
+        errors.append('密码不能包含 4 位以上连续字符（如 1234、abcd、qwerty）')
+
+    if has_repeated_chars(password):
+        errors.append('密码不能包含 %d 个以上连续重复的字符（如 aaaa）' % PASSWORD_MIN_REPEAT_RUN)
+
+    return errors
+
+
+def password_strength_level(password: str) -> str:
+    """粗略评估密码强度等级，供前端展示强度条
+
+    Returns:
+        'empty'（未填写）/ 'weak' / 'medium' / 'strong'
+    """
+    if not password:
+        return 'empty'
+
+    score = 0
+    if len(password) >= PASSWORD_MIN_LENGTH:
+        score += 1
+    if len(password) >= 12:
+        score += 1
+    if len(password) >= 16:
+        score += 1
+    types = len(password_char_types(password))
+    if types >= 2:
+        score += 1
+    if types >= 3:
+        score += 1
+    if types >= 4:
+        score += 1
+
+    if score <= 2:
+        return 'weak'
+    if score <= 4:
+        return 'medium'
+    return 'strong'
+
+
+# ---------------------------------------------------------------------------
+# 四、验证码相关（原有逻辑）
+# ---------------------------------------------------------------------------
 
 
 def send_verify_email(to_mail: str, code: str, subject: str = _("Verify Email")):
