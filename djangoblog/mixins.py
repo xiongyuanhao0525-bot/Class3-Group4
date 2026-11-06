@@ -16,6 +16,7 @@ Django Blog 混入类 (Mixins)
 
 import logging
 from django.db import models
+from django.db.models import Prefetch   # xyh：功能点 3——自定义预加载（只取需要的列）
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -146,25 +147,41 @@ class OptimizedArticleQueryMixin:
 
     def get_optimized_article_queryset(self):
         """
-        返回优化后的 Article queryset
+        返回优化后的 Article queryset（功能点 3 增强）
 
         使用 select_related 预加载外键关联：
             - author: 文章作者
             - category: 文章分类
 
-        使用 prefetch_related 预加载多对多关联：
-            - tags: 文章标签
+        使用 prefetch_related 预加载多对多 / 反向关联：
+            - tags:        文章标签（卡片上的标签列表）
+            - comment_set: 文章评论（卡片上要显示 {{ article.comment_set.count }}）
+
+        【为什么必须预加载 comment_set】
+            列表卡模板 article_info.html 里有 {{ article.comment_set.count }}，
+            它会对每篇文章单独发一条 SELECT COUNT(*) —— 一页 10 篇文章就是 10 条
+            额外 SQL（典型 N+1）。用 Prefetch 只取 id 与 article_id 两列一次性
+            拉全，计数改为在内存里 len()，SQL 条数从 1+2N 降到 1+2。
+
+        【为什么不用 defer('body')】
+            实测正文 body 在列表页仍会被 seo_optimizer 插件读取（生成 meta 描述），
+            defer 掉之后反而变成“每篇文章再回查一次 body”，比不 defer 更慢，
+            因此这里保持整行读取。
 
         Returns:
             QuerySet: 优化后的 Article queryset
         """
         from blog.models import Article   # xyh：函数内导入避免模块级循环依赖
+        from comments.models import Comment   # xyh：评论模型用于反向关联预加载
 
         return Article.objects.select_related(
             'author',      # 预加载作者（ForeignKey）
             'category'     # 预加载分类（ForeignKey）
         ).prefetch_related(
-            'tags'         # 预加载标签（ManyToMany）
+            'tags',        # 预加载标签（ManyToMany）
+            # xyh：只取主键与外键列，避免把评论正文等大字段一起拉回来
+            Prefetch('comment_set',
+                     queryset=Comment.objects.only('id', 'article_id')),
         )
 
 

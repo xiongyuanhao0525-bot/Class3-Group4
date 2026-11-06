@@ -85,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',   # xyh：会话装载
     'django.middleware.locale.LocaleMiddleware',   # 中英文多语言
     'django.middleware.gzip.GZipMiddleware',       # 响应压缩
+    'djangoblog.rate_limit.RateLimitMiddleware',   # xyh：访问限流——登录/注册/找回密码验证码等敏感接口防撞库、防刷；置于业务处理前，超限直接 429
     # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',   # xyh：通用处理（URL 规整等）
     # 'django.middleware.cache.FetchFromCacheMiddleware',
@@ -484,3 +485,52 @@ ACTIVE_PLUGINS = [
     'article_recommendation',   # xyh：相关文章推荐
     'cloudflare_cache',  # Cloudflare缓存管理插件
 ]
+
+# ===== ⑰页面缓存策略（功能点 1：全站缓存 —— 视图级缓存 + 自动刷新）=====
+# xyh：改造前 UpdateCacheMiddleware/FetchFromCacheMiddleware 是注释状态，全站没有整页缓存；
+# xyh：现在改用 djangoblog.cache_utils.versioned_page_cache 做「视图级」整页缓存，
+# xyh：由 blog/views.py 的列表类视图显式挂载，比全站中间件更可控（不受后台/登录态干扰）。
+# xyh：⚠ 默认「开发(DEBUG)/测试」关闭、生产开启 —— 避免组员本地改模板后因缓存看不到效果；
+# xyh：演示/验收要展示缓存效果时，启动前设置环境变量 DJANGO_PAGE_CACHE=True 即可。
+PAGE_CACHE_ENABLED = env_to_bool('DJANGO_PAGE_CACHE', not (DEBUG or TESTING))
+# xyh：整页缓存时长（秒）。内容变更后由 cache_signals 提升版本号立即失效，不依赖它过期
+PAGE_CACHE_TIMEOUT = int(os.environ.get('DJANGO_PAGE_CACHE_TIMEOUT') or 600)
+
+# ===== ⑱安全加固（功能点 2）=====
+# xyh：以下为“无条件安全”项——不影响本地 http 调试，任何环境都应当开启
+SECURE_CONTENT_TYPE_NOSNIFF = True   # xyh：禁止浏览器 MIME 嗅探，防“伪装成图片的脚本”被执行
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'   # xyh：跨站跳转不泄露完整来源 URL
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'   # xyh：限制 window.opener，防反向标签劫持
+SESSION_COOKIE_HTTPONLY = True   # xyh：会话 Cookie 禁止 JS 读取，降低 XSS 后被劫持会话的风险
+SESSION_COOKIE_SAMESITE = 'Lax'   # xyh：限制跨站携带会话，缓解 CSRF
+CSRF_COOKIE_SAMESITE = 'Lax'
+# xyh：CSRF Cookie 保持可被 JS 读取（False）——前端 commentSystem.js / reactionPicker.js
+# xyh：需要从 cookie 取 csrftoken 放进请求头，设 True 会让评论/表情接口全部 403
+CSRF_COOKIE_HTTPONLY = False
+
+# xyh：以下为“HTTPS 专属”项——本地 http 开发开着会导致会话/表单全部失效，
+# xyh：因此默认随 DEBUG 变化：DEBUG=False（生产）自动开启，需要本地强制开启时设 DJANGO_HTTPS_ONLY=True
+HTTPS_ONLY = env_to_bool('DJANGO_HTTPS_ONLY', not DEBUG)
+if HTTPS_ONLY:
+    SECURE_SSL_REDIRECT = True   # xyh：http 请求 301 跳 https，防明文传输
+    SESSION_COOKIE_SECURE = True   # xyh：会话 Cookie 仅走 https
+    CSRF_COOKIE_SECURE = True   # xyh：CSRF Cookie 仅走 https
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_HSTS_SECONDS') or 31536000)   # xyh：HSTS 一年
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')   # xyh：反向代理后正确识别原始协议
+
+# ===== ⑲访问限流（功能点 2：主动防御）=====
+# xyh：只对“可被脚本反复刷”的敏感接口限流，正常浏览不受影响；键为「路径后缀」，值为 (次数上限, 窗口秒数)
+# xyh：⚠ 默认「开发(DEBUG)/测试」关闭、生产开启 —— 避免组员本地反复登录测试时被自己的限流挡住；
+# xyh：演示/验收要展示限流效果时，启动前设置环境变量 DJANGO_RATE_LIMIT=True 即可。
+RATE_LIMIT_ENABLED = env_to_bool('DJANGO_RATE_LIMIT', not (DEBUG or TESTING))
+RATE_LIMIT_RULES = {
+    'login/': (10, 60),                 # xyh：登录——每 IP 每分钟最多 10 次，防撞库
+    'register/': (5, 300),              # xyh：注册——每 IP 每 5 分钟最多 5 次，防批量刷号
+    'forget_password/': (5, 300),       # xyh：找回密码表单页
+    'forget_password_code/': (3, 300),  # xyh：验证码发送接口——防把邮件额度刷爆
+    'search/': (30, 60),                # xyh：站内搜索——防大批量爬取/拖垮搜索引擎
+}
+# xyh：默认不信任 X-Forwarded-For（可被伪造）；部署在可信反向代理后才开启
+RATE_LIMIT_TRUST_X_FORWARDED_FOR = env_to_bool('DJANGO_RATE_LIMIT_TRUST_XFF', False)

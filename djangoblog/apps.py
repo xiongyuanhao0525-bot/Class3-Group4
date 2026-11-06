@@ -10,4 +10,9 @@ class DjangoblogAppConfig(AppConfig):
         super().ready()
         # Import and load plugins here
         from .plugin_manage.loader import load_plugins   # xyh：延迟导入避免循环依赖
-        load_plugins()   # xyh：按 ACTIVE_PLUGINS 白名单实例化并注册全部插件 
+        load_plugins()   # xyh：按 ACTIVE_PLUGINS 白名单实例化并注册全部插件
+
+        # xyh：功能点 1——注册「页面缓存自动刷新」信号（内容变更 → 版本号 +1 → 旧页面缓存全部失效）
+        # xyh：放在 ready() 里显式注册，保证只要 Django 启动就一定挂上，不依赖某个模块被 import 的偶然时机
+        from .cache_signals import register_cache_invalidation
+        register_cache_invalidation() 

@@ -27,6 +27,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
+# 类视图方法装饰器：把函数式装饰器挂到类方法上（本文件用于给 dispatch 加页面缓存）
+from django.utils.decorators import method_decorator
 # Haystack（全文检索）的搜索视图，站内搜索页面基于它实现
 from haystack.views import SearchView
 
@@ -50,6 +52,8 @@ from djangoblog.mixins import (
     CachedListViewMixin,
     PageNumberMixin
 )
+# 页面缓存（功能点 1）：视图级整页缓存 + 全局版本号自动刷新（见 djangoblog/cache_utils.py）
+from djangoblog.cache_utils import build_view_cache_key, versioned_page_cache
 
 # 本模块的日志记录器，出错时按模块名输出日志，便于定位问题
 logger = logging.getLogger(__name__)
@@ -86,10 +90,13 @@ class ArticleListView(CachedListViewMixin, PageNumberMixin, ListView):
     # 本页面底部展示哪一类友情链接（L = 列表页）
     link_type = LinkShowType.L
 
-    # 整页缓存的缓存键：默认取请求参数中的 pages
-    # （子类一般会用 get_queryset_cache_key() 提供更精确的键，见下面各子类）
+    # 整页缓存的缓存键：原实现为 self.request.get['pages']，
+    # 但 request 是 HttpRequest 对象、.get 是方法，下标访问必然抛 AttributeError，
+    # 属历史遗留缺陷（该方法当时未被调用所以没暴露）。功能点 1 改为交给
+    # cache_utils.build_view_cache_key 统一生成带版本号的键。
     def get_view_cache_key(self):
-        return self.request.get['pages']
+        return build_view_cache_key(
+            self.__class__.__name__.lower(), self.request)
 
     def get_context_data(self, **kwargs):
         # 把友情链接类型放进模板上下文，模板据此决定底部显示哪些链接
@@ -103,6 +110,7 @@ class ArticleListView(CachedListViewMixin, PageNumberMixin, ListView):
 # 继承：OptimizedArticleQueryMixin 提供优化过的文章查询（少打数据库查询）
 #       ArticleListView 提供列表页的公共属性、分页和整页缓存
 # ============================================================
+@method_decorator(versioned_page_cache(key_prefix='blog-index'), name='dispatch')
 class IndexView(OptimizedArticleQueryMixin, ArticleListView):
     """
     首页视图（重构版）
@@ -168,6 +176,28 @@ class ArticleDetailView(DetailView):
     pk_url_kwarg = 'article_id'
     # 在模板中用 {{ article }} 这个名字访问当前文章
     context_object_name = "article"
+
+    def get_queryset(self):
+        """功能点 3：详情页把 作者 / 分类 / 标签 / 评论关联 一次性预加载，消除 N+1 查询。
+
+        原实现沿用 DetailView 默认的 Article.objects.all()，模板里再分别访问
+        article.category、article.author、article.tags.all、article.comment_set.count 时，
+        每访问一次关联就多打一条 SQL（分类 1 条、作者 1 条、标签关系 1 条、N 个标签 N 条、
+        评论计数 1 条）。改为 select_related 预加载外键、prefetch_related 预加载
+        多对多与反向关联后，关联查询总数固定，不随标签/评论数量增长。
+        """
+        from django.db.models import Prefetch
+
+        from comments.models import Comment
+
+        return Article.objects.select_related(
+            'author',      # 预加载作者（ForeignKey）
+            'category'     # 预加载分类（ForeignKey）
+        ).prefetch_related(
+            'tags',        # 预加载标签（ManyToMany）
+            Prefetch('comment_set',
+                     queryset=Comment.objects.only('id', 'article_id')),   # xyh：模板要显示评论数
+        )
 
     def get_context_data(self, **kwargs):
         # 1) 评论表单：渲染页面底部的“写评论”输入框
@@ -276,6 +306,7 @@ class ArticleDetailView(DetailView):
 # 分类目录视图：点某个分类后，显示该分类（含子分类）下的已发布文章
 # 地址形如 /category/<分类名>/
 # ============================================================
+@method_decorator(versioned_page_cache(key_prefix='blog-category'), name='dispatch')
 class CategoryDetailView(SlugCachedMixin, OptimizedArticleQueryMixin, ArticleListView):
     """
     分类目录列表（重构版）
@@ -333,6 +364,7 @@ class CategoryDetailView(SlugCachedMixin, OptimizedArticleQueryMixin, ArticleLis
 # 作者文章归档页：显示某位作者发表的全部已发布文章
 # 地址形如 /author/<用户名>/
 # ============================================================
+@method_decorator(versioned_page_cache(key_prefix='blog-author'), name='dispatch')
 class AuthorDetailView(OptimizedArticleQueryMixin, ArticleListView):
     """
     作者详情页（重构版）
@@ -374,6 +406,7 @@ class AuthorDetailView(OptimizedArticleQueryMixin, ArticleListView):
 # 标签列表视图：点某个标签后，显示打了这个标签的已发布文章
 # 地址形如 /tag/<标签名>/
 # ============================================================
+@method_decorator(versioned_page_cache(key_prefix='blog-tag'), name='dispatch')
 class TagDetailView(SlugCachedMixin, OptimizedArticleQueryMixin, ArticleListView):
     """
     标签列表页面（重构版）
@@ -419,6 +452,7 @@ class TagDetailView(SlugCachedMixin, OptimizedArticleQueryMixin, ArticleListView
 # 文章归档页：把所有已发布文章按时间顺序列出来（/archives.html）
 # 和其他列表页不同：这里不分页，一次把全部文章显示完
 # ============================================================
+@method_decorator(versioned_page_cache(key_prefix='blog-archives'), name='dispatch')
 class ArchivesView(OptimizedArticleQueryMixin, ArticleListView):
     """
     文章归档页面（重构版）
