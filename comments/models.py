@@ -19,7 +19,20 @@ class Comment(models.Model):
     # #jxr - author：外键指向用户表，CASCADE 级联删除（用户注销则评论一并删除）
     # #jxr - article：外键指向文章表，CASCADE 级联删除（文章删除则评论一并删除）
     # #jxr - parent_comment：自引用外键，顶级评论为 NULL，非空表示这是一条"楼中楼"回复
-    # #jxr - is_enable：审核开关，默认 False（新评论需管理员审核通过后才对外展示）
+    # #jxr - is_enable：展示开关，默认 False（新评论需管理员审核通过后才对外展示）
+    # #jxr - review_status：审核状态三态（待审/通过/拒绝），与 is_enable 保持同步；
+    # #jxr   对外可见性仍以 is_enable 为准，这样 article.comment_list()、模板过滤等旧链路无需改动
+
+    # #jxr 审核状态常量：既用于 choices，也供视图/后台/测试直接引用，避免手写字符串
+    REVIEW_STATUS_PENDING = 'pending'
+    REVIEW_STATUS_APPROVED = 'approved'
+    REVIEW_STATUS_REJECTED = 'rejected'
+    REVIEW_STATUS_CHOICES = [
+        (REVIEW_STATUS_PENDING, _('Pending review')),
+        (REVIEW_STATUS_APPROVED, _('Approved')),
+        (REVIEW_STATUS_REJECTED, _('Rejected')),
+    ]
+
     body = models.TextField('正文', max_length=300)  # 评论正文，最多300字
     creation_time = models.DateTimeField(_('creation time'), default=now)  # 评论创建时间
     last_modify_time = models.DateTimeField(_('last modify time'), default=now)  # 评论最后修改时间
@@ -39,6 +52,13 @@ class Comment(models.Model):
         on_delete=models.CASCADE)
     is_enable = models.BooleanField(_('enable'),  # 评论是否通过审核（是否显示）
                                     default=False, blank=False, null=False)
+    review_status = models.CharField(  # #jxr 三态审核状态：待审 / 通过 / 拒绝
+        _('review status'),
+        max_length=10,
+        choices=REVIEW_STATUS_CHOICES,
+        default=REVIEW_STATUS_PENDING,
+        db_index=True,  # #jxr 后台按状态筛选、批量操作都要走这个字段，单独建索引
+        help_text=_('Pending review / approved / rejected, kept in sync with enable.'))
 
     class Meta:
         ordering = ['-id']  # 按id倒序排列，最新评论显示在最前
@@ -54,6 +74,97 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+
+    # ==================== #jxr 审核状态：三态与 is_enable 的同步 ====================
+
+    @property
+    def is_approved(self):
+        """#jxr 是否已通过审核（等价于前台可见）。"""
+        return bool(self.is_enable)
+
+    def _sync_review_status(self):
+        """#jxr 保存前把 review_status 与 is_enable 对齐。
+
+        规则（兼容项目里历史写法“只改 is_enable”的代码）：
+        - 本次修改里 review_status 有变化 → 以 review_status 为准推 is_enable；
+        - 只有 is_enable 变化 → 由 is_enable 反推 review_status（True→通过，False→待审）；
+        - 新建对象两者都没显式给 → 默认待审（is_enable=False）。
+        """
+        previous = None
+        if self.pk:
+            # #jxr 只有已入库的对象才需要对比旧值；多一次 SELECT 换取两种写法都能自洽
+            previous = (type(self)._default_manager
+                        .filter(pk=self.pk)
+                        .values('is_enable', 'review_status')
+                        .first())
+
+        if previous is None:
+            status_changed = self.review_status != self.REVIEW_STATUS_PENDING
+            enable_changed = bool(self.is_enable)
+        else:
+            status_changed = self.review_status != previous['review_status']
+            enable_changed = bool(self.is_enable) != bool(previous['is_enable'])
+
+        if status_changed:
+            # #jxr 状态是“主”，展示开关是“从”：通过→可见，其余→不可见
+            self.is_enable = self.review_status == self.REVIEW_STATUS_APPROVED
+        elif enable_changed:
+            # #jxr 兼容旧代码：直接改 is_enable 时自动补出对应状态
+            self.review_status = (self.REVIEW_STATUS_APPROVED if self.is_enable
+                                  else self.REVIEW_STATUS_PENDING)
+
+        # #jxr 返回“审核状态或展示状态是否发生了变化”，save() 据此决定要不要清缓存
+        return status_changed or enable_changed
+
+    def save(self, *args, **kwargs):
+        """#jxr 重写 save，保证任何入口写入后三态与展示开关都是一致的。"""
+        update_fields = kwargs.get('update_fields')
+        visibility_changed = False
+        if update_fields is None:
+            visibility_changed = self._sync_review_status()
+        else:
+            fields = set(update_fields)
+            if 'review_status' in fields or 'is_enable' in fields:
+                visibility_changed = self._sync_review_status()
+                # #jxr 同步可能改到另一个字段，必须一起写进 update_fields，否则落库不完整
+                fields.update({'review_status', 'is_enable'})
+                kwargs['update_fields'] = fields
+        super().save(*args, **kwargs)
+
+        # #jxr 任何入口（后台批量动作、后台修改表单、approve()/reject()、脚本）只要
+        # #jxr 改动了审核/展示状态，就立刻失效该文章的评论缓存与侧边栏“近期评论”缓存。
+        # #jxr 只靠 blog_signals 是不够的：它只在 is_enable 为真时清缓存，把评论改成
+        # #jxr 拒绝/待审时不会触发，前台就会出现“后台已改、页面还是旧数据”。
+        if visibility_changed:
+            from comments.utils import invalidate_article_comment_cache
+            invalidate_article_comment_cache(self.article)
+
+    def approve(self, save=True):
+        """#jxr 审核通过：置为“通过”并对外可见。"""
+        self.review_status = self.REVIEW_STATUS_APPROVED
+        self.is_enable = True
+        self.last_modify_time = now()
+        if save:
+            self.save()
+        return self
+
+    def reject(self, save=True):
+        """#jxr 审核拒绝：置为“拒绝”并对外隐藏。"""
+        self.review_status = self.REVIEW_STATUS_REJECTED
+        self.is_enable = False
+        self.last_modify_time = now()
+        if save:
+            self.save()
+        return self
+
+    def reset_to_pending(self, save=True):
+        """#jxr 打回待审：置为“待审”并对外隐藏（用于误操作撤回）。"""
+        self.review_status = self.REVIEW_STATUS_PENDING
+        self.is_enable = False
+        self.last_modify_time = now()
+        if save:
+            self.save()
+        return self
 
     def get_reactions_summary(self, user=None):
         """

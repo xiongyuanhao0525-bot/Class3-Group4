@@ -55,8 +55,16 @@ class CommentPostView(AuthenticatedFormView):
         comment = form.save(False)        # 先不写入数据库
         comment.article = article         # 绑定所属文章
         from djangoblog.utils import get_blog_setting  # #jxr 延迟导入：获取站点配置工具
-        settings = get_blog_setting()
-        if not settings.comment_need_review:  # 如果站点配置不需要审核，评论直接通过
+        blog_setting = get_blog_setting()
+
+        # #jxr 按站点“先审后发”配置决定初始审核状态：
+        # #jxr - 需要审核：待审 + 不展示，等管理员在后台通过/拒绝
+        # #jxr - 不需审核：直接通过 + 展示
+        if blog_setting.comment_need_review:
+            comment.review_status = Comment.REVIEW_STATUS_PENDING
+            comment.is_enable = False
+        else:
+            comment.review_status = Comment.REVIEW_STATUS_APPROVED
             comment.is_enable = True
         comment.author = author           # 绑定评论作者
 
