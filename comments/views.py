@@ -1,5 +1,6 @@
 # Create your views here.
 from django.core.exceptions import ValidationError  # 业务校验异常
+from django.db import IntegrityError, transaction  # 并发写入的兜底与事务
 from django.http import HttpResponseRedirect, JsonResponse  # 页面跳转 / JSON 响应
 from django.shortcuts import get_object_or_404  # 查对象，不存在则返回404
 from django.views import View  # Django 基础视图类
@@ -88,19 +89,40 @@ class CommentReactionView(View):
     # #jxr 设计要点：
     # #jxr - GET 公开：任何人可查看某条已审核评论的表情统计
     # #jxr - POST 需登录：未登录返回 401；同一用户对同一表情再点一次即"取消"（切换语义）
+    # #jxr - 本视图是纯 JSON 接口：任何异常分支（评论不存在/类型非法/未登录）都返回 JSON，
+    # #jxr   不能把 HTML 404 页塞给前端，否则前端 res.json() 解析失败会退化成“操作失败，请重试”
+
+    @staticmethod
+    def _comment_not_found_response():
+        """#jxr 统一的“评论不存在”响应：状态码 404，保持 JSON 契约。"""
+        return JsonResponse({
+            'success': False,
+            'error': 'Comment not found'
+        }, status=404)
+
+    @staticmethod
+    def _get_visible_comment(comment_id):
+        """#jxr 只允许对“已通过审核”的评论回应；查不到返回 None（包含待审/拒绝的评论）。"""
+        return Comment.objects.filter(id=comment_id, is_enable=True).first()
+
+    @staticmethod
+    def _reactions_payload(comment, user):
+        """#jxr 组装接口返回体，GET 与 POST 共用，避免两处字段不一致。"""
+        return {
+            'success': True,
+            'reactions': comment.get_reactions_summary(user),
+            'available_reactions': CommentReaction.available_reaction_types(),
+        }
 
     def get(self, request, comment_id):
         """获取评论的 reactions 数据（公开访问）"""
-        comment = get_object_or_404(Comment, id=comment_id, is_enable=True)  # 只取已通过审核的评论
+        comment = self._get_visible_comment(comment_id)
+        if comment is None:
+            return self._comment_not_found_response()
 
         # 传递用户信息，如果未登录则传递 None
         user = request.user if request.user.is_authenticated else None
-        reactions_data = comment.get_reactions_summary(user)  # 调用模型方法统计表情
-
-        return JsonResponse({
-            'success': True,
-            'reactions': reactions_data
-        })
+        return JsonResponse(self._reactions_payload(comment, user))
 
     def post(self, request, comment_id):
         # POST 需要登录验证
@@ -109,40 +131,41 @@ class CommentReactionView(View):
                 'success': False,
                 'error': 'Authentication required'
             }, status=401)
-        # 获取评论（只有已启用的评论才能点赞）
-        comment = get_object_or_404(Comment, id=comment_id, is_enable=True)
 
-        # 获取 reaction 类型（前端传的 emoji）
-        reaction_type = request.POST.get('reaction_type')
+        # 获取评论（只有已启用的评论才能点赞）
+        comment = self._get_visible_comment(comment_id)
+        if comment is None:
+            return self._comment_not_found_response()
+
+        # 获取 reaction 类型（前端传的 emoji），顺手去掉可能的首尾空白
+        reaction_type = (request.POST.get('reaction_type') or '').strip()
 
         # 验证 reaction_type 是否合法（必须是预设表情之一）
-        valid_reactions = [choice[0] for choice in CommentReaction.REACTION_CHOICES]
-        if reaction_type not in valid_reactions:
+        if reaction_type not in CommentReaction.available_reaction_types():
             return JsonResponse({
+                'success': False,
                 'error': 'Invalid reaction type'
             }, status=400)
 
-        # 切换 reaction：已存在则删除（取消点赞），否则创建
-        # #jxr 依赖 models.CommentReaction 的 unique_together 唯一约束：
-        # #jxr get_or_create 在记录已存在时返回 (对象, False)，此时删除即可实现"取消"
-        reaction, created = CommentReaction.objects.get_or_create(
-            comment=comment,
-            user=request.user,
-            reaction_type=reaction_type
-        )
-
-        if not created:
-            # 已存在，删除它（取消点赞）
-            reaction.delete()
-            action = 'removed'
-        else:
+        # #jxr 切换语义：已存在则删除（取消），不存在则新增。
+        # #jxr 原来用 get_or_create 再判断 created，两个请求同时到达时可能都尝试 INSERT，
+        # #jxr 触发唯一约束报错；这里改为“先查后写”并放进事务 + 捕获 IntegrityError：
+        # #jxr 并发下另一个请求已经创建，就按“已添加”返回，不再把 500 抛给前端。
+        try:
+            with transaction.atomic():
+                reaction = CommentReaction.objects.filter(
+                    comment=comment, user=request.user, reaction_type=reaction_type).first()
+                if reaction is not None:
+                    reaction.delete()
+                    action = 'removed'
+                else:
+                    CommentReaction.objects.create(
+                        comment=comment, user=request.user, reaction_type=reaction_type)
+                    action = 'added'
+        except IntegrityError:
+            # #jxr 极端并发：唯一约束挡下了重复插入，说明该表情此刻已存在
             action = 'added'
 
-        # 返回该评论的所有 reactions 统计
-        reactions_data = comment.get_reactions_summary(request.user)
-
-        return JsonResponse({
-            'success': True,
-            'action': action,
-            'reactions': reactions_data
-        })
+        payload = self._reactions_payload(comment, request.user)
+        payload['action'] = action
+        return JsonResponse(payload)

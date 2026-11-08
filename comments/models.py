@@ -1,3 +1,5 @@
+from collections import Counter  # #jxr 表情汇总用计数器，避免逐表情再查一轮
+
 from django.conf import settings  # 获取 AUTH_USER_MODEL 等全局配置
 from django.db import models
 from django.utils.timezone import now  # 时区感知的当前时间，作为默认创建时间
@@ -166,43 +168,47 @@ class Comment(models.Model):
             self.save()
         return self
 
+    # ==================== #jxr 表情回应汇总 ====================
+
     def get_reactions_summary(self, user=None):
+        """#jxr 汇总该评论的表情回应：每种表情的数量、前若干位用户、当前用户是否点过。
+
+        原实现是“先按表情分组，再对每种表情各查一次用户列表 + 各查一次 exists”，
+        一条评论最多 8 种表情时要发 17 条 SQL；本实现改为：
+        - 1 条 SQL 取回全部回应（按表情、时间排序），在内存里分组计数；
+        - 登录用户再补 1 条 SQL 取“我点过哪些表情”。
+        同时顺序固定为“先点的在前”，用户预览列表不再随数据库返回顺序漂移。
         """
-        获取评论的 reactions 统计信息：按表情分组统计数量、点赞用户列表
-        """
-        from django.db.models import Count  # #jxr 函数内导入，避免模块加载开销
+        queryset = CommentReaction.objects.filter(comment=self)
 
-        reactions = CommentReaction.objects.filter(  # 查出该评论的全部反应记录
-            comment=self
-        ).values('reaction_type').annotate(count=Count('id'))  # 按表情类型分组，统计每种表情的数量
+        # #jxr values_list 直接取昵称/用户名，避免 select_related 把整行用户对象取回来
+        rows = list(
+            queryset.order_by('reaction_type', 'created_at', 'id').values_list(
+                'reaction_type', 'user__nickname', 'user__username'))
 
-        result = {}
-        for reaction in reactions:
-            emoji = reaction['reaction_type']  # 当前表情类型
+        counts = Counter()
+        user_previews = {}
+        for reaction_type, nickname, username in rows:
+            counts[reaction_type] += 1
+            names = user_previews.setdefault(reaction_type, [])
+            if len(names) < CommentReaction.USER_PREVIEW_LIMIT:
+                names.append(nickname or username)
 
-            # 获取点过该表情的用户（最多10个）
-            reaction_users = CommentReaction.objects.filter(
-                comment=self,
-                reaction_type=emoji
-            ).select_related('user')[:10]  # #jxr select_related 预取用户表，避免 N+1 查询
+        reacted_types = set()
+        if user is not None and getattr(user, 'is_authenticated', False):
+            reacted_types = set(
+                queryset.filter(user=user).values_list('reaction_type', flat=True))
 
-            user_names = [r.user.nickname or r.user.username for r in reaction_users]  # 取用户昵称，没有昵称则用用户名
-
-            # #jxr 组装该表情的汇总字典：数量、当前登录用户是否已点过、点过的用户名列表
-            result[emoji] = {
-                'count': reaction['count'],  # 该表情总数量
-                'has_reacted': False,
-                'users': user_names  # 点过该表情的用户名列表
+        # #jxr 固定按 REACTION_CHOICES 的顺序输出全部表情（没有回应的也返回 count=0），
+        # #jxr 前端可以直接按 key 取值，取消最后一个回应后也不会出现“键突然消失”
+        return {
+            reaction_type: {
+                'count': counts.get(reaction_type, 0),
+                'has_reacted': reaction_type in reacted_types,
+                'users': user_previews.get(reaction_type, []),
             }
-
-            if user and user.is_authenticated:  # 如果传入了登录用户，判断TA是否已点过该表情
-                result[emoji]['has_reacted'] = CommentReaction.objects.filter(
-                    comment=self,
-                    user=user,
-                    reaction_type=emoji
-                ).exists()
-
-        return result
+            for reaction_type in CommentReaction.available_reaction_types()
+        }
 
 
 class CommentReaction(models.Model):
@@ -219,6 +225,9 @@ class CommentReaction(models.Model):
         ('🚀', 'rocket'),
         ('👀', 'eyes'),
     ]
+    # #jxr 汇总时每种表情最多回传多少个用户名，避免接口响应过大
+    USER_PREVIEW_LIMIT = 10
+
     # #jxr 设计要点：
     # #jxr - comment：外键关联评论，related_name='reactions' 支持 comment.reactions 反向取全部反应
     # #jxr - user：外键关联用户，记录"谁"点的
@@ -256,3 +265,8 @@ class CommentReaction(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.reaction_type} on comment {self.comment.id}'
+
+    @classmethod
+    def available_reaction_types(cls):
+        """#jxr 当前支持的表情列表，API 回传给前端，避免前端再写死一份。"""
+        return [choice[0] for choice in cls.REACTION_CHOICES]
