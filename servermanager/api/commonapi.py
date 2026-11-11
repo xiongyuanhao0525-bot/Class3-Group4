@@ -9,6 +9,7 @@ import os
 
 import openai
 
+from servermanager.alarm import report_alarm
 from servermanager.models import commands
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,8 @@ class ChatGPT:
             return completion.choices[0].message.content
         except Exception as e:
             logger.error(e)
+            # #wxy 上报异常告警（内部已做合并与限频，不会因发信失败打断对话）
+            report_alarm('openai_error', f"ChatGPT 调用失败: {e}")
             return "服务器出错了"
 
 
@@ -63,7 +66,9 @@ class CommandHandler:
         try:
             res = os.popen(cmd).read()
             return res
-        except BaseException:
+        except BaseException as e:
+            # #wxy 上报命令执行异常告警（合并 + 限频后再通知管理员）
+            report_alarm('command_error', f"运维命令执行失败: {cmd} | {e}")
             return '命令执行出错!'
 
     def get_help(self):
