@@ -49,6 +49,16 @@ class SeoOptimizerPlugin(BasePlugin):
             meta_tags += f'<meta property="article:tag" content="{escape(tag.name)}"/>'
         meta_tags += f'<meta property="og:site_name" content="{escape(blog_setting.site_name)}"/>'
 
+        # #wxy Twitter/X 卡片标签：文章页使用大图卡片
+        article_image = request.build_absolute_uri(article.get_first_image_url())
+        meta_tags += (
+            '<meta name="twitter:card" content="summary_large_image"/>'
+            f'<meta name="twitter:title" content="{escape(article.title)}"/>'
+            f'<meta name="twitter:description" content="{description_escaped}"/>'
+        )
+        if article_image:
+            meta_tags += f'<meta name="twitter:image" content="{article_image}"/>'
+
         # JSON-LD 结构化数据
         structured_data = {
             "@context": "https://schema.org",
@@ -162,8 +172,15 @@ class SeoOptimizerPlugin(BasePlugin):
                 "query-input": "required name=search_term_string"
             }
         }
+        # #wxy Twitter/X 卡片标签：列表/首页使用摘要卡片
+        from django.utils.html import escape
+        meta_tags = (
+            '<meta name="twitter:card" content="summary"/>'
+            f'<meta name="twitter:title" content="{escape(blog_setting.site_name)}"/>'
+            f'<meta name="twitter:description" content="{escape(blog_setting.site_description or blog_setting.site_name)}"/>'
+        )
         return {
-            "meta_tags": "",
+            "meta_tags": meta_tags,
             "json_ld": structured_data
         }
 
@@ -196,8 +213,12 @@ class SeoOptimizerPlugin(BasePlugin):
         # 只生成 JSON-LD 和增强的 OG 标签
         json_ld_script = f'<script type="application/ld+json">{json.dumps(seo_data.get("json_ld", {}), ensure_ascii=False, indent=4)}</script>'
 
+        # #wxy 在全站 <head> 暴露 sitemap 入口，便于搜索引擎发现站点地图
+        sitemap_link = '<link rel="sitemap" type="application/xml" href="/sitemap.xml"/>'
+
         seo_html = f"""
         {seo_data.get("meta_tags", "")}
+        {sitemap_link}
         {json_ld_script}
         """
         

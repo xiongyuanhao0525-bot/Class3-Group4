@@ -3,14 +3,20 @@
 
 覆盖本轮两个插件的新增功能：
   - image_lazy_loading：占位图（data-src + 骨架占位）与加载失败兜底；
-  - seo_optimizer：Twitter/X 卡片标签与 sitemap 入口。
+  - seo_optimizer：Twitter/X 卡片标签与 sitemap 入口链接。
 
 plugins 不是 Django INSTALLED_APPS，可通过显式标签运行：
     python manage.py test plugins.tests
 """
+from types import SimpleNamespace
+from unittest.mock import patch
+
 from django.test import RequestFactory, TestCase
 
+from accounts.models import BlogUser
+from blog.models import Article, Category
 from plugins.image_lazy_loading.plugin import plugin as image_plugin
+from plugins.seo_optimizer.plugin import SeoOptimizerPlugin
 
 
 class ImageLazyLoadingPluginTest(TestCase):
@@ -58,3 +64,64 @@ class ImageLazyLoadingPluginTest(TestCase):
 
     def test_js_files_registered(self):
         self.assertEqual(image_plugin.get_js_files(), ['js/lazyload.js'])
+
+
+class SeoOptimizerPluginTest(TestCase):
+    """SEO 插件：Twitter 卡片标签 + sitemap 入口。"""
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.seo = SeoOptimizerPlugin()
+        self.blog_setting = SimpleNamespace(
+            site_name='测试站点', site_description='这是一个测试站点描述')
+
+    def _make_article(self):
+        user = BlogUser.objects.create_superuser(
+            email='seo@example.com', username='seouser', password='seo12345')
+        category = Category.objects.create(name='测试分类')
+        article = Article.objects.create(
+            title='SEO 测试文章',
+            body='正文内容，用于生成描述。',
+            author=user,
+            category=category,
+            type='a',
+            status='p',
+        )
+        return article
+
+    def test_default_page_twitter_summary_card(self):
+        request = self.factory.get('/')
+        with patch('plugins.seo_optimizer.plugin.get_blog_setting',
+                   return_value=self.blog_setting):
+            data = self.seo._get_default_seo_data({}, request, self.blog_setting)
+
+        meta = data['meta_tags']
+        self.assertIn('twitter:card" content="summary"', meta)
+        self.assertIn('twitter:title', meta)
+        self.assertIn('twitter:description', meta)
+
+    def test_article_page_twitter_large_card(self):
+        article = self._make_article()
+        request = self.factory.get(article.get_full_url())
+        context = {'article': article, 'request': request}
+
+        with patch('plugins.seo_optimizer.plugin.get_blog_setting',
+                   return_value=self.blog_setting):
+            data = self.seo._get_article_seo_data(context, request, self.blog_setting)
+
+        meta = data['meta_tags']
+        self.assertIn('twitter:card" content="summary_large_image"', meta)
+        self.assertIn('twitter:title', meta)
+        self.assertIn('twitter:description', meta)
+
+    def test_dispatch_outputs_sitemap_link(self):
+        request = self.factory.get('/')
+        request.resolver_match = SimpleNamespace(view_name='blog:index')
+        context = {'request': request}
+
+        with patch('plugins.seo_optimizer.plugin.get_blog_setting',
+                   return_value=self.blog_setting):
+            html = self.seo.dispatch_seo_generation('', context)
+
+        self.assertIn('rel="sitemap"', html)
+        self.assertIn('/sitemap.xml', html)
