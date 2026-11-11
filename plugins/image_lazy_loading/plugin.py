@@ -5,11 +5,21 @@ from djangoblog.plugin_manage.base_plugin import BasePlugin
 from djangoblog.plugin_manage import hooks
 from djangoblog.plugin_manage.hook_constants import ARTICLE_CONTENT_HOOK_NAME
 
+# #wxy 内联 SVG 占位图（灰色骨架），data URI 形式，无需额外静态请求
+PLACEHOLDER_DATA_URI = (
+    "data:image/svg+xml;charset=utf-8,"
+    "%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='400'%20height='300'%3E"
+    "%3Crect%20width='100%25'%20height='100%25'%20fill='%23eeeeee'/%3E"
+    "%3C/svg%3E"
+)
+# #wxy 图片加载失败时的兜底图（与占位图一致的灰底，避免裂图）
+FALLBACK_DATA_URI = PLACEHOLDER_DATA_URI
+
 
 class ImageOptimizationPlugin(BasePlugin):
     PLUGIN_NAME = '图片性能优化插件'
     PLUGIN_DESCRIPTION = '自动为文章中的图片添加懒加载、异步解码等性能优化属性，显著提升页面加载速度。'
-    PLUGIN_VERSION = '1.0.0'
+    PLUGIN_VERSION = '1.1.0'
     PLUGIN_AUTHOR = 'liangliangyy'
 
     def __init__(self):
@@ -17,7 +27,10 @@ class ImageOptimizationPlugin(BasePlugin):
         self.config = {
             'enable_lazy_loading': True,        # 启用懒加载
             'enable_async_decoding': True,      # 启用异步解码
-            'add_loading_placeholder': True,    # 添加加载占位符
+            'add_loading_placeholder': True,    # 添加加载占位图（data-src + 骨架占位）
+            'placeholder_src': PLACEHOLDER_DATA_URI,  # 占位图 data URI
+            'enable_error_fallback': True,     # 图片加载失败兜底
+            'fallback_src': FALLBACK_DATA_URI, # 失败兜底图 data URI
             'optimize_external_images': True,   # 优化外部图片
             'add_responsive_attributes': True,  # 添加响应式属性
             'skip_first_image': True,          # 跳过第一张图片（LCP优化）
@@ -148,6 +161,25 @@ class ImageOptimizationPlugin(BasePlugin):
             if 'loading' in attrs:
                 del attrs['loading']
 
+        # 9. #wxy 加载占位图：真实地址存入 data-src，src 先放内联 SVG 骨架占位；
+        #    由 lazyload.js 在图片进入视口时把 data-src 回填到 src。
+        #    仅对懒加载图片生效，首图（LCP）保持真实 src 直接加载。
+        if (self.config['add_loading_placeholder'] and attrs.get('loading') == 'lazy'
+                and 'src' in attrs and attrs['src']):
+            attrs['data-src'] = attrs['src']
+            attrs['src'] = self.config['placeholder_src']
+            existing_class = attrs.get('class', '')
+            attrs['class'] = ('lazy-img ' + existing_class).strip()
+
+        # 10. #wxy 加载失败兜底：真实图加载出错时回退到兜底图，避免出现裂图；
+        #     onerror 先置空自身防止兜底图再次失败造成死循环。
+        if self.config['enable_error_fallback'] and 'src' in attrs:
+            attrs['data-fallback'] = self.config['fallback_src']
+            attrs['onerror'] = (
+                "this.onerror=null;"
+                "if(this.dataset.fallback){this.src=this.dataset.fallback;}"
+            )
+
         return attrs
 
     def _build_img_tag(self, attrs):
@@ -176,6 +208,10 @@ class ImageOptimizationPlugin(BasePlugin):
             return get_current_site().domain
         except:
             return ''
+
+    def get_js_files(self):
+        """#wxy 返回懒加载脚本：观察 .lazy-img，进入视口时把 data-src 回填到 src。"""
+        return ['js/lazyload.js']
 
 
 # 实例化插件
