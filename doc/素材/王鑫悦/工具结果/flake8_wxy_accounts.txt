@@ -1,0 +1,55 @@
+D:\Class3-Group4\accounts\admin.py:12:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\accounts\admin.py:13:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:21:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:22:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:23:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:24:80: E501 line too long (196 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:25:80: E501 line too long (329 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:26:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:27:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:28:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:29:80: E501 line too long (165 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:30:80: E501 line too long (203 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:31:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:32:80: E501 line too long (94 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:33:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:34:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:35:80: E501 line too long (94 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:36:80: E501 line too long (266 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0001_initial.py:37:80: E501 line too long (229 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0002_alter_bloguser_options_remove_bloguser_created_time_and_more.py:16:80: E501 line too long (120 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0002_alter_bloguser_options_remove_bloguser_created_time_and_more.py:29:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0002_alter_bloguser_options_remove_bloguser_created_time_and_more.py:34:80: E501 line too long (107 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0002_alter_bloguser_options_remove_bloguser_created_time_and_more.py:39:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\accounts\migrations\0002_alter_bloguser_options_remove_bloguser_created_time_and_more.py:44:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\accounts\test_admin.py:6:1: F401 'django.test.TestCase' imported but unused
+D:\Class3-Group4\accounts\test_admin.py:6:1: F401 'django.test.RequestFactory' imported but unused
+D:\Class3-Group4\accounts\test_admin.py:7:1: F401 'django.urls.reverse' imported but unused
+D:\Class3-Group4\accounts\test_admin.py:84:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\accounts\test_admin.py:92:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\accounts\test_user_business_logic.py:5:1: F401 'django.test.Client' imported but unused
+D:\Class3-Group4\accounts\test_user_business_logic.py:7:1: F401 'django.utils.timezone' imported but unused
+D:\Class3-Group4\accounts\tests.py:4:1: F401 'django.utils.translation.gettext_lazy as _' imported but unused
+D:\Class3-Group4\accounts\tests.py:8:1: F403 'from djangoblog.utils import *' used; unable to detect undefined names
+D:\Class3-Group4\accounts\tests.py:26:9: F841 local variable 'site' is assigned to but never used
+D:\Class3-Group4\accounts\tests.py:26:16: F405 'get_current_site' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:31:9: F841 local variable 'testuser' is assigned to but never used
+D:\Class3-Group4\accounts\tests.py:74:16: F405 'get_sha256' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:74:27: F405 'get_sha256' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:74:38: F405 'settings' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:86:9: F405 'delete_sidebar_cache' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:123:16: F405 'generate_code' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:156:16: F405 'generate_code' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:192:5: E303 too many blank lines (2)
+D:\Class3-Group4\accounts\tests.py:193:16: F405 'generate_code' may be undefined, or defined from star imports: djangoblog.utils
+D:\Class3-Group4\accounts\tests.py:207:1: W391 blank line at end of file
+D:\Class3-Group4\accounts\utils.py:13:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\accounts\utils.py:21:80: E501 line too long (116 > 79 characters)
+D:\Class3-Group4\accounts\views.py:2:1: F401 'django.utils.translation.gettext_lazy as _' imported but unused
+D:\Class3-Group4\accounts\views.py:19:80: E501 line too long (106 > 79 characters)
+D:\Class3-Group4\accounts\views.py:20:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\accounts\views.py:22:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\accounts\views.py:51:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\accounts\views.py:72:19: E127 continuation line over-indented for visual indent
+D:\Class3-Group4\accounts\views.py:206:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\accounts\views.py:207:80: E501 line too long (82 > 79 characters)

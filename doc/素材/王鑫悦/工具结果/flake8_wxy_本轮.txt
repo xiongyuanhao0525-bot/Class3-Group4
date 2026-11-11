@@ -1,0 +1,73 @@
+plugins/image_lazy_loading/plugin.py:11:80: E501 line too long (81 > 79 characters)
+plugins/image_lazy_loading/plugin.py:33:47: E261 at least two spaces before inline comment
+plugins/image_lazy_loading/plugin.py:57:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:61:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:64:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:67:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:70:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:76:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:84:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:87:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:92:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:112:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:138:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:140:80: E501 line too long (85 > 79 characters)
+plugins/image_lazy_loading/plugin.py:150:80: E501 line too long (91 > 79 characters)
+plugins/image_lazy_loading/plugin.py:167:80: E501 line too long (85 > 79 characters)
+plugins/image_lazy_loading/plugin.py:190:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:194:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:199:1: W293 blank line contains whitespace
+plugins/image_lazy_loading/plugin.py:209:9: E722 do not use bare 'except'
+plugins/seo_optimizer/plugin.py:3:1: F401 'django.template.defaultfilters.truncatewords' imported but unused
+plugins/seo_optimizer/plugin.py:12:80: E501 line too long (124 > 79 characters)
+plugins/seo_optimizer/plugin.py:27:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:34:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:43:80: E501 line too long (90 > 79 characters)
+plugins/seo_optimizer/plugin.py:44:80: E501 line too long (97 > 79 characters)
+plugins/seo_optimizer/plugin.py:45:80: E501 line too long (85 > 79 characters)
+plugins/seo_optimizer/plugin.py:46:80: E501 line too long (84 > 79 characters)
+plugins/seo_optimizer/plugin.py:49:80: E501 line too long (87 > 79 characters)
+plugins/seo_optimizer/plugin.py:50:80: E501 line too long (98 > 79 characters)
+plugins/seo_optimizer/plugin.py:53:80: E501 line too long (81 > 79 characters)
+plugins/seo_optimizer/plugin.py:57:80: E501 line too long (81 > 79 characters)
+plugins/seo_optimizer/plugin.py:60:80: E501 line too long (82 > 79 characters)
+plugins/seo_optimizer/plugin.py:73:80: E501 line too long (82 > 79 characters)
+plugins/seo_optimizer/plugin.py:87:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:94:80: E501 line too long (104 > 79 characters)
+plugins/seo_optimizer/plugin.py:95:80: E501 line too long (109 > 79 characters)
+plugins/seo_optimizer/plugin.py:97:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:114:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:121:80: E501 line too long (104 > 79 characters)
+plugins/seo_optimizer/plugin.py:122:80: E501 line too long (108 > 79 characters)
+plugins/seo_optimizer/plugin.py:123:80: E501 line too long (104 > 79 characters)
+plugins/seo_optimizer/plugin.py:125:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:145:80: E501 line too long (104 > 79 characters)
+plugins/seo_optimizer/plugin.py:146:80: E501 line too long (111 > 79 characters)
+plugins/seo_optimizer/plugin.py:147:80: E501 line too long (107 > 79 characters)
+plugins/seo_optimizer/plugin.py:149:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:171:80: E501 line too long (95 > 79 characters)
+plugins/seo_optimizer/plugin.py:179:80: E501 line too long (86 > 79 characters)
+plugins/seo_optimizer/plugin.py:180:80: E501 line too long (125 > 79 characters)
+plugins/seo_optimizer/plugin.py:199:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:202:80: E501 line too long (81 > 79 characters)
+plugins/seo_optimizer/plugin.py:204:80: E501 line too long (82 > 79 characters)
+plugins/seo_optimizer/plugin.py:208:80: E501 line too long (80 > 79 characters)
+plugins/seo_optimizer/plugin.py:209:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:211:80: E501 line too long (81 > 79 characters)
+plugins/seo_optimizer/plugin.py:214:80: E501 line too long (143 > 79 characters)
+plugins/seo_optimizer/plugin.py:217:80: E501 line too long (89 > 79 characters)
+plugins/seo_optimizer/plugin.py:224:1: W293 blank line contains whitespace
+plugins/seo_optimizer/plugin.py:228:1: E305 expected 2 blank lines after class or function definition, found 1
+plugins/tests.py:96:80: E501 line too long (81 > 79 characters)
+plugins/tests.py:110:80: E501 line too long (86 > 79 characters)
+servermanager/alarm.py:57:80: E501 line too long (83 > 79 characters)
+servermanager/alarm.py:60:80: E501 line too long (85 > 79 characters)
+servermanager/alarm.py:63:80: E501 line too long (89 > 79 characters)
+servermanager/alarm.py:66:80: E501 line too long (83 > 79 characters)
+servermanager/alarm.py:100:80: E501 line too long (83 > 79 characters)
+servermanager/alarm.py:105:80: E501 line too long (91 > 79 characters)
+servermanager/alarm.py:113:80: E501 line too long (91 > 79 characters)
+servermanager/alarm.py:117:80: E501 line too long (83 > 79 characters)
+servermanager/alarm.py:126:80: E501 line too long (83 > 79 characters)
+servermanager/api/commonapi.py:32:80: E501 line too long (101 > 79 characters)
+servermanager/tests.py:2:1: F401 'django.utils.timezone' imported but unused

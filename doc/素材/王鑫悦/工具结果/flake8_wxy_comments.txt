@@ -1,0 +1,65 @@
+D:\Class3-Group4\comments\admin.py:42:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\admin.py:55:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\comments\admin.py:73:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:22:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:24:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:25:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:26:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:27:80: E501 line too long (130 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:28:80: E501 line too long (139 > 79 characters)
+D:\Class3-Group4\comments\migrations\0001_initial.py:29:80: E501 line too long (166 > 79 characters)
+D:\Class3-Group4\comments\migrations\0003_alter_comment_options_remove_comment_created_time_and_more.py:20:80: E501 line too long (126 > 79 characters)
+D:\Class3-Group4\comments\migrations\0003_alter_comment_options_remove_comment_created_time_and_more.py:33:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\comments\migrations\0003_alter_comment_options_remove_comment_created_time_and_more.py:38:80: E501 line too long (107 > 79 characters)
+D:\Class3-Group4\comments\migrations\0003_alter_comment_options_remove_comment_created_time_and_more.py:43:80: E501 line too long (124 > 79 characters)
+D:\Class3-Group4\comments\migrations\0003_alter_comment_options_remove_comment_created_time_and_more.py:48:80: E501 line too long (133 > 79 characters)
+D:\Class3-Group4\comments\migrations\0003_alter_comment_options_remove_comment_created_time_and_more.py:58:80: E501 line too long (158 > 79 characters)
+D:\Class3-Group4\comments\migrations\0004_comment_idx_art_parent_enable_comment_idx_enable_id.py:10:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\comments\migrations\0004_comment_idx_art_parent_enable_comment_idx_enable_id.py:11:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\comments\migrations\0004_comment_idx_art_parent_enable_comment_idx_enable_id.py:18:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\comments\migrations\0004_comment_idx_art_parent_enable_comment_idx_enable_id.py:22:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:11:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:19:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:20:80: E501 line too long (250 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:21:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:22:80: E501 line too long (165 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:23:80: E501 line too long (139 > 79 characters)
+D:\Class3-Group4\comments\migrations\0005_commentreaction.py:28:80: E501 line too long (108 > 79 characters)
+D:\Class3-Group4\comments\models.py:10:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\comments\models.py:13:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\comments\models.py:14:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\comments\models.py:39:80: E501 line too long (106 > 79 characters)
+D:\Class3-Group4\comments\models.py:55:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\comments\models.py:67:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\comments\models.py:84:1: E302 expected 2 blank lines, found 1
+D:\Class3-Group4\comments\models.py:115:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\comments\models.py:124:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\comments\models.py:128:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\comments\models.py:128:91: W292 no newline at end of file
+D:\Class3-Group4\comments\test_comment_business_logic.py:5:1: F401 'django.test.Client' imported but unused
+D:\Class3-Group4\comments\test_comment_business_logic.py:677:9: F841 local variable 'reply_id' is assigned to but never used
+D:\Class3-Group4\comments\test_views.py:9:1: F401 'djangoblog.test_base.BaseTestCase' imported but unused
+D:\Class3-Group4\comments\test_views.py:56:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:67:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:76:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:101:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:115:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:125:9: F841 local variable 'comment' is assigned to but never used
+D:\Class3-Group4\comments\test_views.py:137:9: F841 local variable 'comment' is assigned to but never used
+D:\Class3-Group4\comments\test_views.py:187:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:202:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:250:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\test_views.py:264:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\comments\tests.py:7:1: F403 'from comments.templatetags.comments_tags import *' used; unable to detect undefined names
+D:\Class3-Group4\comments\tests.py:101:16: F405 'parse_commenttree' may be undefined, or defined from star imports: comments.templatetags.comments_tags
+D:\Class3-Group4\comments\tests.py:103:16: F405 'show_comment_item' may be undefined, or defined from star imports: comments.templatetags.comments_tags
+D:\Class3-Group4\comments\utils.py:15:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\comments\utils.py:16:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\comments\utils.py:20:80: E501 line too long (94 > 79 characters)
+D:\Class3-Group4\comments\utils.py:21:80: E501 line too long (110 > 79 characters)
+D:\Class3-Group4\comments\utils.py:26:80: E501 line too long (119 > 79 characters)
+D:\Class3-Group4\comments\utils.py:26:120: W291 trailing whitespace
+D:\Class3-Group4\comments\utils.py:28:26: W291 trailing whitespace
+D:\Class3-Group4\comments\utils.py:31:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\comments\utils.py:33:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\comments\views.py:102:80: E501 line too long (84 > 79 characters)

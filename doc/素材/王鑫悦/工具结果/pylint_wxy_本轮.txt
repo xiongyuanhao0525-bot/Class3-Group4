@@ -1,0 +1,42 @@
+************* Module servermanager.alarm
+servermanager\alarm.py:56:4: R0913: Too many arguments (6/5) (too-many-arguments)
+servermanager\alarm.py:56:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+servermanager\alarm.py:148:12: C0415: Import outside toplevel (djangoblog.utils.send_email) (import-outside-toplevel)
+************* Module servermanager.api.commonapi
+servermanager\api\commonapi.py:27:13: W0621: Redefining name 'prompt' from outer scope (line 85) (redefined-outer-name)
+servermanager\api\commonapi.py:31:25: E1101: Module 'openai' has no 'ChatCompletion' member (no-member)
+servermanager\api\commonapi.py:46:24: E1101: Class 'commands' has no 'objects' member (no-member)
+servermanager\api\commonapi.py:58:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+servermanager\api\commonapi.py:78:19: C0209: Formatting a regular string which could be an f-string (consider-using-f-string)
+************* Module servermanager.tests
+servermanager\tests.py:23:30: W0613: Unused argument 'timeout' (unused-argument)
+servermanager\tests.py:2:0: W0611: Unused timezone imported from django.utils (unused-import)
+************* Module plugins.image_lazy_loading.plugin
+plugins\image_lazy_loading\plugin.py:43:0: W0613: Unused argument 'args' (unused-argument)
+plugins\image_lazy_loading\plugin.py:43:0: W0613: Unused argument 'kwargs' (unused-argument)
+plugins\image_lazy_loading\plugin.py:95:4: R0912: Too many branches (20/12) (too-many-branches)
+plugins\image_lazy_loading\plugin.py:209:8: W0702: No exception type(s) specified (bare-except)
+plugins\image_lazy_loading\plugin.py:207:12: C0415: Import outside toplevel (djangoblog.utils.get_current_site) (import-outside-toplevel)
+************* Module plugins.seo_optimizer.plugin
+plugins\seo_optimizer\plugin.py:19:4: R0914: Too many local variables (16/15) (too-many-locals)
+plugins\seo_optimizer\plugin.py:24:8: C0415: Import outside toplevel (django.utils.html.escape) (import-outside-toplevel)
+plugins\seo_optimizer\plugin.py:25:8: C0415: Import outside toplevel (django.utils.text.Truncator) (import-outside-toplevel)
+plugins\seo_optimizer\plugin.py:26:8: C0415: Import outside toplevel (djangoblog.utils.CommonMarkdown) (import-outside-toplevel)
+plugins\seo_optimizer\plugin.py:88:19: E1101: Class 'Category' has no 'objects' member (no-member)
+plugins\seo_optimizer\plugin.py:83:55: W0613: Unused argument 'blog_setting' (unused-argument)
+plugins\seo_optimizer\plugin.py:115:14: E1101: Class 'Tag' has no 'objects' member (no-member)
+plugins\seo_optimizer\plugin.py:109:50: W0613: Unused argument 'blog_setting' (unused-argument)
+plugins\seo_optimizer\plugin.py:137:53: W0613: Unused argument 'blog_setting' (unused-argument)
+plugins\seo_optimizer\plugin.py:176:8: C0415: Import outside toplevel (django.utils.html.escape) (import-outside-toplevel)
+plugins\seo_optimizer\plugin.py:161:36: W0613: Unused argument 'context' (unused-argument)
+plugins\seo_optimizer\plugin.py:7:0: C0412: Imports from package djangoblog are not grouped (ungrouped-imports)
+plugins\seo_optimizer\plugin.py:3:0: W0611: Unused truncatewords imported from django.template.defaultfilters (unused-import)
+************* Module plugins.tests
+plugins\tests.py:81:19: E1101: Class 'Category' has no 'objects' member (no-member)
+plugins\tests.py:82:18: E1101: Class 'Article' has no 'objects' member (no-member)
+plugins\tests.py:96:19: W0212: Access to a protected member _get_default_seo_data of a client class (protected-access)
+plugins\tests.py:110:19: W0212: Access to a protected member _get_article_seo_data of a client class (protected-access)
+
+-----------------------------------
+Your code has been rated at 8.92/10
+
