@@ -1,0 +1,164 @@
+D:\Class3-Group4\plugins\article_copyright\plugin.py:15:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\plugins\article_copyright\plugin.py:25:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_copyright\plugin.py:31:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\plugins\article_copyright\plugin.py:36:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:15:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:18:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:23:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:31:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:35:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:36:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:41:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:48:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:50:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:52:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:58:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:64:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:73:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:80:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:82:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:86:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:89:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:98:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:101:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:110:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:116:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:118:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:122:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:126:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:131:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:133:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:148:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:150:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:153:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:165:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:167:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:170:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:181:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:189:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:191:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:193:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:194:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\article_recommendation\plugin.py:196:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:9:1: F401 'typing.Optional' imported but unused
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:55:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:85:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:93:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:109:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:161:29: F541 f-string is missing placeholders
+D:\Class3-Group4\plugins\cloudflare_cache\api.py:194:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:35:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:54:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:67:80: E501 line too long (108 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:72:80: E501 line too long (127 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:112:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:114:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:116:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:130:30: F541 f-string is missing placeholders
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:135:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:139:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:165:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:175:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:199:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:204:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:207:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:208:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:212:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:213:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\handlers.py:236:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:51:80: E501 line too long (130 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:73:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:74:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:80:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:105:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:110:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:115:80: E501 line too long (97 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:118:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:136:80: E501 line too long (98 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:167:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:168:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:171:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:174:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:177:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:179:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:184:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\cloudflare_cache\plugin.py:221:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\plugins\external_links\plugin.py:10:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\plugins\external_links\plugin.py:22:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\plugins\external_links\plugin.py:40:80: E501 line too long (107 > 79 characters)
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:11:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:33:47: E261 at least two spaces before inline comment
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:57:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:61:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:64:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:67:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:70:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:76:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:84:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:87:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:92:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:112:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:138:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:140:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:150:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:167:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:190:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:194:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:199:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\image_lazy_loading\plugin.py:209:9: E722 do not use bare 'except'
+D:\Class3-Group4\plugins\reading_time\plugin.py:28:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\reading_time\plugin.py:32:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\reading_time\plugin.py:37:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\reading_time\plugin.py:45:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\reading_time\plugin.py:47:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\plugins\reading_time\plugin.py:48:80: E501 line too long (100 > 79 characters)
+D:\Class3-Group4\plugins\reading_time\plugin.py:49:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\reading_time\plugin.py:55:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\reading_time\plugin.py:59:29: W291 trailing whitespace
+D:\Class3-Group4\plugins\reading_time\plugin.py:59:30: W292 no newline at end of file
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:3:1: F401 'django.template.defaultfilters.truncatewords' imported but unused
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:12:80: E501 line too long (124 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:27:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:34:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:43:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:44:80: E501 line too long (97 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:45:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:46:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:49:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:50:80: E501 line too long (98 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:53:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:57:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:60:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:73:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:87:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:94:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:95:80: E501 line too long (109 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:97:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:114:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:121:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:122:80: E501 line too long (108 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:123:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:125:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:145:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:146:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:147:80: E501 line too long (107 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:149:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:171:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:179:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:180:80: E501 line too long (125 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:199:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:202:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:204:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:208:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:209:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:211:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:214:80: E501 line too long (143 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:217:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:224:1: W293 blank line contains whitespace
+D:\Class3-Group4\plugins\seo_optimizer\plugin.py:228:1: E305 expected 2 blank lines after class or function definition, found 1
+D:\Class3-Group4\plugins\tests.py:96:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\plugins\tests.py:110:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\plugins\view_count\__init__.py:1:40: W291 trailing whitespace
+D:\Class3-Group4\plugins\view_count\__init__.py:1:41: W292 no newline at end of file
+D:\Class3-Group4\plugins\view_count\plugin.py:18:27: W291 trailing whitespace
+D:\Class3-Group4\plugins\view_count\plugin.py:18:28: W292 no newline at end of file

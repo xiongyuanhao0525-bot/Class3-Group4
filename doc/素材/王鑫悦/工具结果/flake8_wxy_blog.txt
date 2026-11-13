@@ -1,0 +1,345 @@
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.Category' imported but unused
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.Tag' imported but unused
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.Links' imported but unused
+D:\Class3-Group4\blog\admin.py:15:1: F401 '.models.SideBar' imported but unused
+D:\Class3-Group4\blog\apps.py:22:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\blog\apps.py:26:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\apps.py:30:80: E501 line too long (98 > 79 characters)
+D:\Class3-Group4\blog\apps.py:31:25: F841 local variable 'manager' is assigned to but never used
+D:\Class3-Group4\blog\apps.py:32:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\blog\apps.py:36:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\apps.py:39:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\apps.py:43:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\apps.py:45:80: E501 line too long (118 > 79 characters)
+D:\Class3-Group4\blog\apps.py:49:80: E501 line too long (118 > 79 characters)
+D:\Class3-Group4\blog\apps.py:51:80: E501 line too long (115 > 79 characters)
+D:\Class3-Group4\blog\context_processors.py:16:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\blog\context_processors.py:37:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\documents.py:5:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\documents.py:41:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\management\commands\build_index.py:3:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\blog\management\commands\create_setup_guide.py:25:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\management\commands\create_setup_guide.py:148:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\management\commands\create_setup_guide.py:236:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\management\commands\create_testdata.py:13:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\blog\management\commands\create_travel_data.py:26:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\management\commands\ping_baidu.py:22:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\management\commands\sync_user_avatar.py:17:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\migrations\0001_initial.py:22:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:23:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:24:80: E501 line too long (105 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:25:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:26:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:27:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:28:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:29:80: E501 line too long (98 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:30:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:31:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:32:80: E501 line too long (132 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:33:80: E501 line too long (100 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:34:80: E501 line too long (120 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:35:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:36:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:37:80: E501 line too long (129 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:47:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:48:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:50:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:51:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:52:80: E501 line too long (178 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:53:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:54:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:65:80: E501 line too long (117 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:68:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:69:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:70:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:71:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:83:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:84:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:85:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:86:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:98:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:99:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:100:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:101:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:102:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:103:80: E501 line too long (164 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:115:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:116:80: E501 line too long (112 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:117:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:119:80: E501 line too long (107 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:120:80: E501 line too long (129 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:121:80: E501 line too long (137 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:122:80: E501 line too long (125 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:123:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:124:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:125:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:126:80: E501 line too long (139 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:127:80: E501 line too long (132 > 79 characters)
+D:\Class3-Group4\blog\migrations\0001_initial.py:128:80: E501 line too long (97 > 79 characters)
+D:\Class3-Group4\blog\migrations\0002_blogsettings_global_footer_and_more.py:16:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\migrations\0002_blogsettings_global_footer_and_more.py:21:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:14:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:20:80: E501 line too long (150 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:24:80: E501 line too long (108 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:28:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:32:80: E501 line too long (108 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:36:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:73:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:78:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:83:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:88:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:93:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:98:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:103:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:108:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:118:80: E501 line too long (133 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:128:80: E501 line too long (126 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:133:80: E501 line too long (134 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:138:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:148:80: E501 line too long (131 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:153:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:158:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:163:80: E501 line too long (126 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:173:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:178:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:183:80: E501 line too long (116 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:188:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:193:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:198:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:203:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:208:80: E501 line too long (97 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:213:80: E501 line too long (94 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:218:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:223:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:233:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:238:80: E501 line too long (156 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:248:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:258:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:268:80: E501 line too long (174 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:283:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\migrations\0005_alter_article_options_alter_category_options_and_more.py:298:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\blog\migrations\0006_alter_blogsettings_options.py:15:80: E501 line too long (110 > 79 characters)
+D:\Class3-Group4\blog\migrations\0007_article_idx_type_status_pub_article_idx_status_views_and_more.py:17:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\blog\migrations\0007_article_idx_type_status_pub_article_idx_status_views_and_more.py:21:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\migrations\0007_article_idx_type_status_pub_article_idx_status_views_and_more.py:25:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\blog\migrations\0007_article_idx_type_status_pub_article_idx_status_views_and_more.py:29:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\blog\migrations\0008_blogsettings_color_scheme.py:9:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\migrations\0008_blogsettings_color_scheme.py:16:80: E501 line too long (391 > 79 characters)
+D:\Class3-Group4\blog\models.py:27:5: E741 ambiguous variable name 'I'
+D:\Class3-Group4\blog\models.py:45:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\blog\models.py:46:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\models.py:59:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\models.py:111:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\models.py:113:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\models.py:118:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\models.py:123:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\models.py:124:80: E501 line too long (97 > 79 characters)
+D:\Class3-Group4\blog\models.py:125:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\models.py:131:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\models.py:133:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\models.py:134:80: E501 line too long (105 > 79 characters)
+D:\Class3-Group4\blog\models.py:140:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\models.py:141:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\blog\models.py:159:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\blog\models.py:163:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\blog\models.py:165:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\blog\models.py:254:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\models.py:261:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\blog\models.py:262:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\models.py:323:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\models.py:324:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\models.py:350:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\models.py:351:80: E501 line too long (97 > 79 characters)
+D:\Class3-Group4\blog\models.py:352:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\models.py:354:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\blog\models.py:359:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\models.py:360:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\models.py:361:80: E501 line too long (99 > 79 characters)
+D:\Class3-Group4\blog\models.py:378:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\models.py:379:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\models.py:380:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\models.py:381:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\models.py:382:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\models.py:383:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\models.py:424:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\models.py:426:80: E501 line too long (106 > 79 characters)
+D:\Class3-Group4\blog\models.py:433:80: E501 line too long (106 > 79 characters)
+D:\Class3-Group4\blog\models.py:434:80: E501 line too long (105 > 79 characters)
+D:\Class3-Group4\blog\models.py:435:80: E501 line too long (105 > 79 characters)
+D:\Class3-Group4\blog\models.py:436:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\blog\models.py:437:80: E501 line too long (111 > 79 characters)
+D:\Class3-Group4\blog\models.py:439:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\models.py:440:80: E501 line too long (122 > 79 characters)
+D:\Class3-Group4\blog\models.py:447:80: E501 line too long (113 > 79 characters)
+D:\Class3-Group4\blog\models.py:448:80: E501 line too long (106 > 79 characters)
+D:\Class3-Group4\blog\models.py:454:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:1:1: F401 'hashlib' imported but unused
+D:\Class3-Group4\blog\templatetags\blog_tags.py:5:1: F401 'urllib' imported but unused
+D:\Class3-Group4\blog\templatetags\blog_tags.py:60:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:63:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:64:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:65:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:80:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:88:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:91:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:103:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:106:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:107:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:110:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:180:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:188:1: E303 too many blank lines (4)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:220:5: F841 local variable 'site' is assigned to but never used
+D:\Class3-Group4\blog\templatetags\blog_tags.py:269:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:283:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:291:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:298:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:321:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:360:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:363:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:385:80: E501 line too long (93 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:527:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:532:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:536:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:538:80: E501 line too long (141 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:539:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:540:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:543:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:545:80: E501 line too long (110 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:547:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:587:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:592:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:597:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:599:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:610:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:611:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:614:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:639:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:659:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:668:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:670:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:677:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:679:80: E501 line too long (95 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:680:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:688:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:694:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:702:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:708:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:714:1: E303 too many blank lines (4)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:718:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:720:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:723:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:729:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:731:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\templatetags\blog_tags.py:732:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\templatetags\blog_tags.py:733:14: W292 no newline at end of file
+D:\Class3-Group4\blog\templatetags\vite_tags.py:55:80: E501 line too long (94 > 79 characters)
+D:\Class3-Group4\blog\templatetags\vite_tags.py:83:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\templatetags\vite_tags.py:108:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\templatetags\vite_tags.py:111:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\templatetags\vite_tags.py:112:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\templatetags\vite_tags.py:195:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\test_admin.py:6:1: F401 'django.test.RequestFactory' imported but unused
+D:\Class3-Group4\blog\test_admin.py:7:1: F401 'django.urls.reverse' imported but unused
+D:\Class3-Group4\blog\test_admin.py:47:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\test_admin.py:90:9: F401 'django.db.models' imported but unused
+D:\Class3-Group4\blog\test_article_business_logic.py:6:1: F401 'django.urls.reverse' imported but unused
+D:\Class3-Group4\blog\test_article_business_logic.py:72:9: F841 local variable 'original_pub_time' is assigned to but never used
+D:\Class3-Group4\blog\test_article_business_logic.py:328:20: E128 continuation line under-indented for visual indent
+D:\Class3-Group4\blog\test_article_business_logic.py:546:9: F841 local variable 'original_mod_time' is assigned to but never used
+D:\Class3-Group4\blog\test_context_processors.py:101:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\test_context_processors.py:166:9: F841 local variable 'draft_page' is assigned to but never used
+D:\Class3-Group4\blog\test_context_processors.py:192:9: F841 local variable 'result1' is assigned to but never used
+D:\Class3-Group4\blog\test_context_processors.py:289:9: F841 local variable 'result' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:5:1: F401 'unittest.mock.MagicMock' imported but unused
+D:\Class3-Group4\blog\test_middleware.py:36:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\test_middleware.py:100:80: E501 line too long (85 > 79 characters)
+D:\Class3-Group4\blog\test_middleware.py:102:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:137:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:146:80: E501 line too long (98 > 79 characters)
+D:\Class3-Group4\blog\test_middleware.py:152:13: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:156:80: E501 line too long (104 > 79 characters)
+D:\Class3-Group4\blog\test_middleware.py:206:9: F841 local variable 'time_parts' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:223:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_middleware.py:274:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_templatetags.py:9:1: F401 'blog.models.Article' imported but unused
+D:\Class3-Group4\blog\test_templatetags.py:10:1: F403 'from blog.templatetags.blog_tags import *' used; unable to detect undefined names
+D:\Class3-Group4\blog\test_templatetags.py:24:18: F405 'load_articletags' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:28:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\test_templatetags.py:39:16: F405 'load_pagination_info' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:52:9: F841 local variable 'info' is assigned to but never used
+D:\Class3-Group4\blog\test_templatetags.py:52:16: F405 'load_pagination_info' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:61:18: F405 'highlight_search_term' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:68:18: F405 'highlight_search_term' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:74:18: F405 'highlight_search_term' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:80:18: F405 'highlight_content' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:86:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:94:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:176:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:186:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:192:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_templatetags.py:199:18: F405 'custom_markdown' may be undefined, or defined from star imports: blog.templatetags.blog_tags
+D:\Class3-Group4\blog\test_views.py:7:1: F401 'blog.models.Article' imported but unused
+D:\Class3-Group4\blog\test_views.py:39:9: F841 local variable 'response' is assigned to but never used
+D:\Class3-Group4\blog\test_views.py:49:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\test_views.py:58:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\test_views.py:61:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\test_views.py:88:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\test_views.py:122:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\test_views.py:168:9: E722 do not use bare 'except'
+D:\Class3-Group4\blog\tests.py:15:80: E501 line too long (120 > 79 characters)
+D:\Class3-Group4\blog\tests.py:28:9: F841 local variable 'site' is assigned to but never used
+D:\Class3-Group4\blog\tests.py:119:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\tests.py:130:9: F841 local variable 'u' is assigned to but never used
+D:\Class3-Group4\blog\tests.py:211:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\tests.py:218:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\tests.py:221:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\tests.py:269:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\urls.py:11:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\urls.py:13:80: E501 line too long (91 > 79 characters)
+D:\Class3-Group4\blog\urls.py:19:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\urls.py:21:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\urls.py:25:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\urls.py:34:80: E501 line too long (81 > 79 characters)
+D:\Class3-Group4\blog\urls.py:39:80: E501 line too long (102 > 79 characters)
+D:\Class3-Group4\blog\urls.py:45:80: E501 line too long (96 > 79 characters)
+D:\Class3-Group4\blog\urls.py:63:80: E501 line too long (86 > 79 characters)
+D:\Class3-Group4\blog\urls.py:77:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\views.py:22:1: F401 'django.shortcuts.get_object_or_404' imported but unused
+D:\Class3-Group4\blog\views.py:23:1: F401 'django.shortcuts.render' imported but unused
+D:\Class3-Group4\blog\views.py:26:1: F401 'django.utils.translation.gettext_lazy as _' imported but unused
+D:\Class3-Group4\blog\views.py:41:1: F401 'djangoblog.plugin_manage.hook_constants.ARTICLE_CONTENT_HOOK_NAME' imported but unused
+D:\Class3-Group4\blog\views.py:46:1: F401 'djangoblog.mixins.ArticleListMixin' imported but unused
+D:\Class3-Group4\blog\views.py:146:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\views.py:194:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\views.py:211:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\blog\views.py:212:80: E501 line too long (92 > 79 characters)
+D:\Class3-Group4\blog\views.py:217:80: E501 line too long (126 > 79 characters)
+D:\Class3-Group4\blog\views.py:220:80: E501 line too long (126 > 79 characters)
+D:\Class3-Group4\blog\views.py:236:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:244:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:252:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:257:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:262:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:266:80: E501 line too long (101 > 79 characters)
+D:\Class3-Group4\blog\views.py:267:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:270:80: E501 line too long (89 > 79 characters)
+D:\Class3-Group4\blog\views.py:279:80: E501 line too long (87 > 79 characters)
+D:\Class3-Group4\blog\views.py:321:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:326:80: E501 line too long (88 > 79 characters)
+D:\Class3-Group4\blog\views.py:327:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\views.py:328:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:362:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:367:80: E501 line too long (84 > 79 characters)
+D:\Class3-Group4\blog\views.py:369:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:377:80: E501 line too long (82 > 79 characters)
+D:\Class3-Group4\blog\views.py:407:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:412:80: E501 line too long (83 > 79 characters)
+D:\Class3-Group4\blog\views.py:414:1: W293 blank line contains whitespace
+D:\Class3-Group4\blog\views.py:491:80: E501 line too long (90 > 79 characters)
+D:\Class3-Group4\blog\views.py:492:80: E501 line too long (80 > 79 characters)
+D:\Class3-Group4\blog\views.py:527:80: E501 line too long (103 > 79 characters)
+D:\Class3-Group4\blog\views.py:532:80: E501 line too long (118 > 79 characters)
+D:\Class3-Group4\blog\views.py:561:1: F401 'djangoblog.error_views.page_not_found_view' imported but unused
+D:\Class3-Group4\blog\views.py:561:1: F401 'djangoblog.error_views.server_error_view' imported but unused
+D:\Class3-Group4\blog\views.py:561:1: F401 'djangoblog.error_views.permission_denied_view' imported but unused
+D:\Class3-Group4\blog\views.py:561:1: E402 module level import not at top of file
