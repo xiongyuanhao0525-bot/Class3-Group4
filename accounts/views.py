@@ -2,6 +2,9 @@
 # 用户模块视图层：注册 / 登录 / 登出 / 邮箱验证 / 找回密码
 # 注释人：陈汉佳 #chj （只加注释，不改逻辑）
 import logging
+import math
+
+from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib import auth
@@ -131,10 +134,21 @@ class LoginView(LoginFormView):
         return super(LoginView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
+        request = self.request
+        username = self._submitted_username()
+        user = self._get_user_by_username(username)
+
+        # 一、账号还在锁定期内：即使密码正确也不允许登录，直接返回锁定提示（429）
+        lock_remaining = utils.get_login_lock_remaining(username, user=user)
+        if lock_remaining:
+            return self._render_locked(username, lock_remaining)
+
         # #chj 重新用 AuthenticationForm 校验用户名密码
         form = AuthenticationForm(data=self.request.POST, request=self.request)
 
         if form.is_valid():
+            # 登录成功：清空失败计数与锁定状态
+            utils.reset_login_failures(form.get_user(), username)
             delete_sidebar_cache()               # #chj 登录后侧边栏数据可能变化，清缓存
             logger.info(self.redirect_field_name)
 
@@ -163,9 +177,63 @@ class LoginView(LoginFormView):
             # return HttpResponseRedirect('/')
         else:
             # #chj 校验失败回登录页展示错误
-            return self.render_to_response({
-                'form': form
-            })
+            return self._register_failure(form)
+
+    def form_invalid(self, form):
+        """用户名/密码错误：累计失败次数，达到阈值后锁定账号"""
+        return self._register_failure(form)
+
+    def _submitted_username(self):
+        return (self.request.POST.get('username') or '').strip()
+
+    def _get_user_by_username(self, username):
+        """按用户名取用户对象，不存在时返回 None（用于失败计数与锁定判断）"""
+        if not username:
+            return None
+        return get_user_model().objects.filter(username=username).first()
+
+    def _register_failure(self, form):
+        """记录一次登录失败，并把剩余可试次数或锁定提示写回表单"""
+        username = self._submitted_username()
+        user = self._get_user_by_username(username)
+
+        lock_remaining = utils.get_login_lock_remaining(username, user=user)
+        if lock_remaining:
+            return self._render_locked(username, lock_remaining)
+
+        if not username:
+            # 连用户名都没填，不做计数
+            return self.render_to_response(self.get_context_data(form=form))
+
+        count, lock_remaining = utils.register_login_failure(
+            username, user=user)
+        if lock_remaining:
+            logger.warning(
+                '账号 %s 连续登录失败 %d 次，已锁定 %d 秒',
+                username, count, lock_remaining)
+            return self._render_locked(username, lock_remaining)
+        else:
+            fail_limit = utils.get_login_failure_limit()
+            lock_minutes = max(1, utils.get_login_lock_seconds() // 60)
+            form.add_error(
+                None,
+                '用户名或密码错误，再失败 %d 次后账号将被临时锁定 %d 分钟' % (
+                    max(fail_limit - count, 1), lock_minutes))
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def _render_locked(self, username, lock_remaining):
+        """渲染"账号已被临时锁定"的登录页"""
+        logger.warning('账号 %s 处于登录锁定期，剩余 %d 秒', username, lock_remaining)
+        locked_form = AuthenticationForm(
+            data=self.request.POST, request=self.request)
+        locked_form.add_error(None, utils.build_login_lock_message(lock_remaining))
+        response = self.render_to_response({
+            'form': locked_form,
+            'lock_remaining': lock_remaining,
+        })
+        response.status_code = 429
+        return response
 
     def get_success_url(self):
         # #chj 校验 next 参数是否本站地址，防止开放重定向攻击
@@ -240,14 +308,50 @@ class ForgetPasswordView(SecureFormView):
 
 class ForgetPasswordEmailCode(View):
     # #chj 发送重置密码邮箱验证码的接口（AJAX 调用）
+    """发送找回密码的邮箱验证码
+
+    除了原来的「发一封验证码邮件」，这里还加了两道节流（防刷）：
+    1. 重发倒计时：同一邮箱两次发送之间至少要隔 CODE_RESEND_INTERVAL 秒，
+       前端按钮据此做倒计时，后端再校验一次，防止绕过前端直接刷接口；
+    2. 发送次数限制：同一邮箱在一个统计窗口内最多发 CODE_SEND_LIMIT 封，
+       超过就锁定到窗口结束，避免邮箱被当成免费短信/邮件通道。
+    被节流时返回 429 + JSON（含 retry_after 剩余秒数），前端可直接读出倒计时；
+    正常发送仍返回纯文本 "ok"，与旧接口保持兼容。
+    """
+
     def post(self, request: HttpRequest):
         form = ForgetPasswordCodeForm(request.POST)
         if not form.is_valid():
             return HttpResponse("错误的邮箱")
         to_email = form.cleaned_data["email"]
 
+        # 第一道：一个窗口内的发送次数是否已用完
+        if utils.is_code_send_limited(to_email):
+            retry_after = utils.get_code_send_window_remaining(to_email)
+            logger.warning(
+                '邮箱 %s 验证码发送次数已达上限，需等待 %d 秒', to_email, retry_after)
+            return JsonResponse({
+                'status': 'limited',
+                'message': '该邮箱获取验证码过于频繁，请 %d 分钟后再试' % max(
+                    1, int(math.ceil(retry_after / 60.0))),
+                'retry_after': retry_after,
+            }, status=429)
+
+        # 第二道：距离上一次发送是否还没满倒计时
+        resend_remaining = utils.get_code_resend_remaining(to_email)
+        if resend_remaining:
+            return JsonResponse({
+                'status': 'too_frequent',
+                'message': '请 %d 秒后再获取验证码' % resend_remaining,
+                'retry_after': resend_remaining,
+            }, status=429)
+
         code = generate_code()                   # #chj 生成随机验证码
         utils.send_verify_email(to_email, code)  # #chj 发送到邮箱
         utils.set_code(to_email, code)           # #chj 写入缓存（5分钟有效）
+        utils.record_code_sent(to_email)
 
-        return HttpResponse("ok")
+        response = HttpResponse("ok")
+        # 让前端知道下一次可用的倒计时秒数，避免前后端两个常量各写一遍
+        response['X-Code-Resend-After'] = str(utils.get_code_resend_interval())
+        return response

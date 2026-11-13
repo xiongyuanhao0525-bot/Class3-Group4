@@ -37,6 +37,28 @@ class RegisterForm(UserCreationForm):
         self.fields['password2'].widget = widgets.PasswordInput(
             attrs={'placeholder': "repeat password", "class": "form-control"})
 
+        # 在密码输入框下方提示强度规则
+        self.fields['password1'].help_text = utils.PASSWORD_RULES_TEXT
+
+    def clean(self):
+        """注册时的密码强度校验
+
+        Django 5.x 在 BaseUserCreationForm.clean() 里完成两次密码一致性与
+        内置密码校验器（长度、常见口令、纯数字等）的检查，这里在其基础上
+        追加项目自定义的强度规则（字符类型数量、连续/重复字符等），
+        并把错误挂到 password2 字段上，便于模板在密码框下展示。
+        """
+        cleaned_data = super(RegisterForm, self).clean()
+
+        password2 = cleaned_data.get('password2')
+        if password2:
+            username = cleaned_data.get('username') or self.data.get('username', '')
+            errors = utils.check_password_strength(password2, username=username)
+            if errors:
+                self.add_error('password2', ValidationError(errors))
+
+        return cleaned_data
+
     def clean_email(self):
         # #chj 校验邮箱是否已被注册，重复则报错
         email = self.cleaned_data['email']
@@ -53,6 +75,7 @@ class ForgetPasswordForm(forms.Form):
     # #chj 找回密码表单：新密码 + 确认密码 + 邮箱 + 验证码
     new_password1 = forms.CharField(
         label=_("New password"),
+        help_text=utils.PASSWORD_RULES_TEXT,
         widget=forms.PasswordInput(
             attrs={
                 "class": "form-control",
@@ -98,6 +121,12 @@ class ForgetPasswordForm(forms.Form):
         if password1 and password2 and password1 != password2:
             raise ValidationError(_("passwords do not match"))
         password_validation.validate_password(password2)
+
+        # 找回密码（改密）时同样执行密码强度校验
+        errors = utils.check_password_strength(
+            password2, username=self.data.get("username", ""))
+        if errors:
+            raise ValidationError(errors)
 
         return password2
 

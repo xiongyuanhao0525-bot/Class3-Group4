@@ -63,10 +63,20 @@ class BlogUserAdmin(UserAdmin):
         'email',
         'last_login',
         'date_joined',
-        'source')
+        'source',
+        'failed_login_count',
+        'lock_until')
     # #chj 可点击进入详情页的列
     list_display_links = ('id', 'username')
     # #chj 默认按 id 倒序
     ordering = ('-id',)
     # #chj 支持按用户名/昵称/邮箱搜索
     search_fields = ('username', 'nickname', 'email')
+    readonly_fields = ('failed_login_count', 'last_failed_login_at', 'lock_until')
+
+    fieldsets = UserAdmin.fieldsets + (
+        (_('登录安全'), {
+            'fields': ('failed_login_count', 'last_failed_login_at', 'lock_until'),
+            'description': _('连续登录失败达到上限后账号会被临时锁定，可在此手动清零解除'),
+        }),
+    )
