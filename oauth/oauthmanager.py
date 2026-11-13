@@ -67,8 +67,9 @@ class BaseOauthManager(metaclass=ABCMeta):
         return self.is_access_token_set and self.access_token is not None and self.openid is not None
 
     @abstractmethod
-    def get_authorization_url(self, nexturl='/'):
-        # yjh: 抽象方法①：拼接授权页 URL，nexturl 为登录成功后的回跳地址
+    def get_authorization_url(self, nexturl='/', state=None):
+        # yjh: 抽象方法①：拼接授权页 URL，nexturl 为登录成功后的回跳地址；
+        # yjh: state 为本次授权流程的一次性随机串，回调时必须原样带回（防 CSRF）
         pass
 
     @abstractmethod
@@ -124,11 +125,13 @@ class WBOauthManager(BaseOauthManager):
             access_token=access_token,
             openid=openid)
 
-    def get_authorization_url(self, nexturl='/'):
+    def get_authorization_url(self, nexturl='/', state=None):
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
-            'redirect_uri': self.callback_url + '&next_url=' + nexturl
+            'redirect_uri': self.callback_url + '&next_url=' + nexturl,
+            # yjh: 微博支持 state 参数，原样回传，无 state 时传空串
+            'state': state or ''
         }
         # yjh: 微博不支持在 state 参数里带 next_url，项目采用的做法是
         # 把 next_url 拼在回调地址后面，回调时再从 query string 中取出
@@ -235,12 +238,14 @@ class GoogleOauthManager(ProxyManagerMixin, BaseOauthManager):
             access_token=access_token,
             openid=openid)
 
-    def get_authorization_url(self, nexturl='/'):
+    def get_authorization_url(self, nexturl='/', state=None):
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
             'redirect_uri': self.callback_url,
             'scope': 'openid email',
+            # yjh: state 在 OIDC 中用于关联请求与响应，防 CSRF
+            'state': state or ''
         }
         # yjh: scope='openid email' 是 OIDC 标准写法，可申请到 email 声明
         url = self.AUTH_URL + "?" + urllib.parse.urlencode(params)
@@ -320,12 +325,14 @@ class GitHubOauthManager(ProxyManagerMixin, BaseOauthManager):
             access_token=access_token,
             openid=openid)
 
-    def get_authorization_url(self, next_url='/'):
+    def get_authorization_url(self, next_url='/', state=None):
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
             'redirect_uri': f'{self.callback_url}&next_url={next_url}',
-            'scope': 'user:email'
+            'scope': 'user:email',
+            # yjh: GitHub 要求 state 不超过 10 分钟有效，正好与一次性校验配合
+            'state': state or ''
         }
         # yjh: scope='user:email' 才能访问 /user/emails 读取用户私有邮箱
         url = self.AUTH_URL + "?" + urllib.parse.urlencode(params)
@@ -423,12 +430,14 @@ class FaceBookOauthManager(ProxyManagerMixin, BaseOauthManager):
             access_token=access_token,
             openid=openid)
 
-    def get_authorization_url(self, next_url='/'):
+    def get_authorization_url(self, next_url='/', state=None):
         params = {
             'client_id': self.client_id,
             'response_type': 'code',
             'redirect_uri': self.callback_url,
-            'scope': 'email,public_profile'
+            'scope': 'email,public_profile',
+            # yjh: Facebook 同样支持 state 回传
+            'state': state or ''
         }
         # yjh: public_profile 提供 id/name，email 需单独声明 scope
         url = self.AUTH_URL + "?" + urllib.parse.urlencode(params)
@@ -503,11 +512,13 @@ class QQOauthManager(BaseOauthManager):
             access_token=access_token,
             openid=openid)
 
-    def get_authorization_url(self, next_url='/'):
+    def get_authorization_url(self, next_url='/', state=None):
         params = {
             'response_type': 'code',
             'client_id': self.client_id,
             'redirect_uri': self.callback_url + '&next_url=' + next_url,
+            # yjh: QQ 授权页支持 state，回调时原样带回
+            'state': state or ''
         }
         url = self.AUTH_URL + "?" + urllib.parse.urlencode(params)
         return url

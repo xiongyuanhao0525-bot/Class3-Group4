@@ -1,0 +1,78 @@
+{% extends 'share_layout/base.html' %}
+{% block header %}
+    <title>第三方账号管理</title>
+{% endblock %}
+{% block content %}
+    <div class="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-10">
+        <div class="mx-auto max-w-2xl space-y-6">
+            <div class="rounded-xl border border-border bg-card p-8 shadow-sm">
+                <h2 class="text-xl font-bold tracking-tight text-foreground mb-1">第三方账号管理</h2>
+                <p class="text-sm text-muted-foreground">绑定第三方账号后，可直接使用对应平台登录本站。</p>
+
+                {% if result == 'bound' %}
+                    <div class="mt-4 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-foreground">
+                        绑定成功。
+                    </div>
+                {% elif result == 'unbound' %}
+                    <div class="mt-4 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-foreground">
+                        已解除绑定。
+                    </div>
+                {% elif result == 'conflict' %}
+                    <div class="mt-4 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-foreground">
+                        该第三方账号已绑定其他本地账号，无法重复绑定。
+                    </div>
+                {% elif result == 'last' %}
+                    <div class="mt-4 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-foreground">
+                        当前账号没有设置密码，且这是最后一个登录方式，不允许解绑。
+                    </div>
+                {% endif %}
+
+                <div class="mt-6 space-y-3">
+                    <h3 class="text-sm font-semibold text-foreground">已绑定</h3>
+                    {% for account in bound_accounts %}
+                        <div class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                {% if account.picture %}
+                                    <img src="{{ account.picture }}" alt="头像"
+                                         class="size-9 rounded-full object-cover">
+                                {% endif %}
+                                <div class="text-sm">
+                                    <div class="font-medium text-foreground">{{ account.type_name }}</div>
+                                    <div class="text-muted-foreground">{{ account.nickname }}</div>
+                                </div>
+                            </div>
+                            {% if can_unbind %}
+                                <form method="post" action="{% url 'oauth:unbind' account.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                                        解绑
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-xs text-muted-foreground">唯一登录方式，不可解绑</span>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p class="text-sm text-muted-foreground">尚未绑定任何第三方账号。</p>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-8 space-y-3">
+                    <h3 class="text-sm font-semibold text-foreground">可绑定</h3>
+                    {% for app in available_apps %}
+                        <div class="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
+                            <span class="text-sm font-medium text-foreground">{{ app.name }}</span>
+                            <a href="{% url 'oauth:oauthlogin' %}?type={{ app.type }}&bind=1"
+                               class="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                                绑定
+                            </a>
+                        </div>
+                    {% empty %}
+                        <p class="text-sm text-muted-foreground">暂无可绑定的平台（未启用或已全部绑定）。</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
