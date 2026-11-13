@@ -201,14 +201,17 @@ class ArticleDetailView(DetailView):
 
     # chj 新增：定时发布校验
     # 拿到文章后先判断——如果 pub_time 在未来，说明是"定时发布"还没到点；
-    # 这时匿名访问直接 404，只有作者本人或管理员能提前看到。
+    # 草稿（status='d'）同样视为未发布。
+    # 这两种情况下匿名访问直接 404，只有作者本人或管理员能提前看到。
     def get_object(self, queryset=None):
         article = super().get_object(queryset)
-        if article.pub_time > timezone.now() and article.status == 'p':
+        is_draft = article.status == 'd'
+        is_scheduled_future = article.pub_time > timezone.now()
+        if is_draft or is_scheduled_future:
             user = self.request.user
             is_owner = user.is_authenticated and user == article.author
             if not (is_owner or user.is_staff):
-                raise Http404('该文章尚未到发布时间')
+                raise Http404('该文章尚未发布或未到发布时间')
         return article
 
     def get_context_data(self, **kwargs):
