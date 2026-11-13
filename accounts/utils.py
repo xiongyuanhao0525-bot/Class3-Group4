@@ -303,8 +303,12 @@ def reset_login_failures(user, username: str = '') -> None:
 
 
 def build_login_lock_message(remaining_seconds: int) -> str:
-    """构造锁定提示文案"""
-    minutes = max(1, int(math.ceil(remaining_seconds / 60.0)))
+    """构造锁定提示文案
+
+    get_lock_remaining_seconds() 会把剩余秒数向上取整 1 秒（避免刚锁定时显示 0），
+    这里若再用 ceil 换算分钟，第一次提示就会把 15 分钟说成 16 分钟，因此先四舍五入。
+    """
+    minutes = max(1, int(round(remaining_seconds / 60.0)))
     return '该账号因连续登录失败已被临时锁定，请约 %d 分钟后再试' % minutes
 
 
