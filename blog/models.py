@@ -278,6 +278,14 @@ class Article(BaseModel):
             'day': self.creation_time.day
         })
 
+    # 【published】—— chj 新增：已公开文章查询集
+    # 作用：列表页/归档页取文章时统一走这个方法，
+    #       条件是「已发布 status='p'」并且「定时发布时间已到 pub_time <= now」。
+    # 这样一篇设了定时发布（pub_time 在未来）的文章，在到点前不会被任何人看到。
+    @classmethod
+    def published(cls):
+        return cls.objects.filter(status='p', pub_time__lte=now())
+
     # 【get_category_tree】—— 取本文所属分类的整条父级链
     # 返回：list[tuple[str, str]]，[(分类名, 分类链接), ...]，从自己一直排到最顶层
     # 说明：详情页面包屑用；分类结构几乎不变，所以整体缓存 10 小时。
