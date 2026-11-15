@@ -229,6 +229,11 @@ class LoginLockUtilsTest(TestCase):
         self.assertIn('锁定', message)
         self.assertIn('15 分钟', message)
 
+    def test_lock_message_rounds_extra_second(self):
+        """剩余秒数向上取整的 1 秒不应把 15 分钟显示成 16 分钟"""
+        self.assertIn('15 分钟', utils.build_login_lock_message(901))
+        self.assertIn('1 分钟', utils.build_login_lock_message(30))
+
     @override_settings(LOGIN_FAILURE_LIMIT=3, LOGIN_LOCK_SECONDS=60)
     def test_settings_override(self):
         """阈值可通过 settings 配置"""
